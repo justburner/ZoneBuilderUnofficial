@@ -35,7 +35,7 @@ namespace CodeImp.DoomBuilder.Controls
 		private List<GeneralizedCategory> generalizedcategories;
 		private List<GeneralizedOption> generalizedoptions; //mxd
 		private bool controlpressed;
-        private readonly bool grayout;
+        private bool grayout;
 		
 		// Constants
 		private const string NUMBER_SEPERATOR = "\t";
@@ -43,19 +43,20 @@ namespace CodeImp.DoomBuilder.Controls
 		// Properties
 		public bool Empty { get { return (number.Text.Length == 0); } set { if(value) number.Text = ""; } }
 		public int Value { get { return GetValue(); } set { number.Text = value.ToString(); } }
-		public List<GeneralizedCategory> GeneralizedCategories { get { return generalizedcategories; } set { generalizedcategories = value; } }
+        public bool GrayOut { get { return grayout; } set { grayout = value; } }
+        public List<GeneralizedCategory> GeneralizedCategories { get { return generalizedcategories; } set { generalizedcategories = value; } }
 		public List<GeneralizedOption> GeneralizedOptions { get { return generalizedoptions; } set { generalizedoptions = value; } } //mxd
 		
 		// Constructor
-		public ActionSelectorControl(bool grayout = true)
-		{
-			// Initialize
-			InitializeComponent();
-			number.MouseWheel += number_OnMouseWheel; //mxd
-            this.grayout = grayout;
-		}
+        public ActionSelectorControl()
+        {
+            // Initialize
+            InitializeComponent();
+            number.MouseWheel += number_OnMouseWheel; //mxd
+            this.grayout = true;
+        }
 
-		// This returns the numeric value
+        // This returns the numeric value
 		public int GetValue()
 		{
 			int val = 0;

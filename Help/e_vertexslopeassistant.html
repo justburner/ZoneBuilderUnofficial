@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	
+	<title>Vertex Slope Assistant</title>
+	
+	<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+	<link rel="stylesheet" type="text/css" href="default.css" media="screen" title="Default" />
+	<script type="text/javascript" src="scripts.js"></script>
+</head>
+<body>
+	
+	<object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<param name="keyword" value="Vertex Slope Assistant">
+	</object>
+	
+	<div id="title"><h1>Vertex Slope Assistant</h1></div>
+	
+	<div id="contents">
+	<p>
+		NEW IN UNOFFICIAL 2.10!<br>
+		Tool to assist on creating and managing Vertex Slopes.<br>
+		(Only for SRB2 and SRB2 Kart!)<br>
+		<br>
+		This mode shows a small dialog window that you can use to manage your Vertex Slopes.<br>
+		Although this mode shows a dialog window, you can still use the main interface and zoom/move your view around the map.<br>
+		<br>
+		This mode is volatile, which means that this mode returns to the previous stable mode when the map is saved or closed, either accepting or discarding your preview changes. You can access this mode through the <a href="e_things.html">Things Mode</a>.<br>
+
+		<h2>Creating Vertex Slopes</h2>
+		There's 2 ways to create vertex slopes, either by using a Triangle Group or 3x Vertex Groups.<br>
+		Note: To create a new group the selected tag should not have an existing group!<br>
+
+		<h2>Creating Vertex Slopes with Triangle Group</h2>
+		Triangle groups allow to quickly create triangles with individual vertices.<br>
+		• Select a free unused tag in "Tag #" or clicking "New" next to "Tag #".<br>
+		• If no shape exists on map use "Draw New Tagged Triangle" to create both shape and vertex slopes, otherwise use "New Triangle Group" and mark the corner points of the triangle geometry.<br>
+		• You can adjust heights of each individual vertex slope after the group has been created.<br>
+		• On map, right-click one of the linedef that form the triangle and apply the correct action.<br>
+
+		<h2>Creating Vertex Slopes with 3 Vertex Groups</h2>
+		Vertex groups allows sharing vertex slopes between triangles to optimize resources.<br>
+		If no shape exists on map you can use "Draw New Empty Triangle" to quickly create a triangle shape.<br>
+		• Select a free unused tag in "Tag #" or clicking "New" next to "Tag #".<br>
+		• If a corner of the triangle geometry doesn't have a vertex slope create one with "New Triangle Vertex".<br>
+		• Repeat those steps for each corner of the triangle.<br>
+		• On map, right-click one of the linedef that form the triangle and apply the correct action, you'll need to double-click on the list the other 2 groups that form the triangle.<br>
+
+		<h2>Managing Vertex Slopes</h2>
+		You can select a vertex slope group by left-clicking a group in the listbox, alternatively you can left-click a triangle group in the map (doesn't work on vertex groups).<br>
+		To manage the group you either can right-click in the listbox, use the toolstrip buttons or right-click on the map.<br>
+		Note: Different set of options are available depending if the selected tag have an existing group or not.<br>
+
+		<h2>Dialog Settings</h2>
+		<table border="0" cellspacing="6" width="90%">
+		<tr>
+			<td width="150" valign="top"><b>Tag #</b></td>
+			<td>Tag number to be used for the vertex slope, should be between 1 to 65535.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>New <i>(next to Tag #)</i></b></td>
+			<td>Find a new unused tag, that is, not being used by any sector or linedef.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Move Vertex Slopes...</b></td>
+			<td>When checked, all Vertex Slopes will slightly move inside the the triangle so height can be adjusted freely without any neighbour sectors affecting it but this will also cause an error of >= 1 pixel on the slope edges.<br>
+			This setting affects: Create New Triangle, New Triangle Group and Remake Group (On triangle groups only).</td>
+		</tr>
+		<tr>
+			<td valign="top"><b><i>Vertex Slope listbox</i></b></td>
+			<td>Select tagged group of vertex slopes for editing. Right-click will open context menu.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Selected Vertex Slope Group</b></td>
+			<td>Set position and height of all Vertex Slopes.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Absolute Z (unique for each vertex)</b></td>
+			<td>When checked the Z position of vertex will be absolute otherwise the value is added into sector height. Note: Absolute Z cannot be positioned less than zero.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Rotate (All)</b></td>
+			<td>Rotate the Vertex Slope order on the triangle. Affects position and height.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Flip (All)</b></td>
+			<td>Flip the 2nd and 3rd Vertex Slope order on the triangle. Affects position and height.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Rotate (Height)</b></td>
+			<td>Rotate the Vertex Slope order on the triangle but only affects Height. Useful if you remade the group with the wrong order.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Flip (Height)</b></td>
+			<td>Flip the 2nd and 3rd Vertex Slope order on the triangle. Useful if you remade the group with the wrong order.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Adj. Heights</b></td>
+			<td>Adjust all heights together. Any negative value will be clipped to zero.</td>
+		</tr>
+		</table>
+
+		<h2>Vertex Slope Group options</h2>
+		<table border="0" cellspacing="6" width="90%">
+		<tr>
+			<td width="150" valign="top"><b>New Triangle Group</b></td>
+			<td>Create a new Triangle Group that consist of 3 vertex slopes.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>New Vertex Group</b></td>
+			<td>Create a new Vertex Group that consist of a single vertex slope.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Remake Group</b></td>
+			<td>Remake selected tagged group by moving the vertex slope(s) position. Invalid group will be valid by having 3 vertex slopes only. Single vertex group will only remake 1 vertex.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Remake Group as Triangle</b></td>
+			<td>Remake selected tagged group by moving the vertex slope(s) position. Invalid group will be valid by having 3 vertex slopes only. Group will be remade with 3 vertex slopes.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Remake Group as Vertex</b></td>
+			<td>Remake selected tagged group by moving the vertex slope(s) position. Invalid group will be valid by having 1 vertex slope only. Group will be remade with a single vertex slope.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Change Group Tag</b></td>
+			<td>Set a new tag to the selected tagged group. Using a tag that belong to another group is not allowed.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Delete Group</b></td>
+			<td>Delete current tagged group, all vertex slopes will be erased!</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Draw New Tagged Triangle</b></td>
+			<td>Draw a new triangle shape with linedefs and attach 3 tagged vertex slopes inside it. Right-click any linedef inside the map to setup a vertex slope action.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Draw New Empty Triangle</b></td>
+			<td>Draw a new triangle shape with linedefs.</td>
+		</tr>
+		</table>
+
+		<h2>Default Controls</h2>
+		<table border="0" cellspacing="6" width="90%">
+		<tr>
+			<td width="150" valign="top"><b>Enter</b></td>
+			<td>Accept and apply all changes, and return to the previous mode.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Escape</b></td>
+			<td>Discard all changes and return to the previous mode.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Backspace</b></td>
+			<td>While creating or remarking: Removes the last drawn vertex.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>LMB</b></td>
+			<td>While creating or remarking: Marks a new point.<br>In selection mode: Selects a triangle group.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>RMB</b></td>
+			<td>Brings up context menu.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Shift+MWheel</b></td>
+			<td>Increase or decrease Tag #.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Ctrl+MWheel</b></td>
+			<td>Increase or decrease Tag #.</td>
+		</tr>
+		</table>
+	</p>
+	</div>
+</body>

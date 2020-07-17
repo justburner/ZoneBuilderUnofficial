@@ -28,4 +28,4 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("2.9.0.2501")]
+[assembly: AssemblyVersion("2.10.0.2506")] //JBR Official is "2.9.0.2501"

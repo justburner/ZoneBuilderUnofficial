@@ -28,23 +28,23 @@
 		/// </summary>
 		private void InitializeComponent() 
 		{
-			this.components = new System.ComponentModel.Container();
-			this.toolTip = new System.Windows.Forms.ToolTip(this.components);
-			this.SuspendLayout();
-			// 
-			// AngleControl
-			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
-			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-			this.Name = "AngleControl";
-			this.Size = new System.Drawing.Size(40, 40);
-			this.toolTip.SetToolTip(this, "Left-click (and drag) to set angle snapped to 45-degree increment.\r\nRight-click (" +
-					"and drag) to set precise angle.");
-			this.Load += new System.EventHandler(this.AngleSelector_Load);
-			this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.AngleSelector_MouseMove);
-			this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.AngleSelector_MouseDown);
-			this.SizeChanged += new System.EventHandler(this.AngleSelector_SizeChanged);
-			this.ResumeLayout(false);
+            this.components = new System.ComponentModel.Container();
+            this.toolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.SuspendLayout();
+            // 
+            // AngleControl
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+            this.Name = "AngleControl";
+            this.Size = new System.Drawing.Size(40, 40);
+            this.toolTip.SetToolTip(this, "Left-click (and drag) to set angle snapped to 45-degree increment.\r\nRight-click (" +
+                    "and drag) to set precise angle.\r\nMiddle-click (and drag) to set loop number.");
+            this.Load += new System.EventHandler(this.AngleSelector_Load);
+            this.SizeChanged += new System.EventHandler(this.AngleSelector_SizeChanged);
+            this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.AngleSelector_MouseDown);
+            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.AngleSelector_MouseMove);
+            this.ResumeLayout(false);
 
 		}
 

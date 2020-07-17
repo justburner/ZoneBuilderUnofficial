@@ -361,7 +361,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			// Select pressed in this mode
 			selectpressed = true;
 			editside = nearestside;
-			base.OnEditBegin();
+            base.OnSelectBegin(); //JBR Was base.OnEditBegin();, maybe a mistake?
 		}
 		
 		// Done selecting

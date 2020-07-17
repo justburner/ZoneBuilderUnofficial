@@ -1,0 +1,150 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	
+	<title>Vertex into Shape Mode</title>
+	
+	<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+	<link rel="stylesheet" type="text/css" href="default.css" media="screen" title="Default" />
+	<script type="text/javascript" src="scripts.js"></script>
+</head>
+<body>
+	
+	<object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<param name="keyword" value="Vertex into Shape Mode">
+	</object>
+	
+	<div id="title"><h1>Vertex into Shape Mode</h1></div>
+	
+	<div id="contents">
+	<p>
+		NEW IN UNOFFICIAL 2.10!<br>
+		Shapes are created on each vertex.<br>
+		<br>
+		This mode is helpful for:<br>
+		• Creating multiple copies of geometric shapes at same time.<br>
+		<br>
+		This mode shows a small dialog window that you can use to adjust the shape to be placed in a vertex or multiple vertices.
+		Although this mode shows a dialog window, you can still use the main interface and zoom/move your view around the map.<br />
+		<br>
+		This mode is volatile, which means that this mode returns to the previous stable mode when the map is saved or closed, either accepting or discarding your preview changes. You can access this mode through the <a href="e_vertices.html">Vertices Mode</a>.<br>
+
+		<h2>Dialog Settings</h2>
+		<table border="0" cellspacing="6" width="90%">
+		<tr>
+			<td width="150" valign="top"><b>Preview Reference</b></td>
+			<td>Visual only. The reference circle will be shown on screen when checked.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Remove Vertices</b></td>
+			<td>When checked it will remove the vertices that were used to place the shapes.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Radius</b></td>
+			<td>Sets the radius.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Ellipse</b></td>
+			<td>Shape can only be scaled in one axis when unchecked.</td>
+		</tr>
+		<tr>
+			<td width="150" valign="top"><b>Create shape as...</b></td>
+			<td>Select which type of elements to create, see below for more information.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Front Outside /<br>Flip Linedefs</b></td>
+			<td>Shape linedefs will point outside when checked, ignored if "Create shape as.." is "Vertices" or "Things".</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Sides</b></td>
+			<td>Sets number of sides that the shape should have, note that reducing sweep angle won't reduce the number of sides.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Spikiness</b></td>
+			<td>Sets percentage of spikiness. Except "Draw Ellipse behaviour" spike type, in that case spikiness is in mp.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b><i>Spike type combo box</i></b></td>
+			<td>Controls how spikes behave in relation to the Spikiness level, see below for more information.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Start Angle</b></td>
+			<td>Controls the starting angle of the first point.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Sweep Angle</b></td>
+			<td>Controls the sweep angle of the slice, 360º will create a closed shape without slices.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Lock to one quadrant</b></td>
+			<td>Locks start angle to top-right quadrant when checked, internally the angle will automatically adjust based of which quadrant the mouse is in.</td>
+		</tr>
+		</table>
+
+		<h2>"Create as..." types</h2>
+		<table border="0" cellspacing="6" width="90%">
+		<tr>
+			<td width="150" valign="top"><b>Close shape<br>towards origin</b></td>
+			<td>Sliced shape will be cut towards origin creating a pie look.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Close shape<br>first to last vertex</b></td>
+			<td>Sliced shape will be closed by a linedef connected from the first to last vertex of the shape.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Open or close shape</b></td>
+			<td>Sliced shape won't be closed.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Shape w/o intersect<br>or sectors</b></td>
+			<td>Creates an isolated shape that won't intersect or merge into elements on the map. Not recommended.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Vertices</b></td>
+			<td>Creates a shape without linedefs.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Thing</b></td>
+			<td>Creates a thing at each point of the shape.</td>
+		</tr>
+		</table>
+
+		<h2>Spike types combo box</h2>
+		<table border="0" cellspacing="6" width="90%">
+		<tr>
+			<td width="150" valign="top"><b>Spike outside</b></td>
+			<td>Spike will go outside of the reference circle.</td>
+		</tr>
+		<tr>
+			<td width="150" valign="top"><b>Spike inside</b></td>
+			<td>Spike will go inside of the reference circle, spikiness should not be more than 100!</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Spike zig-zag</b></td>
+			<td>Spike will go outside and inside of the reference circle causing it to be 2x more severe, spikiness should not be more than 100!</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Spike gear</b></td>
+			<td>Spike create a gear shape inside and outside of the reference circle, spikiness should not be more than 100! Number of sides must be multiple of 4 in this type.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>DrawEllipse behaviour</b></td>
+			<td>Simulates Draw Ellipse bevel behaviour, in this case the spikiness will be distance of spikes away from the reference circle rather than a percentage.</td>
+		</tr>
+		</table>
+		If Spikiness is more than 0 then sides must be multiple of 2 (except Spike Gear that requires 4).<br>
+
+		<h2>Default Controls</h2>
+		<table border="0" cellspacing="6" width="90%">
+		<tr>
+			<td width="150" valign="top"><b>Enter</b></td>
+			<td>Accept and apply the changes, and return to the previous mode.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Escape</b></td>
+			<td>Discard the changes and return to the previous mode.</td>
+		</tr>
+		</table>
+	</p>
+	</div>
+</body>

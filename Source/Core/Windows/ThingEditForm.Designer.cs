@@ -49,7 +49,7 @@ namespace CodeImp.DoomBuilder.Windows
             this.actiongroup = new System.Windows.Forms.GroupBox();
             this.argscontrol = new CodeImp.DoomBuilder.Controls.ArgumentsControl();
             this.actionhelp = new CodeImp.DoomBuilder.Controls.ActionSpecialHelpButton();
-            this.action = new CodeImp.DoomBuilder.Controls.ActionSelectorControl(true);
+            this.action = new CodeImp.DoomBuilder.Controls.ActionSelectorControl();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.cbRandomAngle = new System.Windows.Forms.CheckBox();
             this.anglecontrol = new CodeImp.DoomBuilder.GZBuilder.Controls.AngleControl();
@@ -307,6 +307,7 @@ namespace CodeImp.DoomBuilder.Windows
             this.action.Empty = false;
             this.action.GeneralizedCategories = null;
             this.action.GeneralizedOptions = null;
+            this.action.GrayOut = true;
             this.action.Location = new System.Drawing.Point(62, 27);
             this.action.Name = "action";
             this.action.Size = new System.Drawing.Size(414, 21);
@@ -395,7 +396,7 @@ namespace CodeImp.DoomBuilder.Windows
             // thingtype
             // 
             this.thingtype.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)));
+                        | System.Windows.Forms.AnchorStyles.Left)));
             this.thingtype.Location = new System.Drawing.Point(9, 13);
             this.thingtype.Margin = new System.Windows.Forms.Padding(6);
             this.thingtype.Name = "thingtype";
@@ -454,8 +455,8 @@ namespace CodeImp.DoomBuilder.Windows
             // flags
             // 
             this.flags.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.flags.AutoScroll = true;
             this.flags.Columns = 2;
             this.flags.Location = new System.Drawing.Point(14, 19);

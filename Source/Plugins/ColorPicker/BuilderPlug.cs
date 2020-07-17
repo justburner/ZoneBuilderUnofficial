@@ -143,7 +143,7 @@ namespace CodeImp.DoomBuilder.ColorPicker
 				if(formLocation.X == 0 && formLocation.Y == 0) 
 				{
 					Size displaySize = General.Interface.Display.Size;
-					Point displayLocation = General.Interface.Display.LocationAbs;
+                    Point displayLocation = General.Interface.Display.GetLocationAbs(); //JBR
 					formLocation = new Point(displayLocation.X + displaySize.Width - form.Width - 16, displayLocation.Y + 16);
 				} 
 				form.Location = formLocation;

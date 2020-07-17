@@ -45,6 +45,7 @@ namespace CodeImp.DoomBuilder.Windows
             this.pictureBox4 = new System.Windows.Forms.PictureBox();
             this.gzdbLink = new System.Windows.Forms.LinkLabel();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.label3 = new System.Windows.Forms.Label();
             label1 = new System.Windows.Forms.Label();
             pictureBox1 = new System.Windows.Forms.PictureBox();
             pictureBox3 = new System.Windows.Forms.PictureBox();
@@ -67,8 +68,8 @@ namespace CodeImp.DoomBuilder.Windows
             label1.Size = new System.Drawing.Size(349, 50);
             label1.TabIndex = 2;
             label1.Text = "Doom Builder is designed and programmed by Pascal vd Heiden.\r\nSeveral game config" +
-    "urations were written by various members of the Doom community. See the website " +
-    "for a complete list of credits.";
+                "urations were written by various members of the Doom community. See the website " +
+                "for a complete list of credits.";
             // 
             // pictureBox1
             // 
@@ -152,6 +153,7 @@ namespace CodeImp.DoomBuilder.Windows
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.label3);
             this.tabPage3.Controls.Add(this.label2);
             this.tabPage3.Controls.Add(this.copyversion);
             this.tabPage3.Controls.Add(this.version);
@@ -239,7 +241,7 @@ namespace CodeImp.DoomBuilder.Windows
             this.gzdbLink.TabIndex = 15;
             this.gzdbLink.TabStop = true;
             this.gzdbLink.Text = "GZDoom Builder is designed and programmed by MaxED.\r\nGZDoom Builder uses game con" +
-    "figurations created by Gez.\r\nOfficial thread at ZDoom.org";
+                "figurations created by Gez.\r\nOfficial thread at ZDoom.org";
             this.gzdbLink.UseCompatibleTextRendering = true;
             this.gzdbLink.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.gzdbLink_LinkClicked);
             // 
@@ -258,6 +260,16 @@ namespace CodeImp.DoomBuilder.Windows
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "About Doom Builder";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label3.Location = new System.Drawing.Point(10, 174);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(157, 13);
+            this.label3.TabIndex = 17;
+            this.label3.Text = "Unofficial version by Justburner.";
             // 
             // AboutForm
             // 
@@ -309,5 +321,6 @@ namespace CodeImp.DoomBuilder.Windows
         private System.Windows.Forms.Label version;
         private System.Windows.Forms.Button copyversion;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label3;
     }
 }

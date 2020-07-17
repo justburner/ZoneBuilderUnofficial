@@ -1,0 +1,94 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	
+	<title>Perpendicular Vertex Mode</title>
+	
+	<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+	<link rel="stylesheet" type="text/css" href="default.css" media="screen" title="Default" />
+	<script type="text/javascript" src="scripts.js"></script>
+</head>
+<body>
+	
+	<object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<param name="keyword" value="Perpendicular Vertex Mode">
+	</object>
+	
+	<div id="title"><h1>Perpendicular Vertex Mode</h1></div>
+	
+	<div id="contents">
+	<p>
+		NEW IN UNOFFICIAL 2.10!<br>
+		Perpendiculars are created on each vertex. It's <b>required</b> a path with linedefs connected to the selected vertices for the mode to work, it cannot operate on vertices alone!<br>
+		<br>
+		This mode is helpful for:<br>
+		• Creating track segments. <i>(Due to float inaccuracies you need to use "Snap distance")</i><br>
+		• Alternative to <a href="e_linedefs.html">Parallel Linedef Mode</a> for placing things parallel to a path.<br>
+		<br>
+		This mode shows a small dialog window that you can use to create a perpendicular linedef, vertex or thing from a vertex or multiple vertices.
+		Although this mode shows a dialog window, you can still use the main interface and zoom/move your view around the map.<br />
+		<br>
+		This mode is volatile, which means that this mode returns to the previous stable mode when the map is saved or closed, either accepting or discarding your preview changes. You can access this mode through the <a href="e_vertices.html">Vertices Mode</a>, <a href="e_linedefs.html">Linedefs Mode</a> or <a href="e_sectors.html">Sectors Mode</a> but is recommended to access from <a href="e_linedefs.html">Linedefs Mode</a>.<br>
+		<br>
+		<b>WARNING!</b><br>
+		• Perpendiculars are only created on selected vertices with 1 or 2 selected linedefs connected! (aka. a path line)<br>
+		• Path with opposite facing linedefs will not produce any perpendicular.<br>
+
+		<h2>Dialog Settings</h2>
+		<table border="0" cellspacing="6" width="90%">
+		<tr>
+			<td width="150" valign="top"><b>Create as...</b></td>
+			<td>Select which type of elements to create, see below for more information.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Distance</b></td>
+			<td>Set distance between selected linedef(s) and the end of the perpendicular.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Process tips</b></td>
+			<td>When unchecked, vertices with only one linedef selected won't be processed.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Backwards</b></td>
+			<td>When checked, it creates a perpendicular on the opposite side of where the linedefs are facing.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Snap distance</b></td>
+			<td>Adjust snap distance to vertices that already exist in the map so perpendiculars get connected to them. Set to zero to disable snapping.</td>
+		</tr>
+		</table>
+
+		<h2>"Create as..." types</h2>
+		<table border="0" cellspacing="6" width="90%">
+		<tr>
+			<td width="150" valign="top"><b>Linked Linedef</b></td>
+			<td>Creates a normal perpendicular linedef.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Unlinked Linedef</b></td>
+			<td>Creates an isolated perpendicular linedef that won't intersect or merge into elements on the map. Not recommended.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Vertices</b></td>
+			<td>Creates a vertex at the end of the perpendicular.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Thing</b></td>
+			<td>Creates a thing at the end of the perpendicular.</td>
+		</tr>
+		</table>
+
+		<h2>Default Controls</h2>
+		<table border="0" cellspacing="6" width="90%">
+		<tr>
+			<td width="150" valign="top"><b>Enter</b></td>
+			<td>Accept and apply the changes, and return to the previous mode.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Escape</b></td>
+			<td>Discard the changes and return to the previous mode.</td>
+		</tr>
+		</table>
+	</p>
+	</div>
+</body>

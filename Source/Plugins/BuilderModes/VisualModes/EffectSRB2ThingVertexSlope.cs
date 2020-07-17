@@ -24,7 +24,8 @@ namespace CodeImp.DoomBuilder.BuilderModes
         private BSP bsp;
 		
 		// Constructor
-		public EffectSRB2ThingVertexSlope(SectorData data, List<Thing> sourcethings, bool floor, VisualBlockMap blockmap, BSP bsp) : base(data)
+        public EffectSRB2ThingVertexSlope(SectorData data, List<Thing> sourcethings, bool floor, VisualBlockMap blockmap, BSP bsp)
+            : base(data)
 		{
 			things = sourcethings;
 			slopefloor = floor;
@@ -54,7 +55,10 @@ namespace CodeImp.DoomBuilder.BuilderModes
                     t.DetermineSector(blockmap);
                 else
                     t.DetermineSector(bsp);
-                position.z += t.Sector.FloorHeight;
+                if (t.Parameter != 0) // JBR Absolute Z
+                    position.z = t.GetFlagsValue();
+                else
+                    position.z += t.Sector.FloorHeight;
                 verts[index] = position;
                 index++;
                 if (index > 2) break; //Only the first three vertices are used

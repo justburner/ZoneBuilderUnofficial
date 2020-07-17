@@ -337,7 +337,12 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			General.Interface.AddButton(BuilderPlug.Me.MenusForm.MarqueSelectTouching); //mxd
 			General.Interface.AddButton(BuilderPlug.Me.MenusForm.SyncronizeThingEditButton); //mxd
 			if(General.Map.UDMF) General.Interface.AddButton(BuilderPlug.Me.MenusForm.TextureOffsetLock, ToolbarSection.Geometry); //mxd
-			
+
+            General.Interface.AddButton(BuilderPlug.Me.MenusForm.PlaceThings); //JBR
+            General.Interface.AddButton(BuilderPlug.Me.MenusForm.PerpendicularVertex); //JBR
+            General.Interface.AddButton(BuilderPlug.Me.MenusForm.PerpendicularLinedef); //JBR
+            General.Interface.AddButton(BuilderPlug.Me.MenusForm.ParallelLinedef); //JBR
+
 			//mxd. Update the tooltip
 			BuilderPlug.Me.MenusForm.SyncronizeThingEditButton.ToolTipText = "Synchronized Things Editing" + Environment.NewLine + BuilderPlug.Me.MenusForm.SyncronizeThingEditLinedefsItem.ToolTipText;
 
@@ -365,6 +370,11 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.MarqueSelectTouching); //mxd
 			General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.SyncronizeThingEditButton); //mxd
 			if(General.Map.UDMF) General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.TextureOffsetLock); //mxd
+
+            General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.PlaceThings); //JBR
+            General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.PerpendicularVertex); //JBR
+            General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.PerpendicularLinedef); //JBR
+            General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.ParallelLinedef); //JBR
 
 			// Going to EditSelectionMode?
 			if(General.Editing.NewMode is EditSelectionMode)
@@ -1644,6 +1654,81 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			// Display info
 			General.Interface.DisplayStatus(StatusType.Action, "Added 'lightfog' flag to " + addedcout + " sidedefs, removed it from " + removedcount + " sidedefs.");
 		}
+
+        //JBR Perpendicular Vertex
+        [BeginAction("perpendicularvertex")]
+        public void PerpendicularVertex()
+        {
+            ICollection<Linedef> selected = General.Map.Map.GetSelectedLinedefs(true);
+
+            // Nothing selected?
+            if (selected.Count == 0)
+            {
+                // Anything highlighted?
+                if (highlighted != null)
+                {
+                    // Select the highlighted item
+                    highlighted.Selected = true;
+                    selected.Add(highlighted);
+                }
+            }
+
+            // Anything selected?
+            if (selected.Count > 0)
+                General.Editing.ChangeMode(new PerpendicularVertexMode(new LinedefsMode()));
+            else
+                General.Interface.DisplayStatus(StatusType.Warning, "This action requires a selection!");
+        }
+
+        //JBR Perpendicular Linedef
+        [BeginAction("perpendicularlinedef")]
+        public void PerpendicularLinedef()
+        {
+            ICollection<Linedef> selected = General.Map.Map.GetSelectedLinedefs(true);
+
+            // Nothing selected?
+            if (selected.Count == 0)
+            {
+                // Anything highlighted?
+                if (highlighted != null)
+                {
+                    // Select the highlighted item
+                    highlighted.Selected = true;
+                    selected.Add(highlighted);
+                }
+            }
+
+            // Anything selected?
+            if (selected.Count > 0)
+                General.Editing.ChangeMode(new PerpendicularLinedefMode(new LinedefsMode()));
+            else
+                General.Interface.DisplayStatus(StatusType.Warning, "This action requires a selection!");
+        }
+
+        //JBR Parallel Linedef
+        [BeginAction("parallellinedef")]
+        public void ParallelLinedef()
+        {
+            ICollection<Linedef> selected = General.Map.Map.GetSelectedLinedefs(true);
+
+            // Nothing selected?
+            if (selected.Count == 0)
+            {
+                // Anything highlighted?
+                if (highlighted != null)
+                {
+                    // Select the highlighted item
+                    highlighted.Selected = true;
+                    selected.Add(highlighted);
+                }
+            }
+
+            // Anything selected?
+            if (selected.Count > 0)
+                General.Editing.ChangeMode(new ParallelLinedefMode(new LinedefsMode()));
+            else
+                General.Interface.DisplayStatus(StatusType.Warning, "This action requires a selection!");
+        }
 
 		#endregion
 	}

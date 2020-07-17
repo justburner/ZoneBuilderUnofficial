@@ -159,7 +159,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 				pos = (pos + offset) * scale * texscale;
 				verts[i].u = pos.x;
 				verts[i].v = pos.y;
-			}
+            }
 
 			// The sector triangulation created clockwise triangles that
 			// are right up for the floor. For the ceiling we must flip

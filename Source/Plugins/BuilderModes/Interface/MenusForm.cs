@@ -89,6 +89,14 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		public ToolStripMenuItem SyncronizeThingEditSectorsItem { get { return syncthingeditsectorsitem; } } //mxd
 		public ToolStripMenuItem SyncronizeThingEditLinedefsItem { get { return syncthingeditlinedefsitem; } } //mxd
 		public ToolStripButton MakeDoor { get { return buttonMakeDoor; } } //mxd
+        public ToolStripButton PlaceThings { get { return buttonPlaceThings; } } //JBR
+        public ToolStripButton PointAtCursor { get { return buttonPointAtCursor; } } //JBR
+        public ToolStripButton PerpendicularVertex { get { return buttonPerpendicularVertex; } } //JBR
+        public ToolStripButton PerpendicularLinedef { get { return buttonPerpendicularLinedef; } } //JBR
+        public ToolStripButton ParallelLinedef { get { return buttonParallelLinedef; } } //JBR
+        public ToolStripButton VertexIntoShape { get { return buttonVertexIntoShape; } } //JBR
+        public ToolStripButton VertexSlopeAssist { get { return buttonVertexSlopeAssist; } } //JBR
+        public ToolStripMenuItem VertexSlopeAssistMenu { get { return vertexSlopeAssistT; } } //JBR
 
 		#endregion
 

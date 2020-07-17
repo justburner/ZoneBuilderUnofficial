@@ -17,6 +17,10 @@
 		<param name="Local" value="terminology.html">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="New in Unofficial 2.10">
+		<param name="Local" value="e_new_in_unofficial.html">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="User Interface">
 		<param name="Local" value="userinterface.html">
 		</OBJECT>
@@ -339,12 +343,36 @@
 				<param name="Local" value="gzdb\features\classic_modes\mode_drawellipse.html">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Draw Shape mode">
+				<param name="Local" value="mode_drawshape.html">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Draw Curve mode">
 				<param name="Local" value="gzdb\features\classic_modes\mode_drawcurve.html">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Draw Grid mode">
 				<param name="Local" value="gzdb\features\classic_modes\mode_drawgrid.html">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Perpendicular Linedef">
+				<param name="Local" value="e_perpendicularlinedef.html">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Perpendicular Vertex">
+				<param name="Local" value="e_perpendicularvertex.html">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Parallel Linedef">
+				<param name="Local" value="e_parallellinedef.html">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Vertex into Shape">
+				<param name="Local" value="e_vertexintoshape.html">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Vertex Slope Assistant">
+				<param name="Local" value="e_vertexslopeassistant.html">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Sound Propagation Mode">

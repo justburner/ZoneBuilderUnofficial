@@ -49,7 +49,8 @@ namespace CodeImp.DoomBuilder.Windows
             this.nodebuildertest = new System.Windows.Forms.ComboBox();
             this.nodebuildersave = new System.Windows.Forms.ComboBox();
             this.tabtesting = new System.Windows.Forms.TabPage();
-            this.gametype = new CodeImp.DoomBuilder.Controls.ActionSelectorControl(false);
+            this.gametype = new CodeImp.DoomBuilder.Controls.ActionSelectorControl();
+            this.gametype.GrayOut = false;
             this.skin = new System.Windows.Forms.ComboBox();
             this.btnRemoveEngine = new System.Windows.Forms.Button();
             this.btnNewEngine = new System.Windows.Forms.Button();

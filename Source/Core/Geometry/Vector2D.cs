@@ -341,6 +341,26 @@ namespace CodeImp.DoomBuilder.Geometry
 			return new Vector2D(rx, ry);
 		}
 
+        //JBR Linear interpolate into...
+        public Vector2D LinearInto(Vector2D dest, float delta)
+        {
+            float px = x + (dest.x - x) * delta;
+            float py = y + (dest.y - y) * delta;
+            return new Vector2D(px, py);
+        }
+
+        //JBR Check if close to another vector (square collision)
+        public bool CloseTo(Vector2D dest, float epsilon)
+        {
+            return Math.Abs(dest.x - x) <= epsilon && Math.Abs(dest.y - y) <= epsilon;
+        }
+
+        //JBR Round coordinates
+        public Vector2D GetRounded()
+        {
+            return new Vector2D((float)Math.Round(x), (float)Math.Round(y));
+        }
+
 		// Checks if the Vector has valid values for x and y
 		public bool IsFinite()
 		{

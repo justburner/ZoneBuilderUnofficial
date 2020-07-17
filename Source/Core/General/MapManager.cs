@@ -135,6 +135,9 @@ namespace CodeImp.DoomBuilder
 
 		public ViewMode ViewMode { get { return renderer2d.ViewMode; } }
 
+        //JBR - SRB2 2.2 / SRB2 Kart - Sector Flat Alignment
+        public bool NewFlatAlignment { get { return config.NewFlatAlignment; } }
+
 		#endregion
 
 		#region ================== Constructor / Disposer
@@ -2554,8 +2557,67 @@ namespace CodeImp.DoomBuilder
 			Cursor.Current = Cursors.Default;
 		}
 
+        //JBR
+        [BeginAction("snapvertsto1mp")]
+        private void SnapSelectedMapElementsTo1mp()
+        {
+            // Get selected elements
+            ICollection<Vertex> verts = map.GetSelectedVertices(true);
+            ICollection<Linedef> lines = map.GetSelectedLinedefs(true); // Sector lines are auto-selected when a sector is selected
+            ICollection<Thing> things = map.GetSelectedThings(true);
+
+            // Get vertices from selection
+            Dictionary<int, Vertex> vertstosnap = new Dictionary<int, Vertex>(verts.Count);
+            foreach (Vertex v in verts) vertstosnap.Add(v.Index, v);
+            foreach (Linedef l in lines)
+            {
+                if (!vertstosnap.ContainsKey(l.Start.Index)) vertstosnap.Add(l.Start.Index, l.Start);
+                if (!vertstosnap.ContainsKey(l.End.Index)) vertstosnap.Add(l.End.Index, l.End);
+            }
+
+            // Anything to snap?
+            if (vertstosnap.Count == 0 && things.Count == 0)
+            {
+                General.Interface.DisplayStatus(StatusType.Warning, "Select any map element first!");
+                return;
+            }
+
+            // Make undo
+            undoredo.CreateUndo("Force snap map elements to 1mp");
+
+            // Do the snapping
+            Cursor.Current = Cursors.AppStarting;
+
+            // Snap vertices?
+            int snappedverts = (vertstosnap.Count > 0 ? SnapVertices(vertstosnap.Values, false, true) : 0);
+
+            // Snap things?..
+            int snappedthings = (things.Count > 0 ? SnapThings(things, false, true) : 0);
+
+            // Assemble status message
+            List<string> message = new List<string>();
+            if (snappedverts > 0) message.Add(snappedverts + " vertices");
+            if (snappedthings > 0) message.Add(snappedthings + " things");
+
+            // Display status
+            General.Interface.DisplayStatus(StatusType.Info, "Force snapped " + string.Join(" and ", message.ToArray()));
+
+            // Invoke clear selection to update sector highlight overlay
+            //General.Actions.InvokeAction("builder_clearselection");
+
+            // Update cached values
+            General.Map.Map.Update();
+
+            // Map is changed
+            General.Map.IsChanged = true;
+
+            // Done
+            General.Interface.RedrawDisplay();
+            Cursor.Current = Cursors.Default;
+        }
+
 		//mxd
-		private int SnapVertices(IEnumerable<Vertex> verts)
+        private int SnapVertices(IEnumerable<Vertex> verts, bool snapToGrid = true, bool addAll = false) //JBR Added "addAll"
 		{
 			int snappedCount = 0;
 			List<Vertex> movedVerts = new List<Vertex>();
@@ -2565,17 +2627,18 @@ namespace CodeImp.DoomBuilder
 			foreach(Vertex v in verts) 
 			{
 				Vector2D pos = v.Position;
-				v.SnapToGrid();
+                if (snapToGrid) v.SnapToGrid();
+                else v.Move(GridSetup.SnappedToGrid(v.Position, 1f, 1f));
 
-				if(v.Position.x != pos.x || v.Position.y != pos.y) 
-				{
-					snappedCount++;
-					movedVerts.Add(v);
-					foreach(Linedef l in v.Linedefs) 
-					{
-						if(!movedLines.Contains(l)) movedLines.Add(l);
-					}
-				}
+                if (v.Position.x != pos.x || v.Position.y != pos.y || addAll)
+                {
+                    snappedCount++;
+                    movedVerts.Add(v);
+                    foreach (Linedef l in v.Linedefs)
+                    {
+                        if (!movedLines.Contains(l)) movedLines.Add(l);
+                    }
+                }
 			}
 
 			//Create blockmap
@@ -2654,7 +2717,7 @@ namespace CodeImp.DoomBuilder
 		}
 
 		//mxd
-		private static int SnapThings(IEnumerable<Thing> things)
+		private static int SnapThings(IEnumerable<Thing> things, bool snapToGrid = true, bool addAll = false) //JBR Added "addAll"
 		{
 			int snappedCount = 0;
 
@@ -2662,8 +2725,9 @@ namespace CodeImp.DoomBuilder
 			foreach(Thing t in things) 
 			{
 				Vector2D pos = t.Position;
-				t.SnapToGrid();
-				if(t.Position.x != pos.x || t.Position.y != pos.y) snappedCount++;
+                if (snapToGrid) t.SnapToGrid();
+                else t.Move(GridSetup.SnappedToGrid(t.Position, 1f, 1f));
+                if (t.Position.x != pos.x || t.Position.y != pos.y || addAll) snappedCount++;
 			}
 
 			return snappedCount;

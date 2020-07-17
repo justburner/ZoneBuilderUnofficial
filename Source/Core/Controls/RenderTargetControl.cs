@@ -39,14 +39,13 @@ namespace CodeImp.DoomBuilder.Controls
 		#region ================== Properties
 		
 		public event KeyEventHandler OnKeyReleased; //mxd. Sometimes it's handeled here, not by MainForm
-		public Point LocationAbs { get { return this.PointToScreen(new Point(-(General.MainWindow.Width - General.MainWindow.ClientSize.Width) / 2, 0)); } } //mxd
 
 		#endregion
 
 		#region ================== Constructor / Disposer
 
 		// Constructor
-		internal RenderTargetControl()
+		public RenderTargetControl()
 		{
 			// Initialize
 			this.SetStyle(ControlStyles.FixedWidth, true);
@@ -81,6 +80,13 @@ namespace CodeImp.DoomBuilder.Controls
 		#endregion
 
 		#region ================== Methods
+
+        //mxd
+        //JBR removed from properties as was causing issues in Component Properties panel
+        public Point GetLocationAbs()
+        {
+            return this.PointToScreen(new Point(-(General.MainWindow.Width - General.MainWindow.ClientSize.Width) / 2, 0));
+        }
 
 		// This sets up the control to display the splash logo
 		public void SetSplashLogoDisplay()

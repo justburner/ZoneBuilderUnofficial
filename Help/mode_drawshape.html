@@ -1,0 +1,200 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	
+	<title>Draw Shape Mode</title>
+	
+	<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+	<link rel="stylesheet" type="text/css" href="default.css" media="screen" title="Default" />
+	<script type="text/javascript" src="scripts.js"></script>
+</head>
+<body>
+	
+	<object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<param name="keyword" value="Draw Shape Mode">
+	</object>
+	
+	<div id="title"><h1>Draw Shape Mode</h1></div>
+	
+	<div id="contents">
+	<p>
+		NEW IN UNOFFICIAL 2.10!<br>
+		Creates shapes, this tool peforms the same as <a href="gzdb/features/classic_modes/mode_drawellipse.html">Draw Ellipse Mode</a> and Insert Things Radially Mode but with added functionality.<br>
+		<b>Default key:</b> Alt-D.<br>
+		<br>
+		This mode lets you draw various shapes, including but not limited to:<br>
+		<table border="0" cellspacing="6" width="90%">
+		<tr>
+			<td width="150" valign="top"><b>Triangle</b></td>
+			<td>3 Sides, no spikiness.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Square or Rectangle</b></td>
+			<td>4 Sides, no spikiness. Size depends of reference circle.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Pentagon</b></td>
+			<td>5 Sides, no spikiness.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Hexagon</b></td>
+			<td>6 Sides, no spikiness.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Heptagon</b></td>
+			<td>7 Sides, no spikiness.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Octagon</b></td>
+			<td>8 Sides, no spikiness.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Circle or ellipse</b></td>
+			<td>High number of sides, no spikiness.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Star</b></td>
+			<td>10 Sides, with spikiness, "spike inside".</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Gear</b></td>
+			<td>8+ Sides (multiple of 4), with spikiness, "spike gear".</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Pac-man</b></td>
+			<td>16+ Sides, no spikiness, 45º Start Angle, 270º Sweep Angle.</td>
+		</tr>
+		</table>
+		...each of this shapes can be sliced.<br>
+		All geometry will fit a reference circle in exception of spikes.<br>
+
+		Make sure to expand the right panel under "Draw Shape" to see the settings:<br>
+		<img src="mode_drawshape.png" /><br>
+
+		<h2>Dialog Settings</h2>
+		<table border="0" cellspacing="6" width="90%">
+		<tr>
+			<td width="150" valign="top"><b>Preview Reference</b></td>
+			<td>Visual only. The reference circle will be shown on screen when checked.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Ellipse</b></td>
+			<td>Shape can only be scaled in one axis when unchecked, this also allows to be much easier to setup angles with the mouse.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>1st Point as...</b></td>
+			<td>Select how the shape will be placed in the map: starting from origin, replicate Draw Ellipse Mode behaviour or side/corner into origin.</td>
+		</tr>
+		<tr>
+			<td width="150" valign="top"><b>Create shape as...</b></td>
+			<td>Select which type of elements to create, see below for more information.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Front Outside /<br>Flip Linedefs</b></td>
+			<td>Shape linedefs will point outside when checked, ignored if "Create shape as.." is "Vertices" or "Things".</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Sides</b></td>
+			<td>Sets number of sides that the shape should have, note that reducing sweep angle won't reduce the number of sides.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Spikiness</b></td>
+			<td>Sets percentage of spikiness. Except "Draw Ellipse behaviour" spike type, in that case spikiness is in mp.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b><i>Spike type combo box</i></b></td>
+			<td>Controls how spikes behave in relation to the Spikiness level, see below for more information.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Start Angle</b></td>
+			<td>Controls the starting angle of the first point.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Sweep Angle</b></td>
+			<td>Controls the sweep angle of the slice, 360º will create a closed shape without slices.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Lock to one quadrant</b></td>
+			<td>Locks start angle to top-right quadrant when checked, internally the angle will automatically adjust based of which quadrant the mouse is in.</td>
+		</tr>
+		</table>
+
+		<h2>"Create as..." types</h2>
+		<table border="0" cellspacing="6" width="90%">
+		<tr>
+			<td width="150" valign="top"><b>Close shape<br>towards origin</b></td>
+			<td>Sliced shape will be cut towards origin creating a pie look.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Close shape<br>first to last vertex</b></td>
+			<td>Sliced shape will be closed by a linedef connected from the first to last vertex of the shape.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Open or close shape</b></td>
+			<td>Sliced shape won't be closed.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Shape w/o intersect<br>or sectors</b></td>
+			<td>Creates an isolated shape that won't intersect or merge into elements on the map. Not recommended.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Vertices</b></td>
+			<td>Creates a shape without linedefs.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Thing</b></td>
+			<td>Creates a thing at each point of the shape.</td>
+		</tr>
+		</table>
+
+		<h2>Spike types combo box</h2>
+		<table border="0" cellspacing="6" width="90%">
+		<tr>
+			<td width="150" valign="top"><b>Spike outside</b></td>
+			<td>Spike will go outside of the reference circle.</td>
+		</tr>
+		<tr>
+			<td width="150" valign="top"><b>Spike inside</b></td>
+			<td>Spike will go inside of the reference circle, spikiness should not be more than 100!</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Spike zig-zag</b></td>
+			<td>Spike will go outside and inside of the reference circle causing it to be 2x more severe, spikiness should not be more than 100!</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Spike gear</b></td>
+			<td>Spike create a gear shape inside and outside of the reference circle, spikiness should not be more than 100! Number of sides must be multiple of 4 in this type.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>DrawEllipse behaviour</b></td>
+			<td>Simulates Draw Ellipse bevel behaviour, in this case the spikiness will be distance of spikes away from the reference circle rather than a percentage.</td>
+		</tr>
+		</table>
+		If Spikiness is more than 0 then sides must be multiple of 2 (except Spike Gear that requires 4).<br>
+
+		<h2>Default Controls</h2>
+		<table border="0" cellspacing="6" width="90%">
+		<tr>
+			<td width="150" valign="top"><b>Alt+D</b></td>
+			<td>Start this drawing mode (available from any classic mode).</td>
+		</tr>
+		<tr>
+			<td width="150" valign="top"><b>Enter</b></td>
+			<td>Accept and apply the changes, and return to the previous mode.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Escape</b></td>
+			<td>Discard the changes and return to the previous mode.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Drag Middle Button</b></td>
+			<td>Sets Start Angle in relation to the origin and mouse position.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Drag Middle Button while holding Ctrl</b></td>
+			<td>Sets Sweep Angle in relation to the origin, start angle and mouse position.</td>
+		</tr>
+		</table>
+	</p>
+	</div>
+</body>

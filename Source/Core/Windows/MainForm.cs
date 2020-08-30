@@ -50,10 +50,10 @@ namespace CodeImp.DoomBuilder.Windows
 	public partial class MainForm : DelayedForm, IMainForm
 	{
 		#region ================== Constants
-		
+
 		// Recent files
 		private const int MAX_RECENT_FILES_PIXELS = 250;
-		
+
 		// Status bar
 		internal const int WARNING_FLASH_COUNT = 10;
 		internal const int WARNING_FLASH_INTERVAL = 100;
@@ -62,7 +62,7 @@ namespace CodeImp.DoomBuilder.Windows
 		internal const int ACTION_FLASH_COUNT = 3;
 		internal const int ACTION_FLASH_INTERVAL = 50;
 		internal const int ACTION_RESET_DELAY = 5000;
-		
+
 		internal readonly Image[,] STATUS_IMAGES = new Image[,]
 		{
 			// Normal versions
@@ -77,21 +77,21 @@ namespace CodeImp.DoomBuilder.Windows
 			  Resources.Status12, Resources.WarningOff
 			}
 		};
-		
+
 		// Message pump
 		public enum ThreadMessages
 		{
 			// Sent by the background threat to update the status
 			UpdateStatus = General.WM_USER + 1,
-			
+
 			// This is sent by the background thread when images are loaded
 			// but only when first loaded or when dimensions were changed
 			ImageDataLoaded = General.WM_USER + 2,
-			
+
 			//mxd. This is sent by the background thread when sprites are loaded
 			SpriteDataLoaded = General.WM_USER + 3,
 		}
-		
+
 		#endregion
 
 		#region ================== Delegates
@@ -115,10 +115,10 @@ namespace CodeImp.DoomBuilder.Windows
 		private Size lastsize;
 		private bool displayresized = true;
 		private bool windowactive;
-		
+
 		// Mouse in display
 		private bool mouseinside;
-		
+
 		// Input
 		private bool shift, ctrl, alt;
 		private MouseButtons mousebuttons;
@@ -126,35 +126,35 @@ namespace CodeImp.DoomBuilder.Windows
 		private Rectangle originalclip;
 		private bool mouseexclusive;
 		private int mouseexclusivebreaklevel;
-		
+
 		// Last info on panels
 		private object lastinfoobject;
-		
+
 		// Recent files
 		private ToolStripMenuItem[] recentitems;
-		
+
 		// View modes
 		private ToolStripButton[] viewmodesbuttons;
 		private ToolStripMenuItem[] viewmodesitems;
-		
+
 		// Edit modes
 		private List<ToolStripItem> editmodeitems;
-		
+
 		// Toolbar
 		private List<PluginToolbarButton> pluginbuttons;
 		private EventHandler buttonvisiblechangedhandler;
 		private bool preventupdateseperators;
 		private bool updatingfilters;
 		private bool toolbarContextMenuShiftPressed; //mxd
-		
+
 		// Statusbar
 		private StatusInfo status;
 		private int statusflashcount;
 		private bool statusflashicon;
-		
+
 		// Properties
 		private IntPtr windowptr;
-		
+
 		// Processing
 		private int processingcount;
 		private float lastupdatetime;
@@ -168,9 +168,13 @@ namespace CodeImp.DoomBuilder.Windows
 		private HintsPanel hintsPanel;
 
 		//mxd
-		private System.Timers.Timer blinkTimer; 
+		private System.Timers.Timer blinkTimer;
 		private bool editformopen;
-		
+
+		//JBR Autosave
+		private static System.Timers.Timer autosaveTmr;
+		private static int autosaveCnt;
+
 		#endregion
 
 		#region ================== Properties
@@ -191,7 +195,7 @@ namespace CodeImp.DoomBuilder.Windows
 		public StatusInfo Status { get { return status; } }
 		public static Size ScaledIconSize = new Size(16, 16); //mxd
 		public static SizeF DPIScaler = new SizeF(1.0f, 1.0f); //mxd
-		
+
 		#endregion
 
 		#region ================== Constructor / Disposer
@@ -200,22 +204,22 @@ namespace CodeImp.DoomBuilder.Windows
 		internal MainForm()
 		{
 			//mxd. Set DPI-aware icon size
-			using(Graphics g = this.CreateGraphics()) 
+			using (Graphics g = this.CreateGraphics())
 			{
 				DPIScaler = new SizeF(g.DpiX / 96, g.DpiY / 96);
 
-				if(DPIScaler.Width != 1.0f || DPIScaler.Height != 1.0f)
+				if (DPIScaler.Width != 1.0f || DPIScaler.Height != 1.0f)
 				{
 					ScaledIconSize.Width = (int)Math.Round(ScaledIconSize.Width * DPIScaler.Width);
 					ScaledIconSize.Height = (int)Math.Round(ScaledIconSize.Height * DPIScaler.Height);
 				}
 			}
-			
+
 			// Setup controls
 			InitializeComponent();
 
 			//mxd. Resize status labels
-			if(DPIScaler.Width != 1.0f)
+			if (DPIScaler.Width != 1.0f)
 			{
 				gridlabel.Width = (int)Math.Round(gridlabel.Width * DPIScaler.Width);
 				zoomlabel.Width = (int)Math.Round(zoomlabel.Width * DPIScaler.Width);
@@ -228,10 +232,10 @@ namespace CodeImp.DoomBuilder.Windows
 			editmodeitems = new List<ToolStripItem>();
 			labelcollapsedinfo.Text = "";
 			display.Dock = DockStyle.Fill;
-			
+
 			// Fetch pointer
 			windowptr = base.Handle;
-			
+
 			// Make array for view modes
 			viewmodesbuttons = new ToolStripButton[Renderer2D.NUM_VIEW_MODES];
 			viewmodesbuttons[(int)ViewMode.Normal] = buttonviewnormal;
@@ -243,7 +247,7 @@ namespace CodeImp.DoomBuilder.Windows
 			viewmodesitems[(int)ViewMode.Brightness] = itemviewbrightness;
 			viewmodesitems[(int)ViewMode.FloorTextures] = itemviewfloors;
 			viewmodesitems[(int)ViewMode.CeilingTextures] = itemviewceilings;
-			
+
 			// Visual Studio IDE doesn't let me set these in the designer :(
 			buttonzoom.Font = menufile.Font;
 			buttonzoom.DropDownDirection = ToolStripDropDownDirection.AboveLeft;
@@ -257,23 +261,30 @@ namespace CodeImp.DoomBuilder.Windows
 			toolbarContextMenu.KeyDown += toolbarContextMenu_KeyDown;
 			toolbarContextMenu.KeyUp += toolbarContextMenu_KeyUp;
 			linedefcolorpresets.DropDown.MouseLeave += linedefcolorpresets_MouseLeave;
-			
+
 			// Apply shortcut keys
 			ApplyShortcutKeys();
-			
+
 			// Make recent items list
 			CreateRecentFiles();
-			
+
 			// Show splash
 			ShowSplashDisplay();
-			
+
 			// Keep last position and size
 			lastposition = this.Location;
 			lastsize = this.Size;
 
 			//mxd
-			blinkTimer = new System.Timers.Timer {Interval = 500};
+			blinkTimer = new System.Timers.Timer { Interval = 500 };
 			blinkTimer.Elapsed += blinkTimer_Elapsed;
+
+			//JBR Autosave
+			autosaveCnt = 0;
+			autosaveTmr = new System.Timers.Timer(60000); // triggered each minute
+			autosaveTmr.SynchronizingObject = this;
+			autosaveTmr.Elapsed += autosaveTmr_Elapsed;
+			AutosaveSetup(General.Settings.AutosaveEnable);
 
 			//mxd. Debug Console
 #if DEBUG
@@ -286,9 +297,9 @@ namespace CodeImp.DoomBuilder.Windows
 			hintsPanel = new HintsPanel();
 			hintsDocker = new Docker("hints", "Help", hintsPanel);
 		}
-		
+
 		#endregion
-		
+
 		#region ================== General
 
 		// Editing mode changed!
@@ -296,7 +307,7 @@ namespace CodeImp.DoomBuilder.Windows
 		{
 			// Check appropriate button on interface
 			// And show the mode name
-			if(General.Editing.Mode != null)
+			if (General.Editing.Mode != null)
 			{
 				General.MainWindow.CheckEditModeButton(General.Editing.Mode.EditModeButtonName);
 				General.MainWindow.DisplayModeName(General.Editing.Mode.Attributes.DisplayName);
@@ -308,7 +319,7 @@ namespace CodeImp.DoomBuilder.Windows
 			}
 
 			// View mode only matters in classic editing modes
-			for(int i = 0; i < Renderer2D.NUM_VIEW_MODES; i++)
+			for (int i = 0; i < Renderer2D.NUM_VIEW_MODES; i++)
 			{
 				viewmodesitems[i].Enabled = (General.Editing.Mode is ClassicMode);
 				viewmodesbuttons[i].Enabled = (General.Editing.Mode is ClassicMode);
@@ -328,7 +339,7 @@ namespace CodeImp.DoomBuilder.Windows
 		internal void SetupInterface()
 		{
 			// Setup docker
-			if(General.Settings.DockersPosition != 2 && General.Map != null)
+			if (General.Settings.DockersPosition != 2 && General.Map != null)
 			{
 				LockUpdate();
 				dockerspanel.Visible = true;
@@ -338,18 +349,18 @@ namespace CodeImp.DoomBuilder.Windows
 				dockerspanel.Expand();
 
 				// Setup docker width
-				if(General.Settings.DockersWidth < dockerspanel.GetCollapsedWidth())
+				if (General.Settings.DockersWidth < dockerspanel.GetCollapsedWidth())
 					General.Settings.DockersWidth = dockerspanel.GetCollapsedWidth();
 
 				// Determine fixed space required
-				if(General.Settings.CollapseDockers)
+				if (General.Settings.CollapseDockers)
 					dockersspace.Width = dockerspanel.GetCollapsedWidth();
 				else
 					dockersspace.Width = General.Settings.DockersWidth;
 
 				// Setup docker
 				int targetindex = this.Controls.IndexOf(display) + 1; //mxd
-				if(General.Settings.DockersPosition == 0)
+				if (General.Settings.DockersPosition == 0)
 				{
 					modestoolbar.Dock = DockStyle.Right; //mxd
 					dockersspace.Dock = DockStyle.Left;
@@ -372,7 +383,7 @@ namespace CodeImp.DoomBuilder.Windows
 				dockerspanel.Height = dockersspace.Height;
 				dockerspanel.BringToFront();
 
-				if(General.Settings.CollapseDockers) dockerspanel.Collapse();
+				if (General.Settings.CollapseDockers) dockerspanel.Collapse();
 
 				UnlockUpdate();
 			}
@@ -387,12 +398,12 @@ namespace CodeImp.DoomBuilder.Windows
 		//mxd. dockersspace display index gets messed up while re-docking. This fixes it...
 		private void AdjustDockersSpace(int targetindex)
 		{
-			while(this.Controls.IndexOf(dockersspace) != targetindex)
+			while (this.Controls.IndexOf(dockersspace) != targetindex)
 			{
 				this.Controls.SetChildIndex(dockersspace, targetindex);
 			}
 		}
-		
+
 		// This updates all menus for the current status
 		internal void UpdateInterface()
 		{
@@ -401,7 +412,7 @@ namespace CodeImp.DoomBuilder.Windows
 
 			// Update the status bar
 			UpdateStatusbar();
-			
+
 			// Update menus and toolbar icons
 			UpdateFileMenu();
 			UpdateEditMenu();
@@ -418,13 +429,13 @@ namespace CodeImp.DoomBuilder.Windows
 		private void UpdateTitle()
 		{
 			// Map opened?
-			if(General.Map != null)
+			if (General.Map != null)
 			{
-                // Get nice name
-                string maptitle = (!string.IsNullOrEmpty(General.Map.Data.MapInfo.Title) ? ": " + General.Map.Data.MapInfo.Title : "");
+				// Get nice name
+				string maptitle = (!string.IsNullOrEmpty(General.Map.Data.MapInfo.Title) ? ": " + General.Map.Data.MapInfo.Title : "");
 
-                // Show map name and filename in caption
-                this.Text = (mapchanged ? "\u25CF " : "") + General.Map.FileTitle + " (" + General.Map.Options.CurrentName + ") - " + Application.ProductName;
+				// Show map name and filename in caption
+				this.Text = (mapchanged ? "\u25CF " : "") + General.Map.FileTitle + " (" + General.Map.Options.CurrentName + ") - " + Application.ProductName;
 			}
 			else
 			{
@@ -436,39 +447,75 @@ namespace CodeImp.DoomBuilder.Windows
 #endif
 			}
 		}
-		
+
 		// Generic event that invokes the tagged action
 		public void InvokeTaggedAction(object sender, EventArgs e)
 		{
 			this.Update();
-			
-			if(sender is ToolStripItem)
+
+			if (sender is ToolStripItem)
 				General.Actions.InvokeAction((sender as ToolStripItem).Tag.ToString());
-			else if(sender is Control)
+			else if (sender is Control)
 				General.Actions.InvokeAction((sender as Control).Tag.ToString());
 			else
 				General.Fail("InvokeTaggedAction used on an unexpected control.");
-			
+
 			this.Update();
 		}
-		
+
+		//JBR Autosave timer
+		public void AutosaveSetup(bool enable)
+		{
+			if (enable && !autosaveTmr.Enabled) autosaveTmr.Start();
+			if (!enable && autosaveTmr.Enabled) autosaveTmr.Stop();
+		}
+		private void autosaveTmr_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+		{
+			if (!General.Settings.AutosaveEnable || General.Map == null || !General.Map.IsChanged)
+			{
+				autosaveCnt = 0;
+				return;
+			}
+			if (++autosaveCnt >= General.Settings.AutosaveMinutes)
+			{
+				if (string.IsNullOrEmpty(General.Map.FilePathName))
+				{
+					autosaveCnt = 0;
+					DisplayStatus(StatusType.Warning, "[AUTOSAVE] Don't forget to save your map first!");
+				}
+				else
+				{
+					if (!General.Settings.AutosaveForce && General.Editing.HasVolatileMode())
+					{
+						DisplayStatus(StatusType.Info, "[AUTOSAVE] In volatile mode, please exit current tool for autosaving.");
+						return;
+					}
+					autosaveCnt = 0;
+					if (!Path.GetExtension(General.Map.FilePathName).Equals(".kart", StringComparison.CurrentCultureIgnoreCase))
+					{
+						General.Actions.InvokeAction("builder_savemap");
+					}
+				}
+			}
+		}
+
 		#endregion
-		
+
 		#region ================== Window
-		
+
 		// This locks the window for updating
 		internal void LockUpdate()
 		{
 			lockupdatecount++;
-			if(lockupdatecount == 1) General.LockWindowUpdate(this.Handle);
+			if (lockupdatecount == 1) General.LockWindowUpdate(this.Handle);
 		}
 
 		// This unlocks for updating
 		internal void UnlockUpdate()
 		{
 			lockupdatecount--;
-			if(lockupdatecount == 0) General.LockWindowUpdate(IntPtr.Zero);
-			if(lockupdatecount < 0) lockupdatecount = 0;
+			if (lockupdatecount == 0) General.LockWindowUpdate(IntPtr.Zero);
+			if (lockupdatecount < 0) lockupdatecount = 0;
 		}
 
 		// This unlocks for updating
@@ -481,11 +528,11 @@ namespace CodeImp.DoomBuilder.Windows
 		//mxd
 		internal void UpdateMapChangedStatus()
 		{
-			if(General.Map == null || General.Map.IsChanged == mapchanged) return;
+			if (General.Map == null || General.Map.IsChanged == mapchanged) return;
 			mapchanged = General.Map.IsChanged;
 			UpdateTitle();
 		}
-		
+
 		// This sets the focus on the display for correct key input
 		public bool FocusDisplay()
 		{
@@ -496,7 +543,7 @@ namespace CodeImp.DoomBuilder.Windows
 		private void MainForm_Shown(object sender, EventArgs e)
 		{
 			// Perform auto map loading action when the window is not delayed
-			if(!General.DelayMainWindow) PerformAutoMapLoading();
+			if (!General.DelayMainWindow) PerformAutoMapLoading();
 		}
 
 		// Auto map loading that must be done when the window is first shown after loading
@@ -504,48 +551,48 @@ namespace CodeImp.DoomBuilder.Windows
 		internal void PerformAutoMapLoading()
 		{
 			// Check if the command line arguments tell us to load something
-			if(General.AutoLoadFile != null)
+			if (General.AutoLoadFile != null)
 			{
 				bool showdialog = false;
 				MapOptions options = new MapOptions();
-				
+
 				// Any of the options already given?
-				if(General.AutoLoadMap != null)
+				if (General.AutoLoadMap != null)
 				{
 					Configuration mapsettings;
-					
+
 					// Try to find existing options in the settings file
 					string dbsfile = General.AutoLoadFile.Substring(0, General.AutoLoadFile.Length - 4) + ".dbs";
-					if(File.Exists(dbsfile))
+					if (File.Exists(dbsfile))
 						try { mapsettings = new Configuration(dbsfile, true); }
-						catch(Exception) { mapsettings = new Configuration(true); }
+						catch (Exception) { mapsettings = new Configuration(true); }
 					else
 						mapsettings = new Configuration(true);
 
 					//mxd. Get proper configuration file
 					bool longtexturenamessupported = false;
 					string configfile = General.AutoLoadConfig;
-					if(string.IsNullOrEmpty(configfile)) configfile = mapsettings.ReadSetting("gameconfig", "");
-					if(configfile.Trim().Length == 0)
+					if (string.IsNullOrEmpty(configfile)) configfile = mapsettings.ReadSetting("gameconfig", "");
+					if (configfile.Trim().Length == 0)
 					{
 						showdialog = true;
 					}
-                    else
-                    {
-                        // Get if long texture names are supported from the game configuration
-                        ConfigurationInfo configinfo = General.GetConfigurationInfo(configfile);
-                        longtexturenamessupported = configinfo.Configuration.ReadSetting("longtexturenames", false);
-                    }
+					else
+					{
+						// Get if long texture names are supported from the game configuration
+						ConfigurationInfo configinfo = General.GetConfigurationInfo(configfile);
+						longtexturenamessupported = configinfo.Configuration.ReadSetting("longtexturenames", false);
+					}
 
-                    // Set map name and other options
-                    options = new MapOptions(mapsettings, General.AutoLoadMap, longtexturenamessupported);
+					// Set map name and other options
+					options = new MapOptions(mapsettings, General.AutoLoadMap, longtexturenamessupported);
 
 					// Set resource data locations
 					options.CopyResources(General.AutoLoadResources);
 
 					// Set strict patches
 					options.StrictPatches = General.AutoLoadStrictPatches;
-					
+
 					// Set configuration file (constructor already does this, but we want this info from the cmd args if possible)
 					options.ConfigFile = configfile;
 				}
@@ -556,7 +603,7 @@ namespace CodeImp.DoomBuilder.Windows
 				}
 
 				// Show open map dialog?
-				if(showdialog)
+				if (showdialog)
 				{
 					// Show open dialog
 					General.OpenMapFile(General.AutoLoadFile, null);
@@ -576,7 +623,7 @@ namespace CodeImp.DoomBuilder.Windows
 			this.SuspendLayout();
 			this.Size = new Size(General.Settings.ReadSetting("mainwindow.sizewidth", this.Size.Width),
 								 General.Settings.ReadSetting("mainwindow.sizeheight", this.Size.Height));
-			this.Location = new Point(General.Clamp(General.Settings.ReadSetting("mainwindow.positionx", this.Location.X), 
+			this.Location = new Point(General.Clamp(General.Settings.ReadSetting("mainwindow.positionx", this.Location.X),
 													SystemInformation.VirtualScreen.Left - this.Size.Width + 128,
 													SystemInformation.VirtualScreen.Right - 128),
 									  General.Clamp(General.Settings.ReadSetting("mainwindow.positiony", this.Location.Y),
@@ -584,9 +631,9 @@ namespace CodeImp.DoomBuilder.Windows
 													SystemInformation.VirtualScreen.Bottom - 128));
 			this.WindowState = (FormWindowState)General.Settings.ReadSetting("mainwindow.windowstate", (int)FormWindowState.Maximized);
 			this.ResumeLayout(true);
-			
+
 			// Normal windowstate?
-			if(this.WindowState == FormWindowState.Normal)
+			if (this.WindowState == FormWindowState.Normal)
 			{
 				// Keep last position and size
 				lastposition = this.Location;
@@ -600,7 +647,7 @@ namespace CodeImp.DoomBuilder.Windows
 
 			// Info panel state?
 			bool expandedpanel = General.Settings.ReadSetting("mainwindow.expandedinfopanel", true);
-			if(expandedpanel != IsInfoPanelExpanded) ToggleInfoPanel();
+			if (expandedpanel != IsInfoPanelExpanded) ToggleInfoPanel();
 		}
 
 		// Window receives focus
@@ -613,21 +660,21 @@ namespace CodeImp.DoomBuilder.Windows
 			ReleaseAllKeys();
 			FocusDisplay();
 		}
-		
+
 		// Window loses focus
 		private void MainForm_Deactivate(object sender, EventArgs e)
 		{
 			windowactive = false;
-			
+
 			BreakExclusiveMouseInput();
 			ReleaseAllKeys();
 		}
-		
+
 		// Window is moved
 		private void MainForm_Move(object sender, EventArgs e)
 		{
 			// Normal windowstate?
-			if(this.WindowState == FormWindowState.Normal)
+			if (this.WindowState == FormWindowState.Normal)
 			{
 				// Keep last position and size
 				lastposition = this.Location;
@@ -647,7 +694,7 @@ namespace CodeImp.DoomBuilder.Windows
 		private void MainForm_ResizeEnd(object sender, EventArgs e)
 		{
 			// Normal windowstate?
-			if(this.WindowState == FormWindowState.Normal)
+			if (this.WindowState == FormWindowState.Normal)
 			{
 				// Keep last position and size
 				lastposition = this.Location;
@@ -656,13 +703,13 @@ namespace CodeImp.DoomBuilder.Windows
 		}
 
 		// Window is being closed
-		protected override void OnFormClosing(FormClosingEventArgs e) 
+		protected override void OnFormClosing(FormClosingEventArgs e)
 		{
 			base.OnFormClosing(e);
-			if(e.CloseReason == CloseReason.ApplicationExitCall) return;
+			if (e.CloseReason == CloseReason.ApplicationExitCall) return;
 
 			// Close the map
-			if(General.CloseMap()) 
+			if (General.CloseMap())
 			{
 				General.WriteLogLine("Closing main interface window...");
 
@@ -680,7 +727,7 @@ namespace CodeImp.DoomBuilder.Windows
 
 				// Determine window state to save
 				int windowstate;
-				if(this.WindowState != FormWindowState.Minimized)
+				if (this.WindowState != FormWindowState.Minimized)
 					windowstate = (int)this.WindowState;
 				else
 					windowstate = (int)FormWindowState.Normal;
@@ -698,8 +745,8 @@ namespace CodeImp.DoomBuilder.Windows
 
 				// Terminate the program
 				General.Terminate(true);
-			} 
-			else 
+			}
+			else
 			{
 				// Cancel the close
 				e.Cancel = true;
@@ -707,38 +754,38 @@ namespace CodeImp.DoomBuilder.Windows
 		}
 
 		//mxd
-		private void OnDragEnter(object sender, DragEventArgs e) 
+		private void OnDragEnter(object sender, DragEventArgs e)
 		{
-			if(e.Data.GetDataPresent(DataFormats.FileDrop))
+			if (e.Data.GetDataPresent(DataFormats.FileDrop))
 			{
 				e.Effect = DragDropEffects.Copy;
-			} 
-			else 
+			}
+			else
 			{
 				e.Effect = DragDropEffects.None;
 			}
 		}
 
 		//mxd
-		private void OnDragDrop(object sender, DragEventArgs e) 
+		private void OnDragDrop(object sender, DragEventArgs e)
 		{
-			if(e.Data.GetDataPresent(DataFormats.FileDrop)) 
+			if (e.Data.GetDataPresent(DataFormats.FileDrop))
 			{
 				string[] filePaths = (string[])e.Data.GetData(DataFormats.FileDrop);
-				if(filePaths.Length != 1) 
+				if (filePaths.Length != 1)
 				{
 					General.Interface.DisplayStatus(StatusType.Warning, "Cannot open multiple files at once!");
 					return;
 				}
 
-				if(!File.Exists(filePaths[0])) 
+				if (!File.Exists(filePaths[0]))
 				{
 					General.Interface.DisplayStatus(StatusType.Warning, "Cannot open '" + filePaths[0] + "': file does not exist!");
 					return;
 				}
 
 				string ext = Path.GetExtension(filePaths[0]);
-				if(string.IsNullOrEmpty(ext) || ext.ToLower() != ".wad") 
+				if (string.IsNullOrEmpty(ext) || ext.ToLower() != ".wad")
 				{
 					General.Interface.DisplayStatus(StatusType.Warning, "Cannot open '" + filePaths[0] + "': only WAD files can be loaded this way!");
 					return;
@@ -751,14 +798,14 @@ namespace CodeImp.DoomBuilder.Windows
 		}
 
 		#endregion
-		
+
 		#region ================== Statusbar
-		
+
 		// This updates the status bar
 		private void UpdateStatusbar()
 		{
 			// Map open?
-			if(General.Map != null)
+			if (General.Map != null)
 			{
 				// Enable items
 				xposlabel.Enabled = true;
@@ -784,54 +831,54 @@ namespace CodeImp.DoomBuilder.Windows
 				buttongrid.Enabled = false;
 				configlabel.Text = "";
 			}
-			
+
 			UpdateStatusIcon();
 		}
-		
+
 		// This flashes the status icon
 		private void statusflasher_Tick(object sender, EventArgs e)
 		{
 			statusflashicon = !statusflashicon;
 			UpdateStatusIcon();
 			statusflashcount--;
-			if(statusflashcount == 0) statusflasher.Stop();
+			if (statusflashcount == 0) statusflasher.Stop();
 		}
-		
+
 		// This resets the status to ready
 		private void statusresetter_Tick(object sender, EventArgs e)
 		{
 			DisplayReady();
 		}
-		
+
 		// This changes status text
 		public void DisplayStatus(StatusType type, string message) { DisplayStatus(new StatusInfo(type, message)); }
 		public void DisplayStatus(StatusInfo newstatus)
 		{
 			// Stop timers
-			if(!newstatus.displayed)
+			if (!newstatus.displayed)
 			{
 				statusresetter.Stop();
 				statusflasher.Stop();
 				statusflashicon = false;
 			}
-			
+
 			// Determine what to do specifically for this status type
-			switch(newstatus.type)
+			switch (newstatus.type)
 			{
 				// Shows information without flashing the icon.
 				case StatusType.Ready: //mxd
 				case StatusType.Selection: //mxd
 				case StatusType.Info:
-					if(!newstatus.displayed)
+					if (!newstatus.displayed)
 					{
 						statusresetter.Interval = INFO_RESET_DELAY;
 						statusresetter.Start();
 					}
 					break;
-					
+
 				// Shows action information and flashes up the status icon once.	
 				case StatusType.Action:
-					if(!newstatus.displayed)
+					if (!newstatus.displayed)
 					{
 						statusflashicon = true;
 						statusflasher.Interval = ACTION_FLASH_INTERVAL;
@@ -841,10 +888,10 @@ namespace CodeImp.DoomBuilder.Windows
 						statusresetter.Start();
 					}
 					break;
-					
+
 				// Shows a warning, makes a warning sound and flashes a warning icon.
 				case StatusType.Warning:
-					if(!newstatus.displayed)
+					if (!newstatus.displayed)
 					{
 						MessageBeep(MessageBeepType.Warning);
 						statusflasher.Interval = WARNING_FLASH_INTERVAL;
@@ -855,38 +902,38 @@ namespace CodeImp.DoomBuilder.Windows
 					}
 					break;
 			}
-			
+
 			// Update status description
 			status = newstatus;
 			status.displayed = true;
 			statuslabel.Text = status.ToString(); //mxd. message -> ToString()
-			
+
 			// Update icon as well
 			UpdateStatusIcon();
-			
+
 			// Refresh
 			statusbar.Invalidate();
 			this.Update();
 		}
-		
+
 		// This changes status text to Ready
 		public void DisplayReady()
 		{
 			DisplayStatus(StatusType.Ready, null);
 		}
-		
+
 		// This updates the status icon
 		private void UpdateStatusIcon()
 		{
 			int statusicon = 0;
 			int statusflashindex = statusflashicon ? 1 : 0;
-			
+
 			// Loading icon?
-			if((General.Map != null) && (General.Map.Data != null) && General.Map.Data.IsLoading)
+			if ((General.Map != null) && (General.Map.Data != null) && General.Map.Data.IsLoading)
 				statusicon = 1;
-			
+
 			// Status type
-			switch(status.type)
+			switch (status.type)
 			{
 				case StatusType.Ready:
 				case StatusType.Info:
@@ -894,17 +941,17 @@ namespace CodeImp.DoomBuilder.Windows
 				case StatusType.Selection: //mxd
 					statuslabel.Image = STATUS_IMAGES[statusflashindex, statusicon];
 					break;
-				
+
 				case StatusType.Busy:
 					statuslabel.Image = STATUS_IMAGES[statusflashindex, 2];
 					break;
-					
+
 				case StatusType.Warning:
 					statuslabel.Image = STATUS_IMAGES[statusflashindex, 3];
 					break;
 			}
 		}
-		
+
 		// This changes coordinates display
 		public void UpdateCoordinates(Vector2D coords)
 		{
@@ -926,10 +973,10 @@ namespace CodeImp.DoomBuilder.Windows
 		private void itemzoomto_Click(object sender, EventArgs e)
 		{
 			// In classic mode?
-			if(General.Map != null && General.Editing.Mode is ClassicMode)
+			if (General.Map != null && General.Editing.Mode is ClassicMode)
 			{
 				// Requested from menu?
-				if(sender is ToolStripMenuItem)
+				if (sender is ToolStripMenuItem)
 				{
 					// Get integral zoom level
 					int zoom = int.Parse((sender as ToolStripMenuItem).Tag.ToString(), CultureInfo.InvariantCulture);
@@ -944,7 +991,7 @@ namespace CodeImp.DoomBuilder.Windows
 		private void itemzoomfittoscreen_Click(object sender, EventArgs e)
 		{
 			// In classic mode?
-			if(General.Map != null && General.Editing.Mode is ClassicMode)
+			if (General.Map != null && General.Editing.Mode is ClassicMode)
 				(General.Editing.Mode as ClassicMode).CenterInScreen();
 		}
 
@@ -958,20 +1005,20 @@ namespace CodeImp.DoomBuilder.Windows
 		// Set grid to a specified size
 		private void itemgridsize_Click(object sender, EventArgs e)
 		{
-			if(General.Map == null) return;
+			if (General.Map == null) return;
 
 			// In classic mode?
-			if(General.Editing.Mode is ClassicMode)
+			if (General.Editing.Mode is ClassicMode)
 			{
 				// Requested from menu?
-				if(sender is ToolStripMenuItem)
+				if (sender is ToolStripMenuItem)
 				{
 					// Get integral zoom level
 					int size = int.Parse((sender as ToolStripMenuItem).Tag.ToString(), CultureInfo.InvariantCulture);
 
 					// Change grid size
 					General.Map.Grid.SetGridSize(size);
-					
+
 					// Redraw display
 					RedrawDisplay();
 				}
@@ -981,9 +1028,9 @@ namespace CodeImp.DoomBuilder.Windows
 		// Show grid setup
 		private void itemgridcustom_Click(object sender, EventArgs e)
 		{
-			if(General.Map != null) GridSetup.ShowGridSetup();
+			if (General.Map != null) GridSetup.ShowGridSetup();
 		}
-		
+
 		#endregion
 
 		#region ================== Display
@@ -996,7 +1043,7 @@ namespace CodeImp.DoomBuilder.Windows
 			display.Cursor = Cursors.Default;
 			this.Update();
 		}
-		
+
 		// This clears the display
 		internal void ClearDisplay()
 		{
@@ -1009,13 +1056,13 @@ namespace CodeImp.DoomBuilder.Windows
 		public void SetCursor(Cursor cursor)
 		{
 			// Only when a map is open
-			if(General.Map != null) display.Cursor = cursor;
+			if (General.Map != null) display.Cursor = cursor;
 		}
 
 		// This redraws the display on the next paint event
 		public void RedrawDisplay()
 		{
-			if((General.Map != null) && (General.Editing.Mode != null))
+			if ((General.Map != null) && (General.Editing.Mode != null))
 			{
 				General.Plugins.OnEditRedrawDisplayBegin();
 				General.Editing.Mode.OnRedrawDisplay();
@@ -1031,22 +1078,22 @@ namespace CodeImp.DoomBuilder.Windows
 		// This event is called when a repaint is needed
 		private void display_Paint(object sender, PaintEventArgs e)
 		{
-			if(General.Map != null)
+			if (General.Map != null)
 			{
-				if(General.Editing.Mode != null)
+				if (General.Editing.Mode != null)
 				{
-					if(!displayresized) General.Editing.Mode.OnPresentDisplay();
+					if (!displayresized) General.Editing.Mode.OnPresentDisplay();
 				}
 				else
 				{
-					if(General.Colors != null)
+					if (General.Colors != null)
 						e.Graphics.Clear(Color.FromArgb(General.Colors.Background.ToInt()));
 					else
 						e.Graphics.Clear(SystemColors.ControlDarkDark);
 				}
 			}
 		}
-		
+
 		// Redraw requested
 		private void redrawtimer_Tick(object sender, EventArgs e)
 		{
@@ -1054,32 +1101,32 @@ namespace CodeImp.DoomBuilder.Windows
 			redrawtimer.Enabled = false;
 
 			// Don't do anything when minimized (mxd)
-			if(this.WindowState == FormWindowState.Minimized) return;
+			if (this.WindowState == FormWindowState.Minimized) return;
 
 			// Resume control layouts
 			//if(displayresized) General.LockWindowUpdate(IntPtr.Zero);
 
 			// Map opened?
-			if(General.Map != null)
+			if (General.Map != null)
 			{
 				// Display was resized?
-				if(displayresized)
+				if (displayresized)
 				{
 					// Reset graphics to match changes
 					General.Map.Graphics.Reset();
 
-                    //mxd. Aspect ratio may've been changed
-                    General.Map.CRenderer3D.CreateProjection();
-                }
+					//mxd. Aspect ratio may've been changed
+					General.Map.CRenderer3D.CreateProjection();
+				}
 
 				// This is a dirty trick to give the display a new mousemove event with correct arguments
-				if(mouseinside)
+				if (mouseinside)
 				{
 					Point mousepos = Cursor.Position;
 					Cursor.Position = new Point(mousepos.X + 1, mousepos.Y + 1);
 					Cursor.Position = mousepos;
 				}
-				
+
 				// Redraw now
 				RedrawDisplay();
 			}
@@ -1097,22 +1144,22 @@ namespace CodeImp.DoomBuilder.Windows
 
 			//mxd. Separators may need updating
 			UpdateSeparators();
-			
+
 			// Request redraw
-			if(!redrawtimer.Enabled) redrawtimer.Enabled = true;
+			if (!redrawtimer.Enabled) redrawtimer.Enabled = true;
 		}
-		
+
 		// This requests a delayed redraw
 		public void DelayedRedraw()
 		{
 			// Request redraw
-			if(!redrawtimer.Enabled) redrawtimer.Enabled = true;
+			if (!redrawtimer.Enabled) redrawtimer.Enabled = true;
 		}
-		
+
 		// Mouse click
 		private void display_MouseClick(object sender, MouseEventArgs e)
 		{
-			if((General.Map != null) && (General.Editing.Mode != null))
+			if ((General.Map != null) && (General.Editing.Mode != null))
 			{
 				General.Plugins.OnEditMouseClick(e);
 				General.Editing.Mode.OnMouseClick(e);
@@ -1122,7 +1169,7 @@ namespace CodeImp.DoomBuilder.Windows
 		// Mouse doubleclick
 		private void display_MouseDoubleClick(object sender, MouseEventArgs e)
 		{
-			if((General.Map != null) && (General.Editing.Mode != null))
+			if ((General.Map != null) && (General.Editing.Mode != null))
 			{
 				General.Plugins.OnEditMouseDoubleClick(e);
 				General.Editing.Mode.OnMouseDoubleClick(e);
@@ -1133,19 +1180,19 @@ namespace CodeImp.DoomBuilder.Windows
 		private void display_MouseDown(object sender, MouseEventArgs e)
 		{
 			int key = 0;
-			
+
 			LoseFocus(this, EventArgs.Empty);
-			
+
 			int mod = 0;
-			if(alt) mod |= (int)Keys.Alt;
-			if(shift) mod |= (int)Keys.Shift;
-			if(ctrl) mod |= (int)Keys.Control;
-			
+			if (alt) mod |= (int)Keys.Alt;
+			if (shift) mod |= (int)Keys.Shift;
+			if (ctrl) mod |= (int)Keys.Control;
+
 			// Apply button
 			mousebuttons |= e.Button;
-			
+
 			// Create key
-			switch(e.Button)
+			switch (e.Button)
 			{
 				case MouseButtons.Left: key = (int)Keys.LButton; break;
 				case MouseButtons.Middle: key = (int)Keys.MButton; break;
@@ -1153,12 +1200,12 @@ namespace CodeImp.DoomBuilder.Windows
 				case MouseButtons.XButton1: key = (int)Keys.XButton1; break;
 				case MouseButtons.XButton2: key = (int)Keys.XButton2; break;
 			}
-			
+
 			// Invoke any actions associated with this key
 			General.Actions.KeyPressed(key | mod);
-			
+
 			// Invoke on editing mode
-			if((General.Map != null) && (General.Editing.Mode != null))
+			if ((General.Map != null) && (General.Editing.Mode != null))
 			{
 				General.Plugins.OnEditMouseDown(e);
 				General.Editing.Mode.OnMouseDown(e);
@@ -1169,11 +1216,11 @@ namespace CodeImp.DoomBuilder.Windows
 		private void display_MouseEnter(object sender, EventArgs e)
 		{
 			mouseinside = true;
-			if((General.Map != null) && (mouseinput == null) && (General.Editing.Mode != null))
+			if ((General.Map != null) && (mouseinput == null) && (General.Editing.Mode != null))
 			{
 				General.Plugins.OnEditMouseEnter(e);
 				General.Editing.Mode.OnMouseEnter(e);
-				if(Application.OpenForms.Count == 1 || editformopen) display.Focus(); //mxd
+				if (Application.OpenForms.Count == 1 || editformopen) display.Focus(); //mxd
 			}
 		}
 
@@ -1181,7 +1228,7 @@ namespace CodeImp.DoomBuilder.Windows
 		private void display_MouseLeave(object sender, EventArgs e)
 		{
 			mouseinside = false;
-			if((General.Map != null) && (mouseinput == null) && (General.Editing.Mode != null))
+			if ((General.Map != null) && (mouseinput == null) && (General.Editing.Mode != null))
 			{
 				General.Plugins.OnEditMouseLeave(e);
 				General.Editing.Mode.OnMouseLeave(e);
@@ -1191,7 +1238,7 @@ namespace CodeImp.DoomBuilder.Windows
 		// Mouse moves
 		private void display_MouseMove(object sender, MouseEventArgs e)
 		{
-			if((General.Map != null) && (mouseinput == null) && (General.Editing.Mode != null))
+			if ((General.Map != null) && (mouseinput == null) && (General.Editing.Mode != null))
 			{
 				General.Plugins.OnEditMouseMove(e);
 				General.Editing.Mode.OnMouseMove(e);
@@ -1202,17 +1249,17 @@ namespace CodeImp.DoomBuilder.Windows
 		private void display_MouseUp(object sender, MouseEventArgs e)
 		{
 			int key = 0;
-			
+
 			int mod = 0;
-			if(alt) mod |= (int)Keys.Alt;
-			if(shift) mod |= (int)Keys.Shift;
-			if(ctrl) mod |= (int)Keys.Control;
-			
+			if (alt) mod |= (int)Keys.Alt;
+			if (shift) mod |= (int)Keys.Shift;
+			if (ctrl) mod |= (int)Keys.Control;
+
 			// Apply button
 			mousebuttons &= ~e.Button;
-			
+
 			// Create key
-			switch(e.Button)
+			switch (e.Button)
 			{
 				case MouseButtons.Left: key = (int)Keys.LButton; break;
 				case MouseButtons.Middle: key = (int)Keys.MButton; break;
@@ -1220,27 +1267,27 @@ namespace CodeImp.DoomBuilder.Windows
 				case MouseButtons.XButton1: key = (int)Keys.XButton1; break;
 				case MouseButtons.XButton2: key = (int)Keys.XButton2; break;
 			}
-			
+
 			// Invoke any actions associated with this key
 			General.Actions.KeyReleased(key | mod);
 
 			// Invoke on editing mode
-			if((General.Map != null) && (General.Editing.Mode != null))
+			if ((General.Map != null) && (General.Editing.Mode != null))
 			{
 				General.Plugins.OnEditMouseUp(e);
 				General.Editing.Mode.OnMouseUp(e);
 			}
 		}
-		
+
 		#endregion
 
 		#region ================== Input
-		
+
 		// This is a tool to lock the mouse in exclusive mode
 		private void StartMouseExclusive()
 		{
 			// Not already locked?
-			if(mouseinput == null)
+			if (mouseinput == null)
 			{
 				// Start special input device
 				mouseinput = new MouseInput(this);
@@ -1256,7 +1303,7 @@ namespace CodeImp.DoomBuilder.Windows
 		private void StopMouseExclusive()
 		{
 			// Locked?
-			if(mouseinput != null)
+			if (mouseinput != null)
 			{
 				// Stop special input device
 				mouseinput.Dispose();
@@ -1268,27 +1315,27 @@ namespace CodeImp.DoomBuilder.Windows
 				Cursor.Show();
 			}
 		}
-		
+
 		// This requests exclusive mouse input
 		public void StartExclusiveMouseInput()
 		{
 			// Only when not already in exclusive mode
-			if(!mouseexclusive)
+			if (!mouseexclusive)
 			{
 				General.WriteLogLine("Starting exclusive mouse input mode...");
-				
+
 				// Start special input device
 				StartMouseExclusive();
 				mouseexclusive = true;
 				mouseexclusivebreaklevel = 0;
 			}
 		}
-		
+
 		// This stops exclusive mouse input
 		public void StopExclusiveMouseInput()
 		{
 			// Only when in exclusive mode
-			if(mouseexclusive)
+			if (mouseexclusive)
 			{
 				General.WriteLogLine("Stopping exclusive mouse input mode...");
 
@@ -1303,11 +1350,11 @@ namespace CodeImp.DoomBuilder.Windows
 		public void BreakExclusiveMouseInput()
 		{
 			// Only when in exclusive mode
-			if(mouseexclusive)
+			if (mouseexclusive)
 			{
 				// Stop special input device
 				StopMouseExclusive();
-				
+
 				// Count the break level
 				mouseexclusivebreaklevel++;
 			}
@@ -1317,13 +1364,13 @@ namespace CodeImp.DoomBuilder.Windows
 		public void ResumeExclusiveMouseInput()
 		{
 			// Only when in exclusive mode
-			if(mouseexclusive && (mouseexclusivebreaklevel > 0))
+			if (mouseexclusive && (mouseexclusivebreaklevel > 0))
 			{
 				// Decrease break level
 				mouseexclusivebreaklevel--;
 
 				// All break levels resumed? Then lock the mouse again.
-				if(mouseexclusivebreaklevel == 0)
+				if (mouseexclusivebreaklevel == 0)
 					StartMouseExclusive();
 			}
 		}
@@ -1337,17 +1384,17 @@ namespace CodeImp.DoomBuilder.Windows
 			ctrl = false;
 			alt = false;
 		}
-		
+
 		// When the mouse wheel is changed
 		protected override void OnMouseWheel(MouseEventArgs e)
 		{
 			int mod = 0;
-			if(alt) mod |= (int)Keys.Alt;
-			if(shift) mod |= (int)Keys.Shift;
-			if(ctrl) mod |= (int)Keys.Control;
-			
+			if (alt) mod |= (int)Keys.Alt;
+			if (shift) mod |= (int)Keys.Shift;
+			if (ctrl) mod |= (int)Keys.Control;
+
 			// Scrollwheel up?
-			if(e.Delta > 0)
+			if (e.Delta > 0)
 			{
 				// Invoke actions for scrollwheel
 				//for(int i = 0; i < e.Delta; i += 120)
@@ -1355,61 +1402,61 @@ namespace CodeImp.DoomBuilder.Windows
 				General.Actions.KeyReleased((int)SpecialKeys.MScrollUp | mod);
 			}
 			// Scrollwheel down?
-			else if(e.Delta < 0)
+			else if (e.Delta < 0)
 			{
 				// Invoke actions for scrollwheel
 				//for(int i = 0; i > e.Delta; i -= 120)
 				General.Actions.KeyPressed((int)SpecialKeys.MScrollDown | mod);
 				General.Actions.KeyReleased((int)SpecialKeys.MScrollDown | mod);
 			}
-			
+
 			// Let the base know
 			base.OnMouseWheel(e);
 		}
-		
+
 		// When a key is pressed
 		private void MainForm_KeyDown(object sender, KeyEventArgs e)
 		{
 			int mod = 0;
-			
+
 			// Keep key modifiers
 			alt = e.Alt;
 			shift = e.Shift;
 			ctrl = e.Control;
-			if(alt) mod |= (int)Keys.Alt;
-			if(shift) mod |= (int)Keys.Shift;
-			if(ctrl) mod |= (int)Keys.Control;
-			
+			if (alt) mod |= (int)Keys.Alt;
+			if (shift) mod |= (int)Keys.Shift;
+			if (ctrl) mod |= (int)Keys.Control;
+
 			// Don't process any keys when they are meant for other input controls
-			if((ActiveControl == null) || (ActiveControl == display))
+			if ((ActiveControl == null) || (ActiveControl == display))
 			{
 				// Invoke any actions associated with this key
 				General.Actions.UpdateModifiers(mod);
 				e.Handled = General.Actions.KeyPressed((int)e.KeyData);
-				
+
 				// Invoke on editing mode
-				if((General.Map != null) && (General.Editing.Mode != null))
+				if ((General.Map != null) && (General.Editing.Mode != null))
 				{
 					General.Plugins.OnEditKeyDown(e);
 					General.Editing.Mode.OnKeyDown(e);
 				}
 
 				// Handled
-				if(e.Handled)
+				if (e.Handled)
 					e.SuppressKeyPress = true;
 			}
-			
+
 			// F1 pressed?
-			if((e.KeyCode == Keys.F1) && (e.Modifiers == Keys.None))
+			if ((e.KeyCode == Keys.F1) && (e.Modifiers == Keys.None))
 			{
 				// No action bound to F1?
 				Actions.Action[] f1actions = General.Actions.GetActionsByKey((int)e.KeyData);
-				if(f1actions.Length == 0)
+				if (f1actions.Length == 0)
 				{
 					// If we don't have any map open, show the Main Window help
 					// otherwise, give the help request to the editing mode so it
 					// can open the appropriate help file.
-					if((General.Map == null) || (General.Editing.Mode == null))
+					if ((General.Map == null) || (General.Editing.Mode == null))
 					{
 						General.ShowHelp("introduction.html");
 					}
@@ -1425,31 +1472,31 @@ namespace CodeImp.DoomBuilder.Windows
 		private void MainForm_KeyUp(object sender, KeyEventArgs e)
 		{
 			int mod = 0;
-			
+
 			// Keep key modifiers
 			alt = e.Alt;
 			shift = e.Shift;
 			ctrl = e.Control;
-			if(alt) mod |= (int)Keys.Alt;
-			if(shift) mod |= (int)Keys.Shift;
-			if(ctrl) mod |= (int)Keys.Control;
-			
+			if (alt) mod |= (int)Keys.Alt;
+			if (shift) mod |= (int)Keys.Shift;
+			if (ctrl) mod |= (int)Keys.Control;
+
 			// Don't process any keys when they are meant for other input controls
-			if((ActiveControl == null) || (ActiveControl == display))
+			if ((ActiveControl == null) || (ActiveControl == display))
 			{
 				// Invoke any actions associated with this key
 				General.Actions.UpdateModifiers(mod);
 				e.Handled = General.Actions.KeyReleased((int)e.KeyData);
-				
+
 				// Invoke on editing mode
-				if((General.Map != null) && (General.Editing.Mode != null))
+				if ((General.Map != null) && (General.Editing.Mode != null))
 				{
 					General.Plugins.OnEditKeyUp(e);
 					General.Editing.Mode.OnKeyUp(e);
 				}
-				
+
 				// Handled
-				if(e.Handled)
+				if (e.Handled)
 					e.SuppressKeyPress = true;
 			}
 		}
@@ -1459,44 +1506,44 @@ namespace CodeImp.DoomBuilder.Windows
 		{
 			MainForm_KeyUp(sender, e);
 		}
-		
+
 		// These prevent focus changes by way of TAB or Arrow keys
 		protected override bool IsInputChar(char charCode) { return false; }
 		protected override bool IsInputKey(Keys keyData) { return false; }
 		protected override bool ProcessKeyPreview(ref Message m) { return false; }
 		protected override bool ProcessDialogKey(Keys keyData) { return false; }
 		protected override bool ProcessCmdKey(ref Message msg, Keys keyData) { return false; }
-		
+
 		// This fixes some odd input behaviour
 		private void display_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
 		{
-			if((ActiveControl == null) || (ActiveControl == display))
+			if ((ActiveControl == null) || (ActiveControl == display))
 			{
 				LoseFocus(this, EventArgs.Empty);
 				KeyEventArgs ea = new KeyEventArgs(e.KeyData);
 				MainForm_KeyDown(sender, ea);
 			}
 		}
-		
+
 		#endregion
 
 		#region ================== Toolbar
-		
+
 		// This updates the skills list
 		private void UpdateSkills()
 		{
 			// Clear list
 			buttontest.DropDownItems.Clear();
-			
+
 			// Map loaded?
-			if(General.Map != null)
+			if (General.Map != null)
 			{
 				// Make the new items list
 				ToolStripItem[] items = new ToolStripItem[(General.Map.Config.Skills.Count * 2) + General.Map.ConfigSettings.TestEngines.Count + 2]; //mxd
 				int addindex = 0;
-				
+
 				// Positive skills are with monsters
-				foreach(SkillInfo si in General.Map.Config.Skills)
+				foreach (SkillInfo si in General.Map.Config.Skills)
 				{
 					ToolStripMenuItem menuitem = new ToolStripMenuItem(si.ToString());
 					menuitem.Image = Resources.Monster2;
@@ -1511,7 +1558,7 @@ namespace CodeImp.DoomBuilder.Windows
 				addindex++;
 
 				// Negative skills are without monsters
-				foreach(SkillInfo si in General.Map.Config.Skills)
+				foreach (SkillInfo si in General.Map.Config.Skills)
 				{
 					ToolStripMenuItem menuitem = new ToolStripMenuItem(si.ToString());
 					menuitem.Image = Resources.Monster3;
@@ -1526,7 +1573,7 @@ namespace CodeImp.DoomBuilder.Windows
 				addindex++;
 
 				//mxd. Add test engines
-				for(int i = 0; i < General.Map.ConfigSettings.TestEngines.Count; i++)
+				for (int i = 0; i < General.Map.ConfigSettings.TestEngines.Count; i++)
 				{
 					ToolStripMenuItem menuitem = new ToolStripMenuItem(General.Map.ConfigSettings.TestEngines[i].TestProgramName);
 					menuitem.Image = General.Map.ConfigSettings.TestEngines[i].TestProgramIcon;
@@ -1535,7 +1582,7 @@ namespace CodeImp.DoomBuilder.Windows
 					menuitem.Checked = (i == General.Map.ConfigSettings.CurrentEngineIndex);
 					items[addindex++] = menuitem;
 				}
-				
+
 				// Add to list
 				buttontest.DropDownItems.AddRange(items);
 			}
@@ -1549,7 +1596,7 @@ namespace CodeImp.DoomBuilder.Windows
 			General.Map.Launcher.TestAtSkill(General.Map.ConfigSettings.TestSkill);
 			UpdateSkills();
 		}
-		
+
 		// Event handler for testing at a specific skill
 		private void TestSkill_Click(object sender, EventArgs e)
 		{
@@ -1559,12 +1606,12 @@ namespace CodeImp.DoomBuilder.Windows
 			General.Map.Launcher.TestAtSkill(Math.Abs(skill));
 			UpdateSkills();
 		}
-		
+
 		// This loses focus
 		private void LoseFocus(object sender, EventArgs e)
 		{
 			// Lose focus!
-			try { display.Focus(); } catch(Exception) { }
+			try { display.Focus(); } catch (Exception) { }
 			this.ActiveControl = null;
 		}
 
@@ -1572,13 +1619,13 @@ namespace CodeImp.DoomBuilder.Windows
 		private void thingfilters_DropDownItemClicked(object sender, EventArgs e)
 		{
 			// Only possible when a map is open
-			if((General.Map != null) && !updatingfilters)
+			if ((General.Map != null) && !updatingfilters)
 			{
 				updatingfilters = true;
 				ToolStripMenuItem clickeditem = sender as ToolStripMenuItem;
 
 				// Keep already selected items selected
-				if(!clickeditem.Checked)
+				if (!clickeditem.Checked)
 				{
 					clickeditem.Checked = true;
 					updatingfilters = false;
@@ -1590,9 +1637,9 @@ namespace CodeImp.DoomBuilder.Windows
 				General.Map.ChangeThingFilter(f);
 
 				// Deselect other items...
-				foreach(var item in thingfilters.DropDown.Items)
+				foreach (var item in thingfilters.DropDown.Items)
 				{
-					if(item != clickeditem) ((ToolStripMenuItem)item).Checked = false;
+					if (item != clickeditem) ((ToolStripMenuItem)item).Checked = false;
 				}
 
 				// Update button text
@@ -1600,71 +1647,71 @@ namespace CodeImp.DoomBuilder.Windows
 
 				updatingfilters = false;
 			}
-			
+
 			// Lose focus
 			LoseFocus(sender, e);
 		}
-		
+
 		//mxd. This updates the things filter on the toolbar
 		internal void UpdateThingsFilters()
 		{
 			// Only possible to list filters when a map is open
-			if(General.Map != null)
+			if (General.Map != null)
 			{
 				ThingsFilter oldfilter = null;
 
 				// Anything selected?
-				foreach(var item in thingfilters.DropDown.Items)
+				foreach (var item in thingfilters.DropDown.Items)
 				{
-					if(((ToolStripMenuItem)item).Checked)
+					if (((ToolStripMenuItem)item).Checked)
 					{
 						oldfilter = ((ToolStripMenuItem)item).Tag as ThingsFilter;
 						break;
 					}
 				}
-				
+
 				updatingfilters = true;
 
 				// Clear the list
 				thingfilters.DropDown.Items.Clear();
 
 				// Add null filter
-				if(General.Map.ThingsFilter is NullThingsFilter)
+				if (General.Map.ThingsFilter is NullThingsFilter)
 					thingfilters.DropDown.Items.Add(CreateThingsFilterMenuItem(General.Map.ThingsFilter));
 				else
 					thingfilters.DropDown.Items.Add(CreateThingsFilterMenuItem(new NullThingsFilter()));
 
 				// Add all filters, select current one
-				foreach(ThingsFilter f in General.Map.ConfigSettings.ThingsFilters)
+				foreach (ThingsFilter f in General.Map.ConfigSettings.ThingsFilters)
 					thingfilters.DropDown.Items.Add(CreateThingsFilterMenuItem(f));
 
 				updatingfilters = false;
-				
+
 				// No filter selected?
 				ToolStripMenuItem selecteditem = null;
-				foreach(var i in thingfilters.DropDown.Items)
+				foreach (var i in thingfilters.DropDown.Items)
 				{
 					ToolStripMenuItem item = i as ToolStripMenuItem;
-					if(item.Checked)
+					if (item.Checked)
 					{
 						selecteditem = item;
 						break;
 					}
 				}
 
-				if(selecteditem == null)
+				if (selecteditem == null)
 				{
 					ToolStripMenuItem first = thingfilters.DropDown.Items[0] as ToolStripMenuItem;
 					first.Checked = true;
 				}
 				// Another filter got selected?
-				else if(selecteditem.Tag != oldfilter)
+				else if (selecteditem.Tag != oldfilter)
 				{
 					selecteditem.Checked = true;
 				}
 
 				// Update button text
-				if(selecteditem != null)
+				if (selecteditem != null)
 					thingfilters.Text = ((ThingsFilter)selecteditem.Tag).Name;
 			}
 			else
@@ -1678,18 +1725,18 @@ namespace CodeImp.DoomBuilder.Windows
 		// This selects the things filter based on the filter set on the map manager
 		internal void ReflectThingsFilter()
 		{
-			if(!updatingfilters)
+			if (!updatingfilters)
 			{
 				updatingfilters = true;
-				
+
 				// Select current filter
 				bool selecteditemfound = false;
-				foreach(var i in thingfilters.DropDown.Items)
+				foreach (var i in thingfilters.DropDown.Items)
 				{
 					ToolStripMenuItem item = i as ToolStripMenuItem;
 					ThingsFilter f = item.Tag as ThingsFilter;
 
-					if(f == General.Map.ThingsFilter)
+					if (f == General.Map.ThingsFilter)
 					{
 						item.Checked = true;
 						thingfilters.Text = f.Name;
@@ -1702,7 +1749,7 @@ namespace CodeImp.DoomBuilder.Windows
 				}
 
 				// Not in the list?
-				if(!selecteditemfound)
+				if (!selecteditemfound)
 				{
 					// Select nothing
 					thingfilters.Text = "(show all)"; //mxd
@@ -1717,8 +1764,8 @@ namespace CodeImp.DoomBuilder.Windows
 		{
 			// Make decorated name
 			string name = f.Name;
-			if(f.Invert) name = "!" + name;
-			switch(f.DisplayMode)
+			if (f.Invert) name = "!" + name;
+			switch (f.DisplayMode)
 			{
 				case ThingsFilterDisplayMode.CLASSIC_MODES_ONLY: name += " [2D]"; break;
 				case ThingsFilterDisplayMode.VISUAL_MODES_ONLY: name += " [3D]"; break;
@@ -1728,9 +1775,9 @@ namespace CodeImp.DoomBuilder.Windows
 			ToolStripMenuItem item = new ToolStripMenuItem(name) { CheckOnClick = true, Tag = f };
 			item.CheckedChanged += thingfilters_DropDownItemClicked;
 			item.Checked = (f == General.Map.ThingsFilter);
-			
+
 			// Update icon
-			if(!(f is NullThingsFilter) && !f.IsValid())
+			if (!(f is NullThingsFilter) && !f.IsValid())
 			{
 				item.Image = Resources.Warning;
 				//item.ImageScaling = ToolStripItemImageScaling.None;
@@ -1746,19 +1793,19 @@ namespace CodeImp.DoomBuilder.Windows
 			((LinedefColorPreset)item.Tag).Enabled = item.Checked;
 
 			List<string> enablednames = new List<string>();
-			foreach(LinedefColorPreset p in General.Map.ConfigSettings.LinedefColorPresets)
+			foreach (LinedefColorPreset p in General.Map.ConfigSettings.LinedefColorPresets)
 			{
-				if(p.Enabled) enablednames.Add(p.Name);
+				if (p.Enabled) enablednames.Add(p.Name);
 			}
 
 			// Update button text
 			UpdateColorPresetsButtonText(linedefcolorpresets, enablednames);
-			
+
 			General.Map.Map.UpdateCustomLinedefColors();
 			General.Map.ConfigSettings.Changed = true;
 
 			// Update display
-			if(General.Editing.Mode is ClassicMode) General.Interface.RedrawDisplay();
+			if (General.Editing.Mode is ClassicMode) General.Interface.RedrawDisplay();
 		}
 
 		//mxd. Handle Shift key...
@@ -1780,9 +1827,9 @@ namespace CodeImp.DoomBuilder.Windows
 			List<string> enablednames = new List<string>();
 			linedefcolorpresets.DropDown.Items.Clear();
 
-			if(General.Map != null)
+			if (General.Map != null)
 			{
-				foreach(LinedefColorPreset p in General.Map.ConfigSettings.LinedefColorPresets)
+				foreach (LinedefColorPreset p in General.Map.ConfigSettings.LinedefColorPresets)
 				{
 					// Create menu item
 					ToolStripMenuItem item = new ToolStripMenuItem(p.Name)
@@ -1795,10 +1842,10 @@ namespace CodeImp.DoomBuilder.Windows
 					};
 
 					// Create icon
-					if(p.IsValid())
+					if (p.IsValid())
 					{
 						Bitmap icon = new Bitmap(16, 16);
-						using(Graphics g = Graphics.FromImage(icon))
+						using (Graphics g = Graphics.FromImage(icon))
 						{
 							g.FillRectangle(new SolidBrush(p.Color.ToColor()), 2, 3, 12, 10);
 							g.DrawRectangle(Pens.Black, 2, 3, 11, 9);
@@ -1814,7 +1861,7 @@ namespace CodeImp.DoomBuilder.Windows
 
 					item.CheckedChanged += linedefcolorpresets_ItemClicked;
 					linedefcolorpresets.DropDown.Items.Add(item);
-					if(p.Enabled) enablednames.Add(p.Name);
+					if (p.Enabled) enablednames.Add(p.Name);
 				}
 			}
 
@@ -1825,14 +1872,14 @@ namespace CodeImp.DoomBuilder.Windows
 		//mxd
 		private static void UpdateColorPresetsButtonText(ToolStripItem button, List<string> names)
 		{
-			if(names.Count == 0)
+			if (names.Count == 0)
 			{
 				button.Text = "No active presets";
 			}
 			else
 			{
 				string text = string.Join(", ", names.ToArray());
-				if(TextRenderer.MeasureText(text, button.Font).Width > button.Width)
+				if (TextRenderer.MeasureText(text, button.Font).Width > button.Width)
 					button.Text = names.Count + (names.Count.ToString(CultureInfo.InvariantCulture).EndsWith("1") ? " preset" : " presets") + " active";
 				else
 					button.Text = text;
@@ -1854,12 +1901,12 @@ namespace CodeImp.DoomBuilder.Windows
 			buttoninfo.button = button;
 			buttoninfo.section = section;
 			pluginbuttons.Add(buttoninfo);
-			
+
 			// Bind visible changed event
-			if(!(button is ToolStripSeparator)) button.VisibleChanged += buttonvisiblechangedhandler;
-			
+			if (!(button is ToolStripSeparator)) button.VisibleChanged += buttonvisiblechangedhandler;
+
 			// Insert the button in the right section
-			switch(section)
+			switch (section)
 			{
 				case ToolbarSection.File: toolbar.Items.Insert(toolbar.Items.IndexOf(seperatorfile), button); break;
 				case ToolbarSection.Script: toolbar.Items.Insert(toolbar.Items.IndexOf(seperatorscript), button); break;
@@ -1873,17 +1920,17 @@ namespace CodeImp.DoomBuilder.Windows
 				case ToolbarSection.Modes: modestoolbar.Items.Add(button); break; //mxd
 				case ToolbarSection.Custom: modecontrolsloolbar.Items.Add(button); modecontrolsloolbar.Visible = true; break; //mxd
 			}
-			
+
 			UpdateToolbar();
 		}
 
 		//mxd
-		public void AddModesButton(ToolStripItem button, string group) 
+		public void AddModesButton(ToolStripItem button, string group)
 		{
 			// Set proper styling
 			button.Padding = new Padding(0, 1, 0, 1);
 			button.Margin = new Padding();
-			
+
 			// Fix tags to full action names
 			ToolStripItemCollection items = new ToolStripItemCollection(toolbar, new ToolStripItem[0]);
 			items.Add(button);
@@ -1898,9 +1945,9 @@ namespace CodeImp.DoomBuilder.Windows
 			button.VisibleChanged += buttonvisiblechangedhandler;
 
 			//find the separator we need
-			for(int i = 0; i < modestoolbar.Items.Count; i++) 
+			for (int i = 0; i < modestoolbar.Items.Count; i++)
 			{
-				if(modestoolbar.Items[i] is ToolStripSeparator && modestoolbar.Items[i].Text == group) 
+				if (modestoolbar.Items[i] is ToolStripSeparator && modestoolbar.Items[i].Text == group)
 				{
 					modestoolbar.Items.Insert(i + 1, button);
 					break;
@@ -1915,9 +1962,9 @@ namespace CodeImp.DoomBuilder.Windows
 		{
 			// Find in the list and remove it
 			PluginToolbarButton buttoninfo = new PluginToolbarButton();
-			for(int i = 0; i < pluginbuttons.Count; i++)
+			for (int i = 0; i < pluginbuttons.Count; i++)
 			{
-				if(pluginbuttons[i].button == button)
+				if (pluginbuttons[i].button == button)
 				{
 					buttoninfo = pluginbuttons[i];
 					pluginbuttons.RemoveAt(i);
@@ -1925,13 +1972,13 @@ namespace CodeImp.DoomBuilder.Windows
 				}
 			}
 
-			if(buttoninfo.button != null)
+			if (buttoninfo.button != null)
 			{
 				// Unbind visible changed event
-				if(!(button is ToolStripSeparator)) button.VisibleChanged -= buttonvisiblechangedhandler;
+				if (!(button is ToolStripSeparator)) button.VisibleChanged -= buttonvisiblechangedhandler;
 
 				//mxd. Remove button from toolbars
-				switch(buttoninfo.section) 
+				switch (buttoninfo.section)
 				{
 					case ToolbarSection.Modes:
 						modestoolbar.Items.Remove(button);
@@ -1944,7 +1991,7 @@ namespace CodeImp.DoomBuilder.Windows
 						toolbar.Items.Remove(button);
 						break;
 				}
-				
+
 				UpdateSeparators();
 			}
 		}
@@ -1952,7 +1999,7 @@ namespace CodeImp.DoomBuilder.Windows
 		// This handle visibility changes in the toolbar buttons
 		private void ToolbarButtonVisibleChanged(object sender, EventArgs e)
 		{
-			if(!preventupdateseperators)
+			if (!preventupdateseperators)
 			{
 				// Update the seeprators
 				UpdateSeparators();
@@ -1969,17 +2016,17 @@ namespace CodeImp.DoomBuilder.Windows
 			UpdateToolStripSeparators(modestoolbar.Items, true);
 			UpdateToolStripSeparators(modecontrolsloolbar.Items, true);
 		}
-		
+
 		// This hides redundant separators
 		private static void UpdateToolStripSeparators(ToolStripItemCollection items, bool defaultvisible)
 		{
 			ToolStripItem pvi = null;
-			foreach(ToolStripItem i in items) 
+			foreach (ToolStripItem i in items)
 			{
 				bool separatorvisible = false;
 
 				// This is a seperator?
-				if(i is ToolStripSeparator) 
+				if (i is ToolStripSeparator)
 				{
 					// Make visible when previous item was not a seperator
 					separatorvisible = !(pvi is ToolStripSeparator) && (pvi != null);
@@ -1987,18 +2034,18 @@ namespace CodeImp.DoomBuilder.Windows
 				}
 
 				// Keep as previous visible item
-				if(i.Visible || separatorvisible || (defaultvisible && !(i is ToolStripSeparator))) pvi = i;
+				if (i.Visible || separatorvisible || (defaultvisible && !(i is ToolStripSeparator))) pvi = i;
 			}
 
 			// Hide last item if it is a seperator
-			if(pvi is ToolStripSeparator) pvi.Visible = false;
+			if (pvi is ToolStripSeparator) pvi.Visible = false;
 		}
-		
+
 		// This enables or disables all editing mode items and toolbar buttons
 		private void UpdateToolbar()
 		{
 			preventupdateseperators = true;
-			
+
 			// Show/hide items based on preferences
 			bool maploaded = (General.Map != null); //mxd
 			buttonnewmap.Visible = General.Settings.ToolbarFile;
@@ -2022,9 +2069,9 @@ namespace CodeImp.DoomBuilder.Windows
 			buttonfullbrightness.Checked = Renderer.FullBrightness; //mxd
 			buttontogglegrid.Visible = General.Settings.ToolbarViewModes && maploaded; //mxd
 			buttontogglegrid.Checked = General.Settings.RenderGrid; //mxd
-            itemrendernightspath.Visible = maploaded && General.Map.SRB2;
-            itemrendernightspath.Checked = General.Settings.RenderNiGHTSPath;
-            buttontogglecomments.Visible = General.Settings.ToolbarViewModes && maploaded && General.Map.UDMF; //mxd
+			itemrendernightspath.Visible = maploaded && General.Map.SRB2;
+			itemrendernightspath.Checked = General.Settings.RenderNiGHTSPath;
+			buttontogglecomments.Visible = General.Settings.ToolbarViewModes && maploaded && General.Map.UDMF; //mxd
 			buttontogglecomments.Checked = General.Settings.RenderComments; //mxd
 			separatorfullbrightness.Visible = General.Settings.ToolbarViewModes && maploaded; //mxd
 			buttonviewbrightness.Visible = General.Settings.ToolbarViewModes && maploaded;
@@ -2034,9 +2081,9 @@ namespace CodeImp.DoomBuilder.Windows
 			buttonsnaptogrid.Visible = General.Settings.ToolbarGeometry && maploaded;
 			buttontoggledynamicgrid.Visible = General.Settings.ToolbarGeometry && maploaded; //mxd
 			buttontoggledynamicgrid.Checked = General.Settings.DynamicGridSize; //mxd
-            buttontogglenightspath.Visible = maploaded && General.Map.SRB2;
-            buttontogglenightspath.Checked = General.Settings.RenderNiGHTSPath;
-            buttonautomerge.Visible = General.Settings.ToolbarGeometry && maploaded;
+			buttontogglenightspath.Visible = maploaded && General.Map.SRB2;
+			buttontogglenightspath.Checked = General.Settings.RenderNiGHTSPath;
+			buttonautomerge.Visible = General.Settings.ToolbarGeometry && maploaded;
 			buttonautoclearsidetextures.Visible = General.Settings.ToolbarGeometry && maploaded; //mxd
 			buttontest.Visible = General.Settings.ToolbarTesting && maploaded;
 
@@ -2045,8 +2092,8 @@ namespace CodeImp.DoomBuilder.Windows
 			dynamiclightmode.Visible = General.Settings.GZToolbarGZDoom && maploaded;
 			buttontogglefx.Visible = General.Settings.GZToolbarGZDoom && maploaded;
 			buttontogglefog.Visible = General.Settings.GZToolbarGZDoom && maploaded;
-            buttontogglesky.Visible = maploaded && (General.Settings.GZToolbarGZDoom || General.Map.SRB2);
-            buttontoggleeventlines.Visible = General.Settings.GZToolbarGZDoom && maploaded;
+			buttontogglesky.Visible = maploaded && (General.Settings.GZToolbarGZDoom || General.Map.SRB2);
+			buttontoggleeventlines.Visible = General.Settings.GZToolbarGZDoom && maploaded;
 			buttontogglevisualvertices.Visible = General.Settings.GZToolbarGZDoom && maploaded;
 			separatorgzmodes.Visible = General.Settings.GZToolbarGZDoom && maploaded;
 
@@ -2054,22 +2101,22 @@ namespace CodeImp.DoomBuilder.Windows
 			modestoolbar.Visible = maploaded;
 			panelinfo.Visible = maploaded;
 			modecontrolsloolbar.Visible = (maploaded && modecontrolsloolbar.Items.Count > 0);
-			
+
 			//mxd. modestoolbar index in Controls gets messed up when it's invisible. This fixes it.
 			//TODO: find out why this happens in the first place
-			if(modestoolbar.Visible) 
+			if (modestoolbar.Visible)
 			{
 				int toolbarpos = this.Controls.IndexOf(toolbar);
-				if(this.Controls.IndexOf(modestoolbar) > toolbarpos) 
+				if (this.Controls.IndexOf(modestoolbar) > toolbarpos)
 				{
 					this.Controls.SetChildIndex(modestoolbar, toolbarpos);
 				}
 			}
 
 			// Update plugin buttons
-			foreach(PluginToolbarButton p in pluginbuttons)
+			foreach (PluginToolbarButton p in pluginbuttons)
 			{
-				switch(p.section)
+				switch (p.section)
 				{
 					case ToolbarSection.File: p.button.Visible = General.Settings.ToolbarFile; break;
 					case ToolbarSection.Script: p.button.Visible = General.Settings.ToolbarScript; break;
@@ -2092,39 +2139,39 @@ namespace CodeImp.DoomBuilder.Windows
 		internal void CheckEditModeButton(string modeclassname)
 		{
 			// Go for all items
-			foreach(ToolStripItem i in editmodeitems)
+			foreach (ToolStripItem i in editmodeitems)
 			{
 				// Check what type it is
-				if(i is ToolStripMenuItem)
+				if (i is ToolStripMenuItem)
 				{
 					// Check if mode type matches with given name
 					(i as ToolStripMenuItem).Checked = ((i.Tag as EditModeInfo).Type.Name == modeclassname);
 				}
-				else if(i is ToolStripButton)
+				else if (i is ToolStripButton)
 				{
 					// Check if mode type matches with given name
 					(i as ToolStripButton).Checked = ((i.Tag as EditModeInfo).Type.Name == modeclassname);
 				}
 			}
 		}
-		
+
 		// This removes the config-specific editing mode buttons
 		internal void RemoveEditModeButtons()
 		{
 			// Go for all items
-			foreach(ToolStripItem i in editmodeitems)
+			foreach (ToolStripItem i in editmodeitems)
 			{
 				// Remove it and restart
 				menumode.DropDownItems.Remove(i);
 				i.Dispose();
 			}
-			
+
 			// Done
 			modestoolbar.Items.Clear(); //mxd
 			editmodeitems.Clear();
 			UpdateSeparators();
 		}
-		
+
 		// This adds an editing mode seperator on the toolbar and menu
 		internal void AddEditModeSeperator(string group)
 		{
@@ -2134,7 +2181,7 @@ namespace CodeImp.DoomBuilder.Windows
 			item.Margin = new Padding(0, 3, 0, 3); //mxd
 			modestoolbar.Items.Add(item); //mxd
 			editmodeitems.Add(item);
-			
+
 			// Create menu item
 			int index = menumode.DropDownItems.Count;
 			item = new ToolStripSeparator();
@@ -2142,15 +2189,15 @@ namespace CodeImp.DoomBuilder.Windows
 			item.Margin = new Padding(0, 3, 0, 3);
 			menumode.DropDownItems.Insert(index, item);
 			editmodeitems.Add(item);
-			
+
 			UpdateSeparators();
 		}
-		
+
 		// This adds an editing mode button to the toolbar and edit menu
 		internal void AddEditModeButton(EditModeInfo modeinfo)
 		{
 			string controlname = modeinfo.ButtonDesc.Replace("&", "&&");
-			
+
 			// Create a button
 			ToolStripItem item = new ToolStripButton(modeinfo.ButtonDesc, modeinfo.ButtonImage, EditModeButtonHandler);
 			item.DisplayStyle = ToolStripItemDisplayStyle.Image;
@@ -2159,7 +2206,7 @@ namespace CodeImp.DoomBuilder.Windows
 			item.Tag = modeinfo;
 			modestoolbar.Items.Add(item); //mxd
 			editmodeitems.Add(item);
-			
+
 			// Create menu item
 			int index = menumode.DropDownItems.Count;
 			item = new ToolStripMenuItem(controlname, modeinfo.ButtonImage, EditModeButtonHandler);
@@ -2167,7 +2214,7 @@ namespace CodeImp.DoomBuilder.Windows
 			menumode.DropDownItems.Insert(index, item);
 			editmodeitems.Add(item);
 			item.Visible = true;
-			
+
 			ApplyShortcutKeys(menumode.DropDownItems);
 			UpdateSeparators();
 		}
@@ -2182,41 +2229,41 @@ namespace CodeImp.DoomBuilder.Windows
 		}
 
 		//mxd
-		public void UpdateGZDoomPanel() 
+		public void UpdateGZDoomPanel()
 		{
-			if(General.Map != null && General.Settings.GZToolbarGZDoom) 
+			if (General.Map != null && General.Settings.GZToolbarGZDoom)
 			{
-				foreach(ToolStripMenuItem item in modelrendermode.DropDownItems)
+				foreach (ToolStripMenuItem item in modelrendermode.DropDownItems)
 				{
 					item.Checked = ((ModelRenderMode)item.Tag == General.Settings.GZDrawModelsMode);
-					if(item.Checked) modelrendermode.Image = item.Image;
+					if (item.Checked) modelrendermode.Image = item.Image;
 				}
 
-				foreach(ToolStripMenuItem item in dynamiclightmode.DropDownItems)
+				foreach (ToolStripMenuItem item in dynamiclightmode.DropDownItems)
 				{
 					item.Checked = ((LightRenderMode)item.Tag == General.Settings.GZDrawLightsMode);
-					if(item.Checked) dynamiclightmode.Image = item.Image;
+					if (item.Checked) dynamiclightmode.Image = item.Image;
 				}
-				
+
 				buttontogglefog.Checked = General.Settings.GZDrawFog;
-                buttontogglesky.Checked = General.Settings.GZDrawSky;
-                buttontoggleeventlines.Checked = General.Settings.GZShowEventLines;
+				buttontogglesky.Checked = General.Settings.GZDrawSky;
+				buttontoggleeventlines.Checked = General.Settings.GZShowEventLines;
 				buttontogglevisualvertices.Visible = General.Map.UDMF;
 				buttontogglevisualvertices.Checked = General.Settings.GZShowVisualVertices;
 			}
 
-            //The sky toggle button should also be visible for SRB2 maps.
-            if (General.Map != null && General.Map.SRB2)
-                buttontogglesky.Checked = General.Settings.GZDrawSky;
-        }
+			//The sky toggle button should also be visible for SRB2 maps.
+			if (General.Map != null && General.Map.SRB2)
+				buttontogglesky.Checked = General.Settings.GZDrawSky;
+		}
 
-        #endregion
+		#endregion
 
-        #region ================== Toolbar context menu (mxd)
+		#region ================== Toolbar context menu (mxd)
 
-        private void toolbarContextMenu_Opening(object sender, CancelEventArgs e)
+		private void toolbarContextMenu_Opening(object sender, CancelEventArgs e)
 		{
-			if(General.Map == null)
+			if (General.Map == null)
 			{
 				e.Cancel = true;
 				return;
@@ -2234,108 +2281,108 @@ namespace CodeImp.DoomBuilder.Windows
 			toggleRendering.Image = General.Settings.GZToolbarGZDoom ? Resources.Check : null;
 		}
 
-		private void toolbarContextMenu_Closing(object sender, ToolStripDropDownClosingEventArgs e) 
+		private void toolbarContextMenu_Closing(object sender, ToolStripDropDownClosingEventArgs e)
 		{
 			e.Cancel = (e.CloseReason == ToolStripDropDownCloseReason.ItemClicked && toolbarContextMenuShiftPressed);
 		}
 
-		private void toolbarContextMenu_KeyDown(object sender, KeyEventArgs e) 
+		private void toolbarContextMenu_KeyDown(object sender, KeyEventArgs e)
 		{
 			toolbarContextMenuShiftPressed = (e.KeyCode == Keys.ShiftKey);
 		}
 
-		private void toolbarContextMenu_KeyUp(object sender, KeyEventArgs e) 
+		private void toolbarContextMenu_KeyUp(object sender, KeyEventArgs e)
 		{
 			toolbarContextMenuShiftPressed = (e.KeyCode != Keys.ShiftKey);
 		}
 
-		private void toggleFile_Click(object sender, EventArgs e) 
+		private void toggleFile_Click(object sender, EventArgs e)
 		{
 			General.Settings.ToolbarFile = !General.Settings.ToolbarFile;
 			UpdateToolbar();
 
-			if(toolbarContextMenuShiftPressed) 
+			if (toolbarContextMenuShiftPressed)
 				toggleFile.Image = General.Settings.ToolbarFile ? Resources.Check : null;
 		}
 
-		private void toggleScript_Click(object sender, EventArgs e) 
+		private void toggleScript_Click(object sender, EventArgs e)
 		{
 			General.Settings.ToolbarScript = !General.Settings.ToolbarScript;
 			UpdateToolbar();
 
-			if(toolbarContextMenuShiftPressed) 
+			if (toolbarContextMenuShiftPressed)
 				toggleScript.Image = General.Settings.ToolbarScript ? Resources.Check : null;
 		}
 
-		private void toggleUndo_Click(object sender, EventArgs e) 
+		private void toggleUndo_Click(object sender, EventArgs e)
 		{
 			General.Settings.ToolbarUndo = !General.Settings.ToolbarUndo;
 			UpdateToolbar();
 
-			if(toolbarContextMenuShiftPressed) 
+			if (toolbarContextMenuShiftPressed)
 				toggleUndo.Image = General.Settings.ToolbarUndo ? Resources.Check : null;
 		}
 
-		private void toggleCopy_Click(object sender, EventArgs e) 
+		private void toggleCopy_Click(object sender, EventArgs e)
 		{
 			General.Settings.ToolbarCopy = !General.Settings.ToolbarCopy;
 			UpdateToolbar();
 
-			if(toolbarContextMenuShiftPressed) 
+			if (toolbarContextMenuShiftPressed)
 				toggleCopy.Image = General.Settings.ToolbarCopy ? Resources.Check : null;
 		}
 
-		private void togglePrefabs_Click(object sender, EventArgs e) 
+		private void togglePrefabs_Click(object sender, EventArgs e)
 		{
 			General.Settings.ToolbarPrefabs = !General.Settings.ToolbarPrefabs;
 			UpdateToolbar();
 
-			if(toolbarContextMenuShiftPressed) 
+			if (toolbarContextMenuShiftPressed)
 				togglePrefabs.Image = General.Settings.ToolbarPrefabs ? Resources.Check : null;
 		}
 
-		private void toggleFilter_Click(object sender, EventArgs e) 
+		private void toggleFilter_Click(object sender, EventArgs e)
 		{
 			General.Settings.ToolbarFilter = !General.Settings.ToolbarFilter;
 			UpdateToolbar();
 
-			if(toolbarContextMenuShiftPressed) 
+			if (toolbarContextMenuShiftPressed)
 				toggleFilter.Image = General.Settings.ToolbarFilter ? Resources.Check : null;
 		}
 
-		private void toggleViewModes_Click(object sender, EventArgs e) 
+		private void toggleViewModes_Click(object sender, EventArgs e)
 		{
 			General.Settings.ToolbarViewModes = !General.Settings.ToolbarViewModes;
 			UpdateToolbar();
 
-			if(toolbarContextMenuShiftPressed) 
+			if (toolbarContextMenuShiftPressed)
 				toggleViewModes.Image = General.Settings.ToolbarViewModes ? Resources.Check : null;
 		}
 
-		private void toggleGeometry_Click(object sender, EventArgs e) 
+		private void toggleGeometry_Click(object sender, EventArgs e)
 		{
 			General.Settings.ToolbarGeometry = !General.Settings.ToolbarGeometry;
 			UpdateToolbar();
 
-			if(toolbarContextMenuShiftPressed) 
+			if (toolbarContextMenuShiftPressed)
 				toggleGeometry.Image = General.Settings.ToolbarGeometry ? Resources.Check : null;
 		}
 
-		private void toggleTesting_Click(object sender, EventArgs e) 
+		private void toggleTesting_Click(object sender, EventArgs e)
 		{
 			General.Settings.ToolbarTesting = !General.Settings.ToolbarTesting;
 			UpdateToolbar();
 
-			if(toolbarContextMenuShiftPressed) 
+			if (toolbarContextMenuShiftPressed)
 				toggleTesting.Image = General.Settings.ToolbarTesting ? Resources.Check : null;
 		}
 
-		private void toggleRendering_Click(object sender, EventArgs e) 
+		private void toggleRendering_Click(object sender, EventArgs e)
 		{
 			General.Settings.GZToolbarGZDoom = !General.Settings.GZToolbarGZDoom;
 			UpdateToolbar();
 
-			if(toolbarContextMenuShiftPressed) 
+			if (toolbarContextMenuShiftPressed)
 				toggleRendering.Image = General.Settings.GZToolbarGZDoom ? Resources.Check : null;
 		}
 
@@ -2352,9 +2399,9 @@ namespace CodeImp.DoomBuilder.Windows
 			ToolStripItemCollection items = new ToolStripItemCollection(this.menumain, new ToolStripItem[0]);
 			items.Add(menu);
 			RenameTagsToFullActions(items, plugin);
-			
+
 			// Insert the menu in the right location
-			switch(section)
+			switch (section)
 			{
 				case MenuSection.FileNewOpenClose: menufile.DropDownItems.Insert(menufile.DropDownItems.IndexOf(seperatorfileopen), menu); break;
 				case MenuSection.FileSave: menufile.DropDownItems.Insert(menufile.DropDownItems.IndexOf(seperatorfilesave), menu); break;
@@ -2380,22 +2427,22 @@ namespace CodeImp.DoomBuilder.Windows
 				case MenuSection.HelpAbout: menuhelp.DropDownItems.Add(menu); break;
 				case MenuSection.Top: menumain.Items.Insert(menumain.Items.IndexOf(menutools), menu); break;
 			}
-			
+
 			ApplyShortcutKeys(items);
 		}
 
 		//mxd
-		public void AddModesMenu(ToolStripItem menu, string group) 
+		public void AddModesMenu(ToolStripItem menu, string group)
 		{
 			// Fix tags to full action names
 			ToolStripItemCollection items = new ToolStripItemCollection(this.menumain, new ToolStripItem[0]);
 			items.Add(menu);
 			RenameTagsToFullActions(items, General.Plugins.FindPluginByAssembly(Assembly.GetCallingAssembly()));
-			
+
 			//find the separator we need
-			for(int i = 0; i < menumode.DropDownItems.Count; i++) 
+			for (int i = 0; i < menumode.DropDownItems.Count; i++)
 			{
-				if(menumode.DropDownItems[i] is ToolStripSeparator && menumode.DropDownItems[i].Text == group) 
+				if (menumode.DropDownItems[i] is ToolStripSeparator && menumode.DropDownItems[i].Text == group)
 				{
 					menumode.DropDownItems.Insert(i + 1, menu);
 					break;
@@ -2404,7 +2451,7 @@ namespace CodeImp.DoomBuilder.Windows
 
 			ApplyShortcutKeys(items);
 		}
-		
+
 		// Removes a menu
 		public void RemoveMenu(ToolStripItem menu)
 		{
@@ -2419,44 +2466,44 @@ namespace CodeImp.DoomBuilder.Windows
 			menuhelp.DropDownItems.Remove(menu);
 			menumain.Items.Remove(menu);
 		}
-		
+
 		// Public method to apply shortcut keys
 		internal void ApplyShortcutKeys()
 		{
 			// Apply shortcut keys to menus
 			ApplyShortcutKeys(menumain.Items);
 		}
-		
+
 		// This sets the shortcut keys on menu items
 		private static void ApplyShortcutKeys(ToolStripItemCollection items)
 		{
 			// Go for all controls to find menu items
-			foreach(ToolStripItem item in items)
+			foreach (ToolStripItem item in items)
 			{
 				// This is a menu item?
-				if(item is ToolStripMenuItem)
+				if (item is ToolStripMenuItem)
 				{
 					// Get the item in proper type
 					ToolStripMenuItem menuitem = (item as ToolStripMenuItem);
 
 					// Tag set for this item?
-					if(menuitem.Tag is string)
+					if (menuitem.Tag is string)
 					{
 						// Action with this name available?
 						string actionname = menuitem.Tag.ToString();
-						if(General.Actions.Exists(actionname))
+						if (General.Actions.Exists(actionname))
 						{
 							// Put the action shortcut key on the menu item
 							menuitem.ShortcutKeyDisplayString = Actions.Action.GetShortcutKeyDesc(General.Actions[actionname].ShortcutKey);
 						}
 					}
 					// Edit mode info set for this item?
-					else if(menuitem.Tag is EditModeInfo)
+					else if (menuitem.Tag is EditModeInfo)
 					{
 						// Action with this name available?
 						EditModeInfo modeinfo = (menuitem.Tag as EditModeInfo);
 						string actionname = modeinfo.SwitchAction.GetFullActionName(modeinfo.Plugin.Assembly);
-						if(General.Actions.Exists(actionname))
+						if (General.Actions.Exists(actionname))
 						{
 							// Put the action shortcut key on the menu item
 							menuitem.ShortcutKeyDisplayString = Actions.Action.GetShortcutKeyDesc(General.Actions[actionname].ShortcutKey);
@@ -2474,13 +2521,13 @@ namespace CodeImp.DoomBuilder.Windows
 		private static void RenameTagsToFullActions(ToolStripItemCollection items, Plugin plugin)
 		{
 			// Go for all controls to find menu items
-			foreach(ToolStripItem item in items)
+			foreach (ToolStripItem item in items)
 			{
 				// Tag set for this item?
-				if(item.Tag is string)
+				if (item.Tag is string)
 				{
 					// Check if the tag doe not already begin with the assembly name
-					if(!(item.Tag as string).StartsWith(plugin.Name + "_", StringComparison.OrdinalIgnoreCase))
+					if (!(item.Tag as string).StartsWith(plugin.Name + "_", StringComparison.OrdinalIgnoreCase))
 					{
 						// Change the tag to a fully qualified action name
 						item.Tag = plugin.Name.ToLowerInvariant() + "_" + (item.Tag as string);
@@ -2488,17 +2535,17 @@ namespace CodeImp.DoomBuilder.Windows
 				}
 
 				// This is a menu item?
-				if(item is ToolStripMenuItem)
+				if (item is ToolStripMenuItem)
 				{
 					// Get the item in proper type
 					ToolStripMenuItem menuitem = (item as ToolStripMenuItem);
-					
+
 					// Recursively perform operation on child menu items
 					RenameTagsToFullActions(menuitem.DropDownItems, plugin);
 				}
 			}
 		}
-		
+
 		#endregion
 
 		#region ================== File Menu
@@ -2529,10 +2576,10 @@ namespace CodeImp.DoomBuilder.Windows
 
 			// Where to insert
 			int insertindex = menufile.DropDownItems.IndexOf(itemnorecent);
-			
+
 			// Create all items
 			recentitems = new ToolStripMenuItem[General.Settings.MaxRecentFiles];
-			for(int i = 0; i < General.Settings.MaxRecentFiles; i++)
+			for (int i = 0; i < General.Settings.MaxRecentFiles; i++)
 			{
 				// Create item
 				recentitems[i] = new ToolStripMenuItem("");
@@ -2542,8 +2589,8 @@ namespace CodeImp.DoomBuilder.Windows
 
 				// Get configuration setting
 				string filename = General.Settings.ReadSetting("recentfiles.file" + i, "");
-                if (!string.IsNullOrEmpty(filename) && File.Exists(filename))
-                {
+				if (!string.IsNullOrEmpty(filename) && File.Exists(filename))
+				{
 					// Set up item
 					int number = i + 1;
 					recentitems[i].Text = "&" + number + "  " + GetDisplayFilename(filename);
@@ -2561,29 +2608,29 @@ namespace CodeImp.DoomBuilder.Windows
 			// Hide the no recent item when there are items
 			itemnorecent.Visible = !anyitems;
 		}
-		
+
 		// This saves the recent files list
 		private void SaveRecentFiles()
 		{
 			// Go for all items
-			for(int i = 0; i < recentitems.Length; i++)
+			for (int i = 0; i < recentitems.Length; i++)
 			{
-                // Recent file set?
-                if (!string.IsNullOrEmpty(recentitems[i].Text))
-                {
+				// Recent file set?
+				if (!string.IsNullOrEmpty(recentitems[i].Text))
+				{
 					// Save to configuration
 					General.Settings.WriteSetting("recentfiles.file" + i, recentitems[i].Tag.ToString());
 				}
 			}
 		}
-		
+
 		// This adds a recent file to the list
 		internal void AddRecentFile(string filename)
 		{
 			//mxd. Recreate recent files list
-			if(recentitems.Length != General.Settings.MaxRecentFiles) 
+			if (recentitems.Length != General.Settings.MaxRecentFiles)
 			{
-				foreach(ToolStripMenuItem item in recentitems)
+				foreach (ToolStripMenuItem item in recentitems)
 					menufile.DropDownItems.Remove(item);
 
 				SaveRecentFiles();
@@ -2591,28 +2638,28 @@ namespace CodeImp.DoomBuilder.Windows
 			}
 
 			int movedownto = General.Settings.MaxRecentFiles - 1;
-			
+
 			// Check if this file is already in the list
-			for(int i = 0; i < General.Settings.MaxRecentFiles; i++)
+			for (int i = 0; i < General.Settings.MaxRecentFiles; i++)
 			{
 				// File same as this item?
-				if(string.Compare(filename, recentitems[i].Tag.ToString(), true) == 0)
+				if (string.Compare(filename, recentitems[i].Tag.ToString(), true) == 0)
 				{
 					// Move down to here so that this item will disappear
 					movedownto = i;
 					break;
 				}
 			}
-			
+
 			// Go for all items, except the last one, backwards
-			for(int i = movedownto - 1; i >= 0; i--)
+			for (int i = movedownto - 1; i >= 0; i--)
 			{
 				// Move recent file down the list
 				int number = i + 2;
 				recentitems[i + 1].Text = "&" + number + "  " + GetDisplayFilename(recentitems[i].Tag.ToString());
 				recentitems[i + 1].Tag = recentitems[i].Tag.ToString();
-                recentitems[i + 1].Visible = !string.IsNullOrEmpty(recentitems[i].Tag.ToString());
-            }
+				recentitems[i + 1].Visible = !string.IsNullOrEmpty(recentitems[i].Tag.ToString());
+			}
 
 			// Add new file at the top
 			recentitems[0].Text = "&1  " + GetDisplayFilename(filename);
@@ -2627,14 +2674,14 @@ namespace CodeImp.DoomBuilder.Windows
 		private string GetDisplayFilename(string filename)
 		{
 			// String doesnt fit?
-			if(GetStringWidth(filename) > MAX_RECENT_FILES_PIXELS)
+			if (GetStringWidth(filename) > MAX_RECENT_FILES_PIXELS)
 			{
 				// Start chopping off characters
-				for(int i = filename.Length - 6; i >= 0; i--)
+				for (int i = filename.Length - 6; i >= 0; i--)
 				{
 					// Does it fit now?
 					string newname = filename.Substring(0, 3) + "..." + filename.Substring(filename.Length - i, i);
-					if(GetStringWidth(newname) <= MAX_RECENT_FILES_PIXELS) return newname;
+					if (GetStringWidth(newname) <= MAX_RECENT_FILES_PIXELS) return newname;
 				}
 
 				// Cant find anything that fits (most unlikely!)
@@ -2646,7 +2693,7 @@ namespace CodeImp.DoomBuilder.Windows
 				return filename;
 			}
 		}
-		
+
 		// This returns the width of a string
 		private float GetStringWidth(string str)
 		{
@@ -2654,7 +2701,7 @@ namespace CodeImp.DoomBuilder.Windows
 			SizeF strsize = g.MeasureString(str, this.Font);
 			return strsize.Width;
 		}
-		
+
 		// Exit clicked
 		private void itemexit_Click(object sender, EventArgs e) { this.Close(); }
 
@@ -2667,7 +2714,7 @@ namespace CodeImp.DoomBuilder.Windows
 			// Open this file
 			General.OpenMapFile(item.Tag.ToString(), null);
 		}
-		
+
 		#endregion
 
 		#region ================== Edit Menu
@@ -2677,7 +2724,7 @@ namespace CodeImp.DoomBuilder.Windows
 		{
 			// No edit menu when no map open
 			menuedit.Visible = (General.Map != null);
-			
+
 			// Enable/disable items
 			itemundo.Enabled = (General.Map != null) && (General.Map.UndoRedo.NextUndo != null);
 			itemredo.Enabled = (General.Map != null) && (General.Map.UndoRedo.NextRedo != null);
@@ -2690,17 +2737,17 @@ namespace CodeImp.DoomBuilder.Windows
 			itemdynamicgridsize.Checked = General.Settings.DynamicGridSize; //mxd
 
 			// Determine undo description
-			if(itemundo.Enabled)
+			if (itemundo.Enabled)
 				itemundo.Text = "Undo " + General.Map.UndoRedo.NextUndo.Description;
 			else
 				itemundo.Text = "Undo";
 
 			// Determine redo description
-			if(itemredo.Enabled)
+			if (itemredo.Enabled)
 				itemredo.Text = "Redo " + General.Map.UndoRedo.NextRedo.Description;
 			else
 				itemredo.Text = "Redo";
-			
+
 			// Toolbar icons
 			buttonundo.Enabled = itemundo.Enabled;
 			buttonredo.Enabled = itemredo.Enabled;
@@ -2713,9 +2760,9 @@ namespace CodeImp.DoomBuilder.Windows
 		}
 
 		//mxd
-		private void menuedit_DropDownOpening(object sender, EventArgs e) 
+		private void menuedit_DropDownOpening(object sender, EventArgs e)
 		{
-			if(General.Map == null) 
+			if (General.Map == null)
 			{
 				selectGroup.Enabled = false;
 				clearGroup.Enabled = false;
@@ -2726,12 +2773,12 @@ namespace CodeImp.DoomBuilder.Windows
 			//get data
 			ToolStripItem item;
 			GroupInfo[] infos = new GroupInfo[10];
-			for(int i = 0; i < infos.Length; i++) infos[i] = General.Map.Map.GetGroupInfo(i);
+			for (int i = 0; i < infos.Length; i++) infos[i] = General.Map.Map.GetGroupInfo(i);
 
 			//update "Add to group" menu
 			addToGroup.Enabled = true;
 			addToGroup.DropDownItems.Clear();
-			foreach(GroupInfo gi in infos) 
+			foreach (GroupInfo gi in infos)
 			{
 				item = addToGroup.DropDownItems.Add(gi.ToString());
 				item.Tag = "builder_assigngroup" + gi.Index;
@@ -2740,9 +2787,9 @@ namespace CodeImp.DoomBuilder.Windows
 
 			//update "Select group" menu
 			selectGroup.DropDownItems.Clear();
-			foreach(GroupInfo gi in infos) 
+			foreach (GroupInfo gi in infos)
 			{
-				if(gi.Empty) continue;
+				if (gi.Empty) continue;
 				item = selectGroup.DropDownItems.Add(gi.ToString());
 				item.Tag = "builder_selectgroup" + gi.Index;
 				item.Click += InvokeTaggedAction;
@@ -2750,9 +2797,9 @@ namespace CodeImp.DoomBuilder.Windows
 
 			//update "Clear group" menu
 			clearGroup.DropDownItems.Clear();
-			foreach(GroupInfo gi in infos) 
+			foreach (GroupInfo gi in infos)
 			{
-				if(gi.Empty) continue;
+				if (gi.Empty) continue;
 				item = clearGroup.DropDownItems.Add(gi.ToString());
 				item.Tag = "builder_cleargroup" + gi.Index;
 				item.Click += InvokeTaggedAction;
@@ -2795,7 +2842,7 @@ namespace CodeImp.DoomBuilder.Windows
 
 		//mxd
 		[BeginAction("togglebrightness")]
-		internal void ToggleBrightness() 
+		internal void ToggleBrightness()
 		{
 			Renderer.FullBrightness = !Renderer.FullBrightness;
 			buttonfullbrightness.Checked = Renderer.FullBrightness;
@@ -2820,20 +2867,20 @@ namespace CodeImp.DoomBuilder.Windows
 			General.Interface.RedrawDisplay();
 		}
 
-        [BeginAction("togglenightspath")]
-        protected void ToggleNiGHTSPath()
-        {
-            General.Settings.RenderNiGHTSPath = !General.Settings.RenderNiGHTSPath;
-            itemrendernightspath.Checked = General.Settings.RenderNiGHTSPath;
-            buttontogglenightspath.Checked = General.Settings.RenderNiGHTSPath;
-            General.Interface.DisplayStatus(StatusType.Action, "NiGHTS path rendering is " + (General.Settings.RenderNiGHTSPath ? "ENABLED" : "DISABLED"));
+		[BeginAction("togglenightspath")]
+		protected void ToggleNiGHTSPath()
+		{
+			General.Settings.RenderNiGHTSPath = !General.Settings.RenderNiGHTSPath;
+			itemrendernightspath.Checked = General.Settings.RenderNiGHTSPath;
+			buttontogglenightspath.Checked = General.Settings.RenderNiGHTSPath;
+			General.Interface.DisplayStatus(StatusType.Action, "NiGHTS path rendering is " + (General.Settings.RenderNiGHTSPath ? "ENABLED" : "DISABLED"));
 
-            // Redraw display to show changes
-            General.Interface.RedrawDisplay();
-        }
+			// Redraw display to show changes
+			General.Interface.RedrawDisplay();
+		}
 
-        //mxd
-        [BeginAction("toggledynamicgrid")]
+		//mxd
+		[BeginAction("toggledynamicgrid")]
 		protected void ToggleDynamicGrid()
 		{
 			General.Settings.DynamicGridSize = !General.Settings.DynamicGridSize;
@@ -2842,13 +2889,13 @@ namespace CodeImp.DoomBuilder.Windows
 			General.Interface.DisplayStatus(StatusType.Action, "Dynamic grid size is " + (General.Settings.DynamicGridSize ? "ENABLED" : "DISABLED"));
 
 			// Redraw display to show changes
-			if(General.Editing.Mode is ClassicMode) ((ClassicMode)General.Editing.Mode).MatchGridSizeToDisplayScale();
+			if (General.Editing.Mode is ClassicMode) ((ClassicMode)General.Editing.Mode).MatchGridSizeToDisplayScale();
 			General.Interface.RedrawDisplay();
 		}
 
 		//mxd
 		[BeginAction("toggleautoclearsidetextures")]
-		internal void ToggleAutoClearSideTextures() 
+		internal void ToggleAutoClearSideTextures()
 		{
 			buttonautoclearsidetextures.Checked = !buttonautoclearsidetextures.Checked;
 			itemautoclearsidetextures.Checked = buttonautoclearsidetextures.Checked;
@@ -2858,7 +2905,7 @@ namespace CodeImp.DoomBuilder.Windows
 
 		//mxd
 		[BeginAction("viewusedtags")]
-		internal void ViewUsedTags() 
+		internal void ViewUsedTags()
 		{
 			TagStatisticsForm f = new TagStatisticsForm();
 			f.ShowDialog(this);
@@ -2871,7 +2918,7 @@ namespace CodeImp.DoomBuilder.Windows
 			ThingStatisticsForm f = new ThingStatisticsForm();
 			f.ShowDialog(this);
 		}
-		
+
 		#endregion
 
 		#region ================== View Menu
@@ -2880,18 +2927,18 @@ namespace CodeImp.DoomBuilder.Windows
 		private void UpdateViewMenu()
 		{
 			menuview.Visible = (General.Map != null); //mxd
-			
+
 			// Menu items
 			itemfullbrightness.Checked = Renderer.FullBrightness; //mxd
 			itemtogglegrid.Checked = General.Settings.RenderGrid; //mxd
 			itemtoggleinfo.Checked = IsInfoPanelExpanded;
 			itemtogglecomments.Visible = (General.Map != null && General.Map.UDMF); //mxd
 			itemtogglecomments.Checked = General.Settings.RenderComments; //mxd
-			
+
 			// View mode items
-			if(General.Map != null)
+			if (General.Map != null)
 			{
-				for(int i = 0; i < Renderer2D.NUM_VIEW_MODES; i++)
+				for (int i = 0; i < Renderer2D.NUM_VIEW_MODES; i++)
 				{
 					// Check the correct item
 					viewmodesbuttons[i].Checked = (i == (int)General.Map.CRenderer2D.ViewMode);
@@ -2909,11 +2956,11 @@ namespace CodeImp.DoomBuilder.Windows
 		{
 			menumode.Visible = (General.Map != null);
 		}
-		
+
 		#endregion
 
 		#region ================== Help Menu
-		
+
 		// This sets up the help menu
 		private void UpdateHelpMenu()
 		{
@@ -2926,7 +2973,7 @@ namespace CodeImp.DoomBuilder.Windows
 		{
 			UpdateChecker.PerformCheck(true);
 		}
-		
+
 		// About clicked
 		private void itemhelpabout_Click(object sender, EventArgs e)
 		{
@@ -2944,12 +2991,12 @@ namespace CodeImp.DoomBuilder.Windows
 		// About this Editing Mode
 		private void itemhelpeditmode_Click(object sender, EventArgs e)
 		{
-			if((General.Map != null) && (General.Editing.Mode != null))
+			if ((General.Map != null) && (General.Editing.Mode != null))
 				General.Editing.Mode.OnHelp();
 		}
 
 		//mxd
-		private void itemShortcutReference_Click(object sender, EventArgs e) 
+		private void itemShortcutReference_Click(object sender, EventArgs e)
 		{
 			const string columnLabels = "<tr><td width=\"240px;\"><strong>Action</strong></td><td width=\"120px;\"><div align=\"center\"><strong>Shortcut</strong></div></td><td width=\"120px;\"><div align=\"center\"><strong>Modifiers</strong></div></td><td><strong>Description</strong></td></tr>";
 			const string categoryPadding = "<tr><td colspan=\"4\"></td></tr>";
@@ -2960,9 +3007,9 @@ namespace CodeImp.DoomBuilder.Windows
 			Actions.Action[] actions = General.Actions.GetAllActions();
 			Dictionary<string, List<Actions.Action>> sortedActions = new Dictionary<string, List<Actions.Action>>(StringComparer.Ordinal);
 
-			foreach(Actions.Action action in actions) 
+			foreach (Actions.Action action in actions)
 			{
-				if(!sortedActions.ContainsKey(action.Category))
+				if (!sortedActions.ContainsKey(action.Category))
 					sortedActions.Add(action.Category, new List<Actions.Action>());
 				sortedActions[action.Category].Add(action);
 			}
@@ -2984,7 +3031,7 @@ namespace CodeImp.DoomBuilder.Windows
 			List<string> catnames = new List<string>(sortedActions.Count);
 			int counter = 0;
 			int numActions = 0;
-			foreach(KeyValuePair<string, List<Actions.Action>> category in sortedActions) 
+			foreach (KeyValuePair<string, List<Actions.Action>> category in sortedActions)
 			{
 				catnames.Add("<a href=\"#cat" + (counter++) + "\">" + General.Actions.Categories[category.Key] + "</a>");
 				numActions += category.Value.Count;
@@ -2996,7 +3043,7 @@ namespace CodeImp.DoomBuilder.Windows
 
 			//add descriptions
 			counter = 0;
-			foreach(KeyValuePair<string, List<Actions.Action>> category in sortedActions) 
+			foreach (KeyValuePair<string, List<Actions.Action>> category in sortedActions)
 			{
 				//add category title
 				html.AppendLine(categoryPadding);
@@ -3007,7 +3054,7 @@ namespace CodeImp.DoomBuilder.Windows
 				Dictionary<string, Actions.Action> actionsByTitle = new Dictionary<string, Actions.Action>(StringComparer.Ordinal);
 				List<string> actionTitles = new List<string>();
 
-				foreach(Actions.Action action in category.Value) 
+				foreach (Actions.Action action in category.Value)
 				{
 					actionsByTitle.Add(action.Title, action);
 					actionTitles.Add(action.Title);
@@ -3015,7 +3062,7 @@ namespace CodeImp.DoomBuilder.Windows
 
 				actionTitles.Sort();
 
-				foreach(string title in actionTitles) 
+				foreach (string title in actionTitles)
 				{
 					Actions.Action a = actionsByTitle[title];
 					List<string> modifiers = new List<string>();
@@ -3024,9 +3071,9 @@ namespace CodeImp.DoomBuilder.Windows
 					html.AppendLine("<td>" + title + "</td>");
 					html.AppendLine("<td><div align=\"center\">" + Actions.Action.GetShortcutKeyDesc(a.ShortcutKey) + "</div></td>");
 
-					if(a.DisregardControl) modifiers.Add("Ctrl");
-					if(a.DisregardAlt) modifiers.Add("Alt");
-					if(a.DisregardShift) modifiers.Add("Shift");
+					if (a.DisregardControl) modifiers.Add("Ctrl");
+					if (a.DisregardAlt) modifiers.Add("Alt");
+					if (a.DisregardShift) modifiers.Add("Shift");
 
 					html.AppendLine("<td><div align=\"center\">" + string.Join(", ", modifiers.ToArray()) + "</div></td>");
 					html.AppendLine("<td>" + a.Description + "</td>");
@@ -3039,19 +3086,19 @@ namespace CodeImp.DoomBuilder.Windows
 
 			//write
 			string path;
-			try 
+			try
 			{
 				path = Path.Combine(General.AppPath, fileName);
-				using(StreamWriter writer = File.CreateText(path)) 
+				using (StreamWriter writer = File.CreateText(path))
 				{
 					writer.Write(html.ToString());
 				}
-			} 
-			catch (Exception) 
+			}
+			catch (Exception)
 			{
 				//Configurtions path SHOULD be accessible and not read-only, right?
 				path = Path.Combine(General.SettingsPath, fileName);
-				using(StreamWriter writer = File.CreateText(path)) 
+				using (StreamWriter writer = File.CreateText(path))
 				{
 					writer.Write(html.ToString());
 				}
@@ -3065,11 +3112,11 @@ namespace CodeImp.DoomBuilder.Windows
 		//mxd
 		private void itemopenconfigfolder_Click(object sender, EventArgs e)
 		{
-			if(Directory.Exists(General.SettingsPath)) Process.Start(General.SettingsPath);
-			else General.ShowErrorMessage("Huh? Where did Settings folder go?.." + Environment.NewLine 
+			if (Directory.Exists(General.SettingsPath)) Process.Start(General.SettingsPath);
+			else General.ShowErrorMessage("Huh? Where did Settings folder go?.." + Environment.NewLine
 				+ "I swear it was here: '" + General.SettingsPath + "'!", MessageBoxButtons.OK); // I don't think this will ever happen
 		}
-		
+
 		#endregion
 
 		#region ================== Prefabs Menu
@@ -3078,19 +3125,19 @@ namespace CodeImp.DoomBuilder.Windows
 		private void UpdatePrefabsMenu()
 		{
 			menuprefabs.Visible = (General.Map != null); //mxd
-			
+
 			// Enable/disable items
 			itemcreateprefab.Enabled = (General.Map != null) && (General.Editing.Mode != null) && General.Editing.Mode.Attributes.AllowCopyPaste;
 			iteminsertprefabfile.Enabled = (General.Map != null) && (General.Editing.Mode != null) && General.Editing.Mode.Attributes.AllowCopyPaste;
 			iteminsertpreviousprefab.Enabled = (General.Map != null) && (General.Editing.Mode != null) && General.Map.CopyPaste.IsPreviousPrefabAvailable && General.Editing.Mode.Attributes.AllowCopyPaste;
-			
+
 			// Toolbar icons
 			buttoninsertprefabfile.Enabled = iteminsertprefabfile.Enabled;
 			buttoninsertpreviousprefab.Enabled = iteminsertpreviousprefab.Enabled;
 		}
-		
+
 		#endregion
-		
+
 		#region ================== Tools Menu
 
 		// This sets up the tools menu
@@ -3109,7 +3156,7 @@ namespace CodeImp.DoomBuilder.Windows
 			itemReloadGldefs.Visible = supported;
 			itemReloadModedef.Visible = supported;
 		}
-		
+
 		// Errors and Warnings
 		[BeginAction("showerrors")]
 		internal void ShowErrors()
@@ -3120,7 +3167,7 @@ namespace CodeImp.DoomBuilder.Windows
 			//mxd
 			SetWarningsCount(General.ErrorLogger.ErrorsCount, false);
 		}
-		
+
 		// Game Configuration action
 		[BeginAction("configuration")]
 		internal void ShowConfiguration()
@@ -3134,18 +3181,18 @@ namespace CodeImp.DoomBuilder.Windows
 		{
 			// Show configuration dialog
 			ConfigForm cfgform = new ConfigForm();
-			if(pageindex > -1) cfgform.ShowTab(pageindex);
-			if(cfgform.ShowDialog(this) == DialogResult.OK)
+			if (pageindex > -1) cfgform.ShowTab(pageindex);
+			if (cfgform.ShowDialog(this) == DialogResult.OK)
 			{
 				// Update stuff
 				SetupInterface();
 				UpdateInterface();
 				General.Editing.UpdateCurrentEditModes();
 				General.Plugins.ProgramReconfigure();
-				
+
 				// Reload resources if a map is open
-				if((General.Map != null) && cfgform.ReloadResources) General.Actions.InvokeAction("builder_reloadresources");
-				
+				if ((General.Map != null) && cfgform.ReloadResources) General.Actions.InvokeAction("builder_reloadresources");
+
 				// Redraw display
 				RedrawDisplay();
 			}
@@ -3160,7 +3207,7 @@ namespace CodeImp.DoomBuilder.Windows
 		{
 			// Show preferences dialog
 			PreferencesForm prefform = new PreferencesForm();
-			if(prefform.ShowDialog(this) == DialogResult.OK)
+			if (prefform.ShowDialog(this) == DialogResult.OK)
 			{
 				// Update stuff
 				SetupInterface();
@@ -3168,17 +3215,17 @@ namespace CodeImp.DoomBuilder.Windows
 				ApplyShortcutKeys();
 				General.Colors.CreateCorrectionTable();
 				General.Plugins.ProgramReconfigure();
-				
+
 				// Map opened?
-				if(General.Map != null)
+				if (General.Map != null)
 				{
 					// Reload resources!
-					if(General.Map.ScriptEditor != null) General.Map.ScriptEditor.Editor.RefreshSettings();
+					if (General.Map.ScriptEditor != null) General.Map.ScriptEditor.Editor.RefreshSettings();
 					General.Map.Graphics.SetupSettings();
 					General.Map.UpdateConfiguration();
-					if(prefform.ReloadResources) General.Actions.InvokeAction("builder_reloadresources");
+					if (prefform.ReloadResources) General.Actions.InvokeAction("builder_reloadresources");
 				}
-				
+
 				// Redraw display
 				RedrawDisplay();
 			}
@@ -3188,21 +3235,21 @@ namespace CodeImp.DoomBuilder.Windows
 		}
 
 		//mxd
-		internal void SaveScreenshot(bool activeControlOnly) 
+		internal void SaveScreenshot(bool activeControlOnly)
 		{
 			//pick a valid folder
 			string folder = General.Settings.ScreenshotsPath;
-			if(!Directory.Exists(folder)) 
+			if (!Directory.Exists(folder))
 			{
-				if(folder != General.DefaultScreenshotsPath 
-					&& General.ShowErrorMessage("Screenshots save path '" + folder 
-					+ "' does not exist!\nPress OK to save to the default folder ('" 
-					+ General.DefaultScreenshotsPath 
+				if (folder != General.DefaultScreenshotsPath
+					&& General.ShowErrorMessage("Screenshots save path '" + folder
+					+ "' does not exist!\nPress OK to save to the default folder ('"
+					+ General.DefaultScreenshotsPath
 					+ "').\nPress Cancel to abort.", MessageBoxButtons.OKCancel) == DialogResult.Cancel) return;
 
 
 				folder = General.DefaultScreenshotsPath;
-				if(!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+				if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
 			}
 
 			// Create name and bounds
@@ -3211,13 +3258,13 @@ namespace CodeImp.DoomBuilder.Windows
 			bool displayextrainfo = false;
 			string mapname = (General.Map != null ? Path.GetFileNameWithoutExtension(General.Map.FileTitle) : General.ThisAssembly.GetName().Name);
 
-			if(activeControlOnly)
+			if (activeControlOnly)
 			{
-				if(Form.ActiveForm != null && Form.ActiveForm != this)
+				if (Form.ActiveForm != null && Form.ActiveForm != this)
 				{
 					name = mapname + " (" + Form.ActiveForm.Text + ") at ";
-					bounds = (Form.ActiveForm.WindowState == FormWindowState.Maximized ? 
-						Screen.GetWorkingArea(Form.ActiveForm) : 
+					bounds = (Form.ActiveForm.WindowState == FormWindowState.Maximized ?
+						Screen.GetWorkingArea(Form.ActiveForm) :
 						Form.ActiveForm.Bounds);
 				}
 				else
@@ -3227,7 +3274,7 @@ namespace CodeImp.DoomBuilder.Windows
 					bounds.Offset(this.PointToScreen(new Point()));
 					displayextrainfo = true;
 				}
-			} 
+			}
 			else
 			{
 				name = mapname + " at ";
@@ -3236,111 +3283,111 @@ namespace CodeImp.DoomBuilder.Windows
 
 			Point cursorLocation = Point.Empty;
 			//dont want to render the cursor in VisualMode
-			if(General.Editing.Mode == null || !(General.Editing.Mode is VisualMode))
+			if (General.Editing.Mode == null || !(General.Editing.Mode is VisualMode))
 				cursorLocation = Cursor.Position - new Size(bounds.Location);
 
 			//create path
 			string date = DateTime.Now.ToString("yyyy.MM.dd HH-mm-ss.fff");
 			string revision = (General.DebugBuild ? "DEVBUILD" : "R" + General.ThisAssembly.GetName().Version.MinorRevision);
-            bool usejpg = General.Settings.CompressScreenshots;
-            string path = Path.Combine(folder, name + date + " [" + revision + "]" + (usejpg ? ".jpg" : ".png"));
+			bool usejpg = General.Settings.CompressScreenshots;
+			string path = Path.Combine(folder, name + date + " [" + revision + "]" + (usejpg ? ".jpg" : ".png"));
 
 			//save image
-			using(Bitmap bitmap = new Bitmap(bounds.Width, bounds.Height)) 
+			using (Bitmap bitmap = new Bitmap(bounds.Width, bounds.Height))
 			{
-				using(Graphics g = Graphics.FromImage(bitmap)) 
+				using (Graphics g = Graphics.FromImage(bitmap))
 				{
 					g.CopyFromScreen(new Point(bounds.Left, bounds.Top), Point.Empty, bounds.Size);
 
 					//draw the cursor
-					if(!cursorLocation.IsEmpty) g.DrawImage(Resources.Cursor, cursorLocation);
+					if (!cursorLocation.IsEmpty) g.DrawImage(Resources.Cursor, cursorLocation);
 
-                    if (General.Settings.DrawScreenshotInfo)
-                    {
-                        //gather some info
-                        string info;
-                        if (displayextrainfo && General.Editing.Mode != null)
-                        {
-                            info = General.Map.FileTitle + " | " + General.Map.Options.CurrentName + " | ";
+					if (General.Settings.DrawScreenshotInfo)
+					{
+						//gather some info
+						string info;
+						if (displayextrainfo && General.Editing.Mode != null)
+						{
+							info = General.Map.FileTitle + " | " + General.Map.Options.CurrentName + " | ";
 
-                            //get map coordinates
-                            if (General.Editing.Mode is ClassicMode)
-                            {
-                                Vector2D pos = ((ClassicMode)General.Editing.Mode).MouseMapPos;
+							//get map coordinates
+							if (General.Editing.Mode is ClassicMode)
+							{
+								Vector2D pos = ((ClassicMode)General.Editing.Mode).MouseMapPos;
 
-                                //mouse inside the view?
-                                if (pos.IsFinite())
-                                {
-                                    info += "X:" + Math.Round(pos.x) + " Y:" + Math.Round(pos.y);
-                                }
-                                else
-                                {
-                                    info += "X:" + Math.Round(General.Map.Renderer2D.TranslateX) + " Y:" + Math.Round(General.Map.Renderer2D.TranslateY);
-                                }
-                            }
-                            else
-                            { //should be visual mode
-                                info += "X:" + Math.Round(General.Map.VisualCamera.Position.x) + " Y:" + Math.Round(General.Map.VisualCamera.Position.y) + " Z:" + Math.Round(General.Map.VisualCamera.Position.z);
-                            }
+								//mouse inside the view?
+								if (pos.IsFinite())
+								{
+									info += "X:" + Math.Round(pos.x) + " Y:" + Math.Round(pos.y);
+								}
+								else
+								{
+									info += "X:" + Math.Round(General.Map.Renderer2D.TranslateX) + " Y:" + Math.Round(General.Map.Renderer2D.TranslateY);
+								}
+							}
+							else
+							{ //should be visual mode
+								info += "X:" + Math.Round(General.Map.VisualCamera.Position.x) + " Y:" + Math.Round(General.Map.VisualCamera.Position.y) + " Z:" + Math.Round(General.Map.VisualCamera.Position.z);
+							}
 
-                            //add the revision number
-                            info += " | " + revision;
-                        }
-                        else
-                        {
-                            //just use the revision number
-                            info = revision;
-                        }
+							//add the revision number
+							info += " | " + revision;
+						}
+						else
+						{
+							//just use the revision number
+							info = revision;
+						}
 
-                        //draw info
-                        Font font = new Font("Tahoma", 10);
-                        SizeF rect = g.MeasureString(info, font);
-                        float px = bounds.Width - rect.Width - 4;
-                        float py = 4;
+						//draw info
+						Font font = new Font("Tahoma", 10);
+						SizeF rect = g.MeasureString(info, font);
+						float px = bounds.Width - rect.Width - 4;
+						float py = 4;
 
-                        g.FillRectangle(Brushes.Black, px, py, rect.Width, rect.Height + 3);
-                        using (SolidBrush brush = new SolidBrush(Color.White))
-                        {
-                            g.DrawString(info, font, brush, px + 2, py + 2);
-                        }
-                    }
+						g.FillRectangle(Brushes.Black, px, py, rect.Width, rect.Height + 3);
+						using (SolidBrush brush = new SolidBrush(Color.White))
+						{
+							g.DrawString(info, font, brush, px + 2, py + 2);
+						}
+					}
 				}
 
-				try 
+				try
 				{
-                    if (usejpg)
-                    {
-                        ImageCodecInfo jpegCodec = null;
-                        ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();
-                        foreach (ImageCodecInfo codec in codecs)
-                        {
-                            if (codec.FormatID == ImageFormat.Jpeg.Guid)
-                            {
-                                jpegCodec = codec;
-                                break;
-                            }
-                        }
+					if (usejpg)
+					{
+						ImageCodecInfo jpegCodec = null;
+						ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();
+						foreach (ImageCodecInfo codec in codecs)
+						{
+							if (codec.FormatID == ImageFormat.Jpeg.Guid)
+							{
+								jpegCodec = codec;
+								break;
+							}
+						}
 
-                        EncoderParameter qualityParam = new EncoderParameter(Encoder.Quality, 90L);
-                        EncoderParameters encoderParams = new EncoderParameters(1);
-                        encoderParams.Param[0] = qualityParam;
+						EncoderParameter qualityParam = new EncoderParameter(Encoder.Quality, 90L);
+						EncoderParameters encoderParams = new EncoderParameters(1);
+						encoderParams.Param[0] = qualityParam;
 
-                        bitmap.Save(path, jpegCodec, encoderParams);
-                    }
-                    else
-                    {
-                        bitmap.Save(path, ImageFormat.Png);
-                    }
-                    DisplayStatus(StatusType.Info, "Screenshot saved to '" + path + "'");
-				} 
-				catch(ExternalException e) 
+						bitmap.Save(path, jpegCodec, encoderParams);
+					}
+					else
+					{
+						bitmap.Save(path, ImageFormat.Png);
+					}
+					DisplayStatus(StatusType.Info, "Screenshot saved to '" + path + "'");
+				}
+				catch (ExternalException e)
 				{
 					DisplayStatus(StatusType.Warning, "Failed to save screenshot...");
 					General.ErrorLogger.Add(ErrorType.Error, "Failed to save screenshot: " + e.Message);
 				}
 			}
 		}
-		
+
 		#endregion
 
 		#region ================== Models and Lights mode (mxd)
@@ -3349,7 +3396,7 @@ namespace CodeImp.DoomBuilder.Windows
 		{
 			General.Settings.GZDrawModelsMode = (ModelRenderMode)((ToolStripMenuItem)sender).Tag;
 
-			switch(General.Settings.GZDrawModelsMode) 
+			switch (General.Settings.GZDrawModelsMode)
 			{
 				case ModelRenderMode.NONE:
 					General.MainWindow.DisplayStatus(StatusType.Action, "Models rendering mode: NONE");
@@ -3367,16 +3414,16 @@ namespace CodeImp.DoomBuilder.Windows
 					General.MainWindow.DisplayStatus(StatusType.Action, "Models rendering mode: ALL");
 					break;
 			}
-			
+
 			UpdateGZDoomPanel();
 			RedrawDisplay();
 		}
 
-		private void ChangeLightRenderingMode(object sender, EventArgs e) 
+		private void ChangeLightRenderingMode(object sender, EventArgs e)
 		{
 			General.Settings.GZDrawLightsMode = (LightRenderMode)((ToolStripMenuItem)sender).Tag;
 
-			switch(General.Settings.GZDrawLightsMode) 
+			switch (General.Settings.GZDrawLightsMode)
 			{
 				case LightRenderMode.NONE:
 					General.MainWindow.DisplayStatus(StatusType.Action, "Dynamic lights rendering mode: NONE");
@@ -3390,7 +3437,7 @@ namespace CodeImp.DoomBuilder.Windows
 					General.MainWindow.DisplayStatus(StatusType.Action, "Models rendering mode: ANIMATED");
 					break;
 			}
-			
+
 			UpdateGZDoomPanel();
 			RedrawDisplay();
 		}
@@ -3404,14 +3451,14 @@ namespace CodeImp.DoomBuilder.Windows
 		[BeginAction("toggleinfopanel")]
 		internal void ToggleInfoPanel()
 		{
-			if(IsInfoPanelExpanded)
+			if (IsInfoPanelExpanded)
 			{
 				panelinfo.Height = buttontoggleinfo.Height + buttontoggleinfo.Top;
 				buttontoggleinfo.Image = Resources.InfoPanelExpand; //mxd
-				if(linedefinfo.Visible) linedefinfo.Hide();
-				if(vertexinfo.Visible) vertexinfo.Hide();
-				if(sectorinfo.Visible) sectorinfo.Hide();
-				if(thinginfo.Visible) thinginfo.Hide();
+				if (linedefinfo.Visible) linedefinfo.Hide();
+				if (vertexinfo.Visible) vertexinfo.Hide();
+				if (sectorinfo.Visible) sectorinfo.Hide();
+				if (thinginfo.Visible) thinginfo.Hide();
 				modename.Visible = false;
 #if DEBUG
 				console.Visible = false; //mxd
@@ -3426,10 +3473,10 @@ namespace CodeImp.DoomBuilder.Windows
 				buttontoggleinfo.Image = Resources.InfoPanelCollapse; //mxd
 				labelcollapsedinfo.Visible = false;
 				itemtoggleinfo.Checked = true;
-				if(lastinfoobject is Vertex) ShowVertexInfo(lastinfoobject as Vertex);
-				else if(lastinfoobject is Linedef) ShowLinedefInfo(lastinfoobject as Linedef);
-				else if(lastinfoobject is Sector) ShowSectorInfo(lastinfoobject as Sector);
-				else if(lastinfoobject is Thing) ShowThingInfo(lastinfoobject as Thing);
+				if (lastinfoobject is Vertex) ShowVertexInfo(lastinfoobject as Vertex);
+				else if (lastinfoobject is Linedef) ShowLinedefInfo(lastinfoobject as Linedef);
+				else if (lastinfoobject is Sector) ShowSectorInfo(lastinfoobject as Sector);
+				else if (lastinfoobject is Thing) ShowThingInfo(lastinfoobject as Thing);
 				else HideInfo();
 			}
 
@@ -3443,11 +3490,11 @@ namespace CodeImp.DoomBuilder.Windows
 			dockerspanel.Height = dockersspace.Height; //mxd
 			FocusDisplay();
 		}
-		
+
 		// This displays the current mode name
 		internal void DisplayModeName(string name)
 		{
-			if(lastinfoobject == null) 
+			if (lastinfoobject == null)
 			{
 				labelcollapsedinfo.Text = name;
 				labelcollapsedinfo.Refresh();
@@ -3455,17 +3502,17 @@ namespace CodeImp.DoomBuilder.Windows
 			modename.Text = name;
 			modename.Refresh();
 		}
-		
+
 		// This hides all info panels
 		public void HideInfo()
 		{
 			// Hide them all
 			bool showModeName = ((General.Map != null) && IsInfoPanelExpanded); //mxd
 			lastinfoobject = null;
-			if(linedefinfo.Visible) linedefinfo.Hide();
-			if(vertexinfo.Visible) vertexinfo.Hide();
-			if(sectorinfo.Visible) sectorinfo.Hide();
-			if(thinginfo.Visible) thinginfo.Hide();
+			if (linedefinfo.Visible) linedefinfo.Hide();
+			if (vertexinfo.Visible) vertexinfo.Hide();
+			if (sectorinfo.Visible) sectorinfo.Hide();
+			if (thinginfo.Visible) thinginfo.Hide();
 			labelcollapsedinfo.Text = modename.Text;
 			labelcollapsedinfo.Refresh();
 #if DEBUG
@@ -3479,83 +3526,83 @@ namespace CodeImp.DoomBuilder.Windows
 			//mxd. let the plugins know
 			General.Plugins.OnHighlightLost();
 		}
-		
+
 		// This refreshes info
 		public void RefreshInfo()
 		{
-			if(lastinfoobject is Vertex) ShowVertexInfo(lastinfoobject as Vertex);
-			else if(lastinfoobject is Linedef) ShowLinedefInfo(lastinfoobject as Linedef);
-			else if(lastinfoobject is Sector) ShowSectorInfo(lastinfoobject as Sector);
-			else if(lastinfoobject is Thing) ShowThingInfo(lastinfoobject as Thing);
+			if (lastinfoobject is Vertex) ShowVertexInfo(lastinfoobject as Vertex);
+			else if (lastinfoobject is Linedef) ShowLinedefInfo(lastinfoobject as Linedef);
+			else if (lastinfoobject is Sector) ShowSectorInfo(lastinfoobject as Sector);
+			else if (lastinfoobject is Thing) ShowThingInfo(lastinfoobject as Thing);
 
 			//mxd. let the plugins know
 			General.Plugins.OnHighlightRefreshed(lastinfoobject);
 		}
 
 		//mxd
-		public void ShowHints(string hintsText) 
+		public void ShowHints(string hintsText)
 		{
-			if(!string.IsNullOrEmpty(hintsText)) 
+			if (!string.IsNullOrEmpty(hintsText))
 			{
 				hintsPanel.SetHints(hintsText);
-			} 
-			else 
+			}
+			else
 			{
 				ClearHints();
 			}
 		}
 
 		//mxd
-		public void ClearHints() 
+		public void ClearHints()
 		{
 			hintsPanel.ClearHints();
 		}
 
 		//mxd
-		internal void AddHintsDocker() 
+		internal void AddHintsDocker()
 		{
-			if(!dockerspanel.Contains(hintsDocker)) dockerspanel.Add(hintsDocker);
+			if (!dockerspanel.Contains(hintsDocker)) dockerspanel.Add(hintsDocker);
 		}
 
 		//mxd
-		internal void RemoveHintsDocker() 
+		internal void RemoveHintsDocker()
 		{
 			dockerspanel.Remove(hintsDocker);
 		}
 
 		//mxd. Show linedef info
-		public void ShowLinedefInfo(Linedef l) 
+		public void ShowLinedefInfo(Linedef l)
 		{
 			ShowLinedefInfo(l, null);
 		}
-		
+
 		//mxd. Show linedef info and highlight given sidedef
 		public void ShowLinedefInfo(Linedef l, Sidedef highlightside)
 		{
-			if(l.IsDisposed)
+			if (l.IsDisposed)
 			{
 				HideInfo();
 				return;
 			}
-			
+
 			lastinfoobject = l;
 			modename.Visible = false;
 #if DEBUG
 			console.Visible = console.AlwaysOnTop; //mxd
 #endif
 			statistics.Visible = false; //mxd
-			if(vertexinfo.Visible) vertexinfo.Hide();
-			if(sectorinfo.Visible) sectorinfo.Hide();
-			if(thinginfo.Visible) thinginfo.Hide();
-			if(IsInfoPanelExpanded) linedefinfo.ShowInfo(l, highlightside);
+			if (vertexinfo.Visible) vertexinfo.Hide();
+			if (sectorinfo.Visible) sectorinfo.Hide();
+			if (thinginfo.Visible) thinginfo.Hide();
+			if (IsInfoPanelExpanded) linedefinfo.ShowInfo(l, highlightside);
 
 			// Show info on collapsed label
-			if(General.Map.Config.LinedefActions.ContainsKey(l.Action)) 
+			if (General.Map.Config.LinedefActions.ContainsKey(l.Action))
 			{
 				LinedefActionInfo act = General.Map.Config.LinedefActions[l.Action];
 				labelcollapsedinfo.Text = act.ToString();
-			} 
-			else if(l.Action == 0)
+			}
+			else if (l.Action == 0)
 			{
 				labelcollapsedinfo.Text = l.Action + " - None";
 			}
@@ -3571,9 +3618,9 @@ namespace CodeImp.DoomBuilder.Windows
 		}
 
 		// Show vertex info
-		public void ShowVertexInfo(Vertex v) 
+		public void ShowVertexInfo(Vertex v)
 		{
-			if(v.IsDisposed) 
+			if (v.IsDisposed)
 			{
 				HideInfo();
 				return;
@@ -3585,10 +3632,10 @@ namespace CodeImp.DoomBuilder.Windows
 			console.Visible = console.AlwaysOnTop; //mxd
 #endif
 			statistics.Visible = false; //mxd
-			if(linedefinfo.Visible) linedefinfo.Hide();
-			if(sectorinfo.Visible) sectorinfo.Hide();
-			if(thinginfo.Visible) thinginfo.Hide();
-			if(IsInfoPanelExpanded) vertexinfo.ShowInfo(v);
+			if (linedefinfo.Visible) linedefinfo.Hide();
+			if (sectorinfo.Visible) sectorinfo.Hide();
+			if (thinginfo.Visible) thinginfo.Hide();
+			if (IsInfoPanelExpanded) vertexinfo.ShowInfo(v);
 
 			// Show info on collapsed label
 			labelcollapsedinfo.Text = v.Position.x.ToString("0.##") + ", " + v.Position.y.ToString("0.##");
@@ -3599,15 +3646,15 @@ namespace CodeImp.DoomBuilder.Windows
 		}
 
 		//mxd. Show sector info
-		public void ShowSectorInfo(Sector s) 
+		public void ShowSectorInfo(Sector s)
 		{
 			ShowSectorInfo(s, false, false);
 		}
 
 		// Show sector info
-		public void ShowSectorInfo(Sector s, bool highlightceiling, bool highlightfloor) 
+		public void ShowSectorInfo(Sector s, bool highlightceiling, bool highlightfloor)
 		{
-			if(s.IsDisposed) 
+			if (s.IsDisposed)
 			{
 				HideInfo();
 				return;
@@ -3619,15 +3666,15 @@ namespace CodeImp.DoomBuilder.Windows
 			console.Visible = console.AlwaysOnTop; //mxd
 #endif
 			statistics.Visible = false; //mxd
-			if(linedefinfo.Visible) linedefinfo.Hide();
-			if(vertexinfo.Visible) vertexinfo.Hide();
-			if(thinginfo.Visible) thinginfo.Hide();
-			if(IsInfoPanelExpanded) sectorinfo.ShowInfo(s, highlightceiling, highlightfloor); //mxd
+			if (linedefinfo.Visible) linedefinfo.Hide();
+			if (vertexinfo.Visible) vertexinfo.Hide();
+			if (thinginfo.Visible) thinginfo.Hide();
+			if (IsInfoPanelExpanded) sectorinfo.ShowInfo(s, highlightceiling, highlightfloor); //mxd
 
 			// Show info on collapsed label
-			if(General.Map.Config.SectorEffects.ContainsKey(s.Effect))
+			if (General.Map.Config.SectorEffects.ContainsKey(s.Effect))
 				labelcollapsedinfo.Text = General.Map.Config.SectorEffects[s.Effect].ToString();
-			else if(s.Effect == 0)
+			else if (s.Effect == 0)
 				labelcollapsedinfo.Text = s.Effect + " - Normal";
 			else
 				labelcollapsedinfo.Text = s.Effect + " - Unknown";
@@ -3641,7 +3688,7 @@ namespace CodeImp.DoomBuilder.Windows
 		// Show thing info
 		public void ShowThingInfo(Thing t)
 		{
-			if(t.IsDisposed)
+			if (t.IsDisposed)
 			{
 				HideInfo();
 				return;
@@ -3653,10 +3700,10 @@ namespace CodeImp.DoomBuilder.Windows
 			console.Visible = console.AlwaysOnTop; //mxd
 #endif
 			statistics.Visible = false; //mxd
-			if(linedefinfo.Visible) linedefinfo.Hide();
-			if(vertexinfo.Visible) vertexinfo.Hide();
-			if(sectorinfo.Visible) sectorinfo.Hide();
-			if(IsInfoPanelExpanded) thinginfo.ShowInfo(t);
+			if (linedefinfo.Visible) linedefinfo.Hide();
+			if (vertexinfo.Visible) vertexinfo.Hide();
+			if (sectorinfo.Visible) sectorinfo.Hide();
+			if (IsInfoPanelExpanded) thinginfo.ShowInfo(t);
 
 			// Show info on collapsed label
 			ThingTypeInfo ti = General.Map.Data.GetThingInfo(t.SRB2Type);
@@ -3684,7 +3731,7 @@ namespace CodeImp.DoomBuilder.Windows
 		{
 			return TextureBrowserForm.Browse(owner, initialvalue, true); //mxd. was FlatBrowserForm
 		}
-		
+
 		// This browses the lindef types
 		// Returns the new action or the same action when cancelled
 		public int BrowseLinedefActions(IWin32Window owner, int initialvalue)
@@ -3707,7 +3754,7 @@ namespace CodeImp.DoomBuilder.Windows
 		}
 
 		//mxd
-		public DialogResult ShowEditVertices(ICollection<Vertex> vertices) 
+		public DialogResult ShowEditVertices(ICollection<Vertex> vertices)
 		{
 			return ShowEditVertices(vertices, true);
 		}
@@ -3728,20 +3775,20 @@ namespace CodeImp.DoomBuilder.Windows
 
 			return result;
 		}
-		
+
 		// This shows the dialog to edit lines
 		public DialogResult ShowEditLinedefs(ICollection<Linedef> lines)
 		{
 			return ShowEditLinedefs(lines, false, false);
 		}
-		
+
 		// This shows the dialog to edit lines
 		public DialogResult ShowEditLinedefs(ICollection<Linedef> lines, bool selectfront, bool selectback)
 		{
 			DialogResult result;
-			
+
 			// Show line edit dialog
-			if(General.Map.UDMF) //mxd
+			if (General.Map.UDMF) //mxd
 			{
 				LinedefEditFormUDMF f = new LinedefEditFormUDMF(selectfront, selectback);
 				DisableProcessing(); //mxd
@@ -3775,8 +3822,8 @@ namespace CodeImp.DoomBuilder.Windows
 			DialogResult result;
 
 			// Show sector edit dialog
-			if(General.Map.UDMF) //mxd
-			{ 
+			if (General.Map.UDMF) //mxd
+			{
 				SectorEditFormUDMF f = new SectorEditFormUDMF();
 				DisableProcessing(); //mxd
 				f.Setup(sectors);
@@ -3804,12 +3851,12 @@ namespace CodeImp.DoomBuilder.Windows
 		}
 
 		// This shows the dialog to edit things
-		public DialogResult ShowEditThings(ICollection<Thing> things) 
+		public DialogResult ShowEditThings(ICollection<Thing> things)
 		{
 			DialogResult result;
 
 			// Show thing edit dialog
-			if(General.Map.UDMF) 
+			if (General.Map.UDMF)
 			{
 				ThingEditFormUDMF f = new ThingEditFormUDMF();
 				DisableProcessing(); //mxd
@@ -3820,8 +3867,8 @@ namespace CodeImp.DoomBuilder.Windows
 				result = f.ShowDialog(this);
 				editformopen = false; //mxd
 				f.Dispose();
-			} 
-			else 
+			}
+			else
 			{
 				ThingEditForm f = new ThingEditForm();
 				DisableProcessing(); //mxd
@@ -3838,13 +3885,13 @@ namespace CodeImp.DoomBuilder.Windows
 		}
 
 		//mxd
-		private void EditForm_OnValuesChanged(object sender, EventArgs e) 
+		private void EditForm_OnValuesChanged(object sender, EventArgs e)
 		{
-			if(OnEditFormValuesChanged != null) 
+			if (OnEditFormValuesChanged != null)
 			{
 				OnEditFormValuesChanged(sender, e);
-			} 
-			else 
+			}
+			else
 			{
 				//If current mode doesn't handle this event, let's at least update the map and redraw display.
 				General.Map.Map.Update();
@@ -3855,21 +3902,21 @@ namespace CodeImp.DoomBuilder.Windows
 		#endregion
 
 		#region ================== Message Pump
-		
+
 		// This handles messages
 		protected override void WndProc(ref Message m)
 		{
 			// Notify message?
-			switch(m.Msg)
+			switch (m.Msg)
 			{
 				case (int)ThreadMessages.UpdateStatus:
 					DisplayStatus(status);
 					break;
-					
+
 				case (int)ThreadMessages.ImageDataLoaded:
 					string imagename = Marshal.PtrToStringAuto(m.WParam);
 					Marshal.FreeCoTaskMem(m.WParam);
-					if((General.Map != null) && (General.Map.Data != null))
+					if ((General.Map != null) && (General.Map.Data != null))
 					{
 						ImageData img = General.Map.Data.GetFlatImage(imagename);
 						ImageDataLoaded(img);
@@ -3879,10 +3926,10 @@ namespace CodeImp.DoomBuilder.Windows
 				case (int)ThreadMessages.SpriteDataLoaded: //mxd
 					string spritename = Marshal.PtrToStringAuto(m.WParam);
 					Marshal.FreeCoTaskMem(m.WParam);
-					if((General.Map != null) && (General.Map.Data != null))
+					if ((General.Map != null) && (General.Map.Data != null))
 					{
 						ImageData img = General.Map.Data.GetSpriteImage(spritename);
-						if(img != null && img.UsedInMap && !img.IsDisposed)
+						if (img != null && img.UsedInMap && !img.IsDisposed)
 						{
 							DelayedRedraw();
 						}
@@ -3891,12 +3938,12 @@ namespace CodeImp.DoomBuilder.Windows
 
 				case General.WM_SYSCOMMAND:
 					// We don't want to open a menu when ALT is pressed
-					if(m.WParam.ToInt32() != General.SC_KEYMENU)
+					if (m.WParam.ToInt32() != General.SC_KEYMENU)
 					{
 						base.WndProc(ref m);
 					}
 					break;
-					
+
 				default:
 					// Let the base handle the message
 					base.WndProc(ref m);
@@ -3906,86 +3953,87 @@ namespace CodeImp.DoomBuilder.Windows
 
 		//mxd. Warnings panel
 		private delegate void SetWarningsCountCallback(int count, bool blink);
-		internal void SetWarningsCount(int count, bool blink) 
+		internal void SetWarningsCount(int count, bool blink)
 		{
-			if(this.InvokeRequired)
+			if (this.InvokeRequired)
 			{
 				SetWarningsCountCallback d = SetWarningsCount;
 				this.Invoke(d, new object[] { count, blink });
 				return;
 			}
 
-            // Update icon, start annoying blinking if necessary
-            if (count > 0)
-            {
-                if (blink && !blinkTimer.Enabled) blinkTimer.Start();
-                warnsLabel.Image = Resources.Warning;
-            }
-            else
-            {
-                blinkTimer.Stop();
-                warnsLabel.Image = Resources.WarningOff;
-                warnsLabel.BackColor = SystemColors.Control;
-            }
+			// Update icon, start annoying blinking if necessary
+			if (count > 0)
+			{
+				if (blink && !blinkTimer.Enabled) blinkTimer.Start();
+				warnsLabel.Image = Resources.Warning;
+			}
+			else
+			{
+				blinkTimer.Stop();
+				warnsLabel.Image = Resources.WarningOff;
+				warnsLabel.BackColor = SystemColors.Control;
+			}
 
-            // Update errors count
-            warnsLabel.Text = count.ToString();
+			// Update errors count
+			warnsLabel.Text = count.ToString();
 		}
 
 		//mxd. Bliks warnings indicator
-		private void Blink() 
+		private void Blink()
 		{
 			warnsLabel.BackColor = (warnsLabel.BackColor == Color.Red ? SystemColors.Control : Color.Red);
 		}
 
 		//mxd
-		private void warnsLabel_Click(object sender, EventArgs e) 
+		private void warnsLabel_Click(object sender, EventArgs e)
 		{
 			ShowErrors();
 		}
 
 		//mxd
-		private void blinkTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e) 
+		private void blinkTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
 		{
-            if (!blinkTimer.Enabled) return;
-            try 
+			if (!blinkTimer.Enabled) return;
+			try
 			{
 				this.Invoke(new CallBlink(Blink));
-			} catch(ObjectDisposedException) { } //la-la-la. We don't care.
+			}
+			catch (ObjectDisposedException) { } //la-la-la. We don't care.
 		}
-		
+
 		#endregion
-		
+
 		#region ================== Processing
-		
+
 		// This is called from the background thread when images are loaded
 		// but only when first loaded or when dimensions were changed
 		internal void ImageDataLoaded(ImageData img)
 		{
 			// Image is used in the map?
-			if((img != null) && img.UsedInMap && !img.IsDisposed)
+			if ((img != null) && img.UsedInMap && !img.IsDisposed)
 			{
 				// Go for all setors
 				bool updated = false;
-				foreach(Sector s in General.Map.Map.Sectors)
+				foreach (Sector s in General.Map.Map.Sectors)
 				{
 					// Update floor buffer if needed
-					if(s.LongFloorTexture == img.LongName)
+					if (s.LongFloorTexture == img.LongName)
 					{
 						s.UpdateFloorSurface();
 						updated = true;
 					}
-					
+
 					// Update ceiling buffer if needed
-					if(s.LongCeilTexture == img.LongName)
+					if (s.LongCeilTexture == img.LongName)
 					{
 						s.UpdateCeilingSurface();
 						updated = true;
 					}
 				}
-				
+
 				// If we made updates, redraw the screen
-				if(updated) DelayedRedraw();
+				if (updated) DelayedRedraw();
 			}
 		}
 
@@ -3995,7 +4043,7 @@ namespace CodeImp.DoomBuilder.Windows
 			processingcount++;
 
 			// If not already enabled, enable processing now
-			if(!processor.Enabled)
+			if (!processor.Enabled)
 			{
 				processor.Enabled = true;
 				lastupdatetime = Clock.CurrentTime;
@@ -4006,10 +4054,10 @@ namespace CodeImp.DoomBuilder.Windows
 		{
 			// Increase count
 			processingcount--;
-			if(processingcount < 0) processingcount = 0;
-			
+			if (processingcount < 0) processingcount = 0;
+
 			// Turn off
-			if(processor.Enabled && (processingcount == 0))
+			if (processor.Enabled && (processingcount == 0))
 				processor.Enabled = false;
 		}
 
@@ -4019,7 +4067,7 @@ namespace CodeImp.DoomBuilder.Windows
 			processingcount = 0;
 			processor.Enabled = false;
 		}
-		
+
 		// Processor event
 		private void processor_Tick(object sender, EventArgs e)
 		{
@@ -4027,96 +4075,96 @@ namespace CodeImp.DoomBuilder.Windows
 			float deltatime = curtime - lastupdatetime;
 			lastupdatetime = curtime;
 
-            if ((General.Map != null) && (General.Editing.Mode != null))
-            {
-                // In exclusive mouse mode?
-                if (mouseinput != null)
-                {
-                    Vector2D deltamouse = mouseinput.Process();
-                    General.Plugins.OnEditMouseInput(deltamouse);
-                    General.Editing.Mode.OnMouseInput(deltamouse);
-                }
+			if ((General.Map != null) && (General.Editing.Mode != null))
+			{
+				// In exclusive mouse mode?
+				if (mouseinput != null)
+				{
+					Vector2D deltamouse = mouseinput.Process();
+					General.Plugins.OnEditMouseInput(deltamouse);
+					General.Editing.Mode.OnMouseInput(deltamouse);
+				}
 
-                // Process signal
-                General.Editing.Mode.OnProcess(deltatime);
-            }
-        }
+				// Process signal
+				General.Editing.Mode.OnProcess(deltatime);
+			}
+		}
 
 		#endregion
 
 		#region ================== Dockers
-		
+
 		// This adds a docker
 		public void AddDocker(Docker d)
 		{
-			if(dockerspanel.Contains(d)) return; //mxd
-			
+			if (dockerspanel.Contains(d)) return; //mxd
+
 			// Make sure the full name is set with the plugin name as prefix
 			Plugin plugin = General.Plugins.FindPluginByAssembly(Assembly.GetCallingAssembly());
 			d.MakeFullName(plugin.Name.ToLowerInvariant());
-			
+
 			dockerspanel.Add(d);
 		}
-		
+
 		// This removes a docker
 		public bool RemoveDocker(Docker d)
 		{
-			if(!dockerspanel.Contains(d)) return true; //mxd. Already removed/never added
-			
+			if (!dockerspanel.Contains(d)) return true; //mxd. Already removed/never added
+
 			// Make sure the full name is set with the plugin name as prefix
 			//Plugin plugin = General.Plugins.FindPluginByAssembly(Assembly.GetCallingAssembly());
 			//d.MakeFullName(plugin.Name.ToLowerInvariant());
-			
+
 			// We must release all keys because the focus may be stolen when
 			// this was the selected docker (the previous docker is automatically selected)
 			ReleaseAllKeys();
-			
+
 			return dockerspanel.Remove(d);
 		}
-		
+
 		// This selects a docker
 		public bool SelectDocker(Docker d)
 		{
-			if(!dockerspanel.Contains(d)) return false; //mxd
-			
+			if (!dockerspanel.Contains(d)) return false; //mxd
+
 			// Make sure the full name is set with the plugin name as prefix
 			Plugin plugin = General.Plugins.FindPluginByAssembly(Assembly.GetCallingAssembly());
 			d.MakeFullName(plugin.Name.ToLowerInvariant());
-			
+
 			// We must release all keys because the focus will be stolen
 			ReleaseAllKeys();
-			
+
 			return dockerspanel.SelectDocker(d);
 		}
-		
+
 		// This selects the previous selected docker
 		public void SelectPreviousDocker()
 		{
 			// We must release all keys because the focus will be stolen
 			ReleaseAllKeys();
-			
+
 			dockerspanel.SelectPrevious();
 		}
-		
+
 		// Mouse enters dockers window
 		private void dockerspanel_MouseContainerEnter(object sender, EventArgs e)
 		{
-			if(General.Settings.CollapseDockers)
+			if (General.Settings.CollapseDockers)
 				dockerscollapser.Start();
-			
+
 			dockerspanel.Expand();
 		}
-		
+
 		// Automatic collapsing
 		private void dockerscollapser_Tick(object sender, EventArgs e)
 		{
-			if(General.Settings.CollapseDockers)
+			if (General.Settings.CollapseDockers)
 			{
-				if(!dockerspanel.IsFocused)
+				if (!dockerspanel.IsFocused)
 				{
 					Point p = this.PointToClient(Cursor.Position);
 					Rectangle r = new Rectangle(dockerspanel.Location, dockerspanel.Size);
-					if(!r.IntersectsWith(new Rectangle(p, Size.Empty)))
+					if (!r.IntersectsWith(new Rectangle(p, Size.Empty)))
 					{
 						dockerspanel.Collapse();
 						dockerscollapser.Stop();
@@ -4128,19 +4176,19 @@ namespace CodeImp.DoomBuilder.Windows
 				dockerscollapser.Stop();
 			}
 		}
-		
+
 		// User resizes the docker
 		private void dockerspanel_UserResize(object sender, EventArgs e)
 		{
 			General.Settings.DockersWidth = dockerspanel.Width;
 
-			if(!General.Settings.CollapseDockers)
+			if (!General.Settings.CollapseDockers)
 			{
 				dockersspace.Width = dockerspanel.Width;
 				dockerspanel.Left = dockersspace.Left;
 			}
 		}
-		
+
 		#endregion
 
 		#region ================== Updater (mxd)
@@ -4148,12 +4196,12 @@ namespace CodeImp.DoomBuilder.Windows
 		private delegate void UpdateAvailableCallback(int remoterev, string changelog);
 		internal void UpdateAvailable(int remoterev, string changelog)
 		{
-			if(this.InvokeRequired)
+			if (this.InvokeRequired)
 			{
 				UpdateAvailableCallback d = UpdateAvailable;
 				this.Invoke(d, new object[] { remoterev, changelog });
-			} 
-			else 
+			}
+			else
 			{
 				// Show the window
 				UpdateForm form = new UpdateForm(remoterev, changelog);
@@ -4162,7 +4210,7 @@ namespace CodeImp.DoomBuilder.Windows
 				// Update ignored revision number
 				General.Settings.IgnoredRemoteRevision = (form.IgnoreThisUpdate ? remoterev : 0);
 
-				if(result == DialogResult.OK && General.AskSaveMap())
+				if (result == DialogResult.OK && General.AskSaveMap())
 				{
 					// Launch the updater
 					Process.Start(Path.Combine(General.AppPath, "Updater.exe"), "-rev " + remoterev);

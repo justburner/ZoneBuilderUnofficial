@@ -135,6 +135,9 @@ namespace CodeImp.DoomBuilder
 
 		public ViewMode ViewMode { get { return renderer2d.ViewMode; } }
 
+		//JBR - SRB2 2.2 / SRB2 Kart - Sector Flat Alignment
+		public bool NewFlatAlignment { get { return config.NewFlatAlignment; } }
+
 		#endregion
 
 		#region ================== Constructor / Disposer

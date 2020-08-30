@@ -161,6 +161,16 @@ markers in snippets will be replaced
 with newline characters, otherwise 
 they will be replaced with tabs/spaces.</value>
   </data>
+  <data name="label32.Text" xml:space="preserve">
+    <value>If checked, autosaving will force to apply or cancel any editing tool running, likely fustrating the user in the progress.
+When in volatile mode and unchecked, autosave will check each minute until it's no longer on that mode and save.
+
+Files with extension .KART won't be autosaved.</value>
+  </data>
+  <data name="autosaveforce.ToolTip" xml:space="preserve">
+    <value>If checked, autosaving will force to apply or cancel any editing tool running, likely fustrating the user in the progress.
+When in volatile mode and unchecked, autosave will check each minute until it's no longer on that mode and save.</value>
+  </data>
   <metadata name="browseScreenshotsFolderDialog.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>114, 17</value>
   </metadata>

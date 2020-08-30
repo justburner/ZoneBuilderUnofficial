@@ -27,39 +27,52 @@
 		<br>
 		This mode is volatile, which means that this mode returns to the previous stable mode when the map is saved or closed, either accepting or discarding your preview changes. You can access this mode through the <a href="e_things.html">Things Mode</a>.<br>
 
-		<h2>Creating Vertex Slopes</h2>
-		There's 2 ways to create vertex slopes, either by using a Triangle Group or 3x Vertex Groups.<br>
+		<h2>Creating Vertex Slope</h2>
+		There's 2 ways to create a vertex slope:<br>
+		• Triangle Group - using 3 vslope things with same tag<br>
+		• 3x Vertex Groups - vslope action with tag & offset flag<br>
 		Note: To create a new group the selected tag should not have an existing group!<br>
 
-		<h2>Creating Vertex Slopes with Triangle Group</h2>
+		<h2>Creating Vertex Slope with Triangle Group</h2>
 		Triangle groups allow to quickly create triangles with individual vertices.<br>
-		• Select a free unused tag in "Tag #" or clicking "New" next to "Tag #".<br>
+		• Select a free unused tag in "Tag #" or click "New" next to "Tag #".<br>
 		• If no shape exists on map use "Draw New Tagged Triangle" to create both shape and vertex slopes, otherwise use "New Triangle Group" and mark the corner points of the triangle geometry.<br>
 		• You can adjust heights of each individual vertex slope after the group has been created.<br>
-		• On map, right-click one of the linedef that form the triangle and apply the correct action.<br>
+		• On map, right-click over the linedef that will form the triangle and apply the correct action.<br>
 
-		<h2>Creating Vertex Slopes with 3 Vertex Groups</h2>
+		<h2>Creating Vertex Slope with 3 Vertex Groups</h2>
 		Vertex groups allows sharing vertex slopes between triangles to optimize resources.<br>
 		If no shape exists on map you can use "Draw New Empty Triangle" to quickly create a triangle shape.<br>
-		• Select a free unused tag in "Tag #" or clicking "New" next to "Tag #".<br>
+		• Select a free unused tag in "Tag #" or click "New" next to "Tag #".<br>
 		• If a corner of the triangle geometry doesn't have a vertex slope create one with "New Triangle Vertex".<br>
 		• Repeat those steps for each corner of the triangle.<br>
-		• On map, right-click one of the linedef that form the triangle and apply the correct action, you'll need to double-click on the list the other 2 groups that form the triangle.<br>
+		• On map, right-click over the linedef that will form the triangle and apply the correct action, you'll need to click on the list or map the other 2 vertex groups that will form the triangle.<br>
 
 		<h2>Managing Vertex Slopes</h2>
-		You can select a vertex slope group by left-clicking a group in the listbox, alternatively you can left-click a triangle group in the map (doesn't work on vertex groups).<br>
-		To manage the group you either can right-click in the listbox, use the toolstrip buttons or right-click on the map.<br>
+		You can select a vertex slope group by left-clicking a group in the groups list, alternatively you can left-click a triangle group in the map.<br>
+		To manage the group you either can right-click in the group list, use the toolstrip buttons or right-click on the map.<br>
 		Note: Different set of options are available depending if the selected tag have an existing group or not.<br>
+
+		<h2>Finding and zooming vertex slope on map</h2>
+		Double-click on the group in the groups list, map will pan and zoom into the selected group.<br>
+
+		<h2>Finding invalid vertex slopes</h2>
+		Invalid number of vertex slopes with same tag is highlighted in the group list as INVALID, to solve user can delete or remake the group.<br>
+		Linedef actions with invalid tags are also shown on the map (red by default) if "Show All Linedefs VSlopes" is checked, to solve user can remove or reassign new action by right-click over the invalid linedef.<br>
 
 		<h2>Dialog Settings</h2>
 		<table border="0" cellspacing="6" width="90%">
 		<tr>
-			<td width="150" valign="top"><b>Tag #</b></td>
-			<td>Tag number to be used for the vertex slope, should be between 1 to 65535.</td>
+			<td valign="top"><b>Starting at</b></td>
+			<td>Number to start searching for a unused tag, to search all possible tags set to 1.</td>
 		</tr>
 		<tr>
-			<td valign="top"><b>New <i>(next to Tag #)</i></b></td>
+			<td valign="top"><b>Find New</b></td>
 			<td>Find a new unused tag, that is, not being used by any sector or linedef.</td>
+		</tr>
+		<tr>
+			<td width="150" valign="top"><b>Tag #</b></td>
+			<td>Tag number to be used for the vertex slope, should be between 1 to 65535.</td>
 		</tr>
 		<tr>
 			<td valign="top"><b>Move Vertex Slopes...</b></td>
@@ -98,6 +111,15 @@
 			<td valign="top"><b>Adj. Heights</b></td>
 			<td>Adjust all heights together. Any negative value will be clipped to zero.</td>
 		</tr>
+		<tr>
+			<td valign="top"><b>Show All Linedefs VSlopes</b></td>
+			<td>Visual Only: Show all valid vertex slopes from linedef actions, additionally gives information of valid and invalid ones.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Show Height/Z Information</b></td>
+			<td>Visual Only: Show height or position Z information of selected group vertices.</td>
+		</tr>
+		
 		</table>
 
 		<h2>Vertex Slope Group options</h2>
@@ -169,6 +191,10 @@
 		<tr>
 			<td valign="top"><b>Ctrl+MWheel</b></td>
 			<td>Increase or decrease Tag #.</td>
+		</tr>
+		<tr>
+			<td valign="top"><b>Ctrl+LMB</b></td>
+			<td>Remake selected tag.</td>
 		</tr>
 		</table>
 	</p>

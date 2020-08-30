@@ -89,7 +89,8 @@ namespace CodeImp.DoomBuilder.Config
 		private readonly bool doomlightlevels;
 		private readonly string actionspecialhelp; //mxd
 		private readonly string thingclasshelp; //mxd
-		
+		private readonly bool newflatalignment; //JBR
+
 		// Skills
 		private readonly List<SkillInfo> skills;
         //Skins
@@ -288,7 +289,10 @@ namespace CodeImp.DoomBuilder.Config
 
 		//mxd
 		public GameType GameType { get { return gameType; } }
-		
+
+		//JBR: SRB2 2.2 / SRB2 Kart - Sector Flat Alignment
+		public bool NewFlatAlignment { get { return newflatalignment; } }
+
 		#endregion
 
 		#region ================== Constructor / Disposer
@@ -374,6 +378,7 @@ namespace CodeImp.DoomBuilder.Config
 			thingclasshelp = cfg.ReadSetting("thingclasshelp", string.Empty); //mxd
 			defaultLinedefActivation = cfg.ReadSetting("defaultlinedefactivation", ""); //mxd
 			for(int i = 0; i < Linedef.NUM_ARGS; i++) makedoorargs[i] = cfg.ReadSetting("makedoorarg" + i.ToString(CultureInfo.InvariantCulture), 0);
+			newflatalignment = cfg.ReadSetting("newflatalignment", true); //JBR
 
 			//mxd. Update map format flags
 			universalmapformat = (formatinterface == "UniversalMapSetIO");

@@ -4,12 +4,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Zone Builder")]
+[assembly: AssemblyTitle("Zone Builder Unofficial")]
 [assembly: AssemblyDescription("SRB2 map editor, forked from GZDoom Builder")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("CodeImp, MaxED, MascaraSnake, Justburner")]
-[assembly: AssemblyProduct("Zone Builder")]
-[assembly: AssemblyCopyright("Copyright © 2007, 2019")]
+[assembly: AssemblyProduct("Zone Builder Unofficial")]
+[assembly: AssemblyCopyright("Copyright © 2007, 2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -28,4 +28,4 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("2.10.0.2507")]
+[assembly: AssemblyVersion("2.11.0.2508")]

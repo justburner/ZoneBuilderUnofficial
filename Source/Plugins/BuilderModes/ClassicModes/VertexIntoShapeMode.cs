@@ -504,9 +504,9 @@ namespace CodeImp.DoomBuilder.BuilderModes
                         {
                             List<Vector2D> refcircle = GenerateShape(origin, 24, 0, 0, radiusX, radiusY, startangle, startangle + sweepangle);
                             for (int i = 1; i < refcircle.Count; i++)
-                                renderer.RenderLine(refcircle[i - 1], refcircle[i], LINE_THICKNESS, General.Colors.Grid, true);
-                            renderer.RenderLine(origin, shapevecs[0], LINE_THICKNESS, General.Colors.Grid, true);
-                            renderer.RenderLine(origin, shapevecs[shapevecs.Count - 1], LINE_THICKNESS, General.Colors.Grid, true);
+                                renderer.RenderLine(refcircle[i - 1], refcircle[i], LINE_THICKNESS, General.Colors.PreviewShape, true);
+                            renderer.RenderLine(origin, shapevecs[0], LINE_THICKNESS, General.Colors.PreviewShape, true);
+                            renderer.RenderLine(origin, shapevecs[shapevecs.Count - 1], LINE_THICKNESS, General.Colors.PreviewShape, true);
                         }
                     }
                 }
@@ -558,7 +558,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 
                     // Gray out origin if is to remove vertex
                     if (removevertices)
-                        renderer.RenderRectangleFilled(new RectangleF(origin.x - vsize, origin.y - vsize, vsize * 2.0f, vsize * 2.0f), General.Colors.Grid, true);
+                        renderer.RenderRectangleFilled(new RectangleF(origin.x - vsize, origin.y - vsize, vsize * 2.0f, vsize * 2.0f), General.Colors.PreviewShape, true);
                 }
 				renderer.Finish();
 			}

@@ -138,7 +138,12 @@ namespace CodeImp.DoomBuilder.Config
 		private int ignoredremoterevision;
         private bool drawscreenshotinfo;
         private bool compressscreenshots;
-		
+		private bool autosaveenable; //JBR
+		private int autosaveminutes; //JBR
+		private bool autosaveforce; //JBR
+		private bool showalllinedefvslopes; //JBR
+		private bool novisualstag0; //JBR
+
 		// These are not stored in the configuration, only used at runtime
 		private int defaultbrightness;
 		private int defaultfloorheight;
@@ -247,9 +252,14 @@ namespace CodeImp.DoomBuilder.Config
 		internal int IgnoredRemoteRevision { get { return ignoredremoterevision; } set { ignoredremoterevision = value; } } //mxd
         public bool DrawScreenshotInfo { get { return drawscreenshotinfo; } set { drawscreenshotinfo = value; } }
         public bool CompressScreenshots { get { return compressscreenshots; } set { compressscreenshots = value; } }
+		public bool AutosaveEnable { get { return autosaveenable; } set { autosaveenable = value; General.MainWindow.AutosaveSetup(value); } } //JBR
+		public int AutosaveMinutes { get { return autosaveminutes; } set { autosaveminutes = Math.Max(1, value); } } //JBR
+		public bool AutosaveForce { get { return autosaveforce; } set { autosaveforce = value; } } //JBR
+		public bool ShowAllLinedefVSlopes { get { return showalllinedefvslopes; } set { showalllinedefvslopes = value; } } //JBR
+		public bool NoVisualsTag0 { get { return novisualstag0; } set { novisualstag0 = value; } } //JBR
 
-        //mxd. Left here for compatibility reasons...
-        public string DefaultTexture { get { return General.Map != null ? General.Map.Options.DefaultWallTexture : "-"; } set { if(General.Map != null) General.Map.Options.DefaultWallTexture = value; } }
+		//mxd. Left here for compatibility reasons...
+		public string DefaultTexture { get { return General.Map != null ? General.Map.Options.DefaultWallTexture : "-"; } set { if(General.Map != null) General.Map.Options.DefaultWallTexture = value; } }
 		public string DefaultFloorTexture { get { return General.Map != null ? General.Map.Options.DefaultFloorTexture : "-"; } set { if(General.Map != null) General.Map.Options.DefaultFloorTexture = value; } }
 		public string DefaultCeilingTexture { get { return General.Map != null ? General.Map.Options.DefaultCeilingTexture : "-"; } set { if(General.Map != null) General.Map.Options.DefaultCeilingTexture = value; } }
 		public int DefaultBrightness { get { return defaultbrightness; } set { defaultbrightness = value; } }
@@ -378,8 +388,17 @@ namespace CodeImp.DoomBuilder.Config
                 drawscreenshotinfo = cfg.ReadSetting("drawscreenshotinfo", true);
                 compressscreenshots = cfg.ReadSetting("compressscreenshots", true);
 
-                //mxd. Sector defaults
-                defaultceilheight = cfg.ReadSetting("defaultceilheight", 128);
+				//JBR Autosaving
+				autosaveenable = cfg.ReadSetting("autosaveenable", false); //JBR
+				autosaveminutes = Math.Max(1, cfg.ReadSetting("autosaveminutes", 15)); //JBR
+				autosaveforce = cfg.ReadSetting("autosaveforce", false); //JBR
+
+				//JBR Extra settings
+				showalllinedefvslopes = cfg.ReadSetting("showalllinedefvslopes", true); //JBR
+				novisualstag0 = cfg.ReadSetting("novisualstag0", false); //JBR
+
+				//mxd. Sector defaults
+				defaultceilheight = cfg.ReadSetting("defaultceilheight", 128);
 				defaultfloorheight = cfg.ReadSetting("defaultfloorheight", 0);
 				defaultbrightness = cfg.ReadSetting("defaultbrightness", 192);
 				
@@ -496,7 +515,16 @@ namespace CodeImp.DoomBuilder.Config
             cfg.WriteSetting("defaultceilheight", defaultceilheight);
 			cfg.WriteSetting("defaultfloorheight", defaultfloorheight);
 			cfg.WriteSetting("defaultbrightness", defaultbrightness);
-			
+
+			//JBR Autosaving
+			cfg.WriteSetting("autosaveenable", autosaveenable);
+			cfg.WriteSetting("autosaveminutes", autosaveminutes);
+			cfg.WriteSetting("autosaveforce", autosaveforce);
+
+			//JBR Extra settings
+			cfg.WriteSetting("showalllinedefvslopes", showalllinedefvslopes);
+			cfg.WriteSetting("novisualstag0", novisualstag0);
+
 			// Save settings configuration
 			General.WriteLogLine("Saving program configuration to '" + filepathname + "'...");
 			cfg.SaveConfiguration(filepathname);

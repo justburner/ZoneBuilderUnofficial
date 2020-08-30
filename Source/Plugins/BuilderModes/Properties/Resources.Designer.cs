@@ -343,6 +343,16 @@ namespace CodeImp.DoomBuilder.BuilderModes.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap FlipLinedef {
+            get {
+                object obj = ResourceManager.GetObject("FlipLinedef", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap FlipSelectionH {
             get {
                 object obj = ResourceManager.GetObject("FlipSelectionH", resourceCulture);
@@ -356,6 +366,16 @@ namespace CodeImp.DoomBuilder.BuilderModes.Properties {
         internal static System.Drawing.Bitmap FlipSelectionV {
             get {
                 object obj = ResourceManager.GetObject("FlipSelectionV", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap FlipSidedefs {
+            get {
+                object obj = ResourceManager.GetObject("FlipSidedefs", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -563,6 +583,26 @@ namespace CodeImp.DoomBuilder.BuilderModes.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap SelectDoubleSide {
+            get {
+                object obj = ResourceManager.GetObject("SelectDoubleSide", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SelectSingleSide {
+            get {
+                object obj = ResourceManager.GetObject("SelectSingleSide", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap SelectThingsInSectors {
             get {
                 object obj = ResourceManager.GetObject("SelectThingsInSectors", resourceCulture);
@@ -626,6 +666,16 @@ namespace CodeImp.DoomBuilder.BuilderModes.Properties {
         internal static System.Drawing.Bitmap SingleVertex {
             get {
                 object obj = ResourceManager.GetObject("SingleVertex", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SplitLinedef {
+            get {
+                object obj = ResourceManager.GetObject("SplitLinedef", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

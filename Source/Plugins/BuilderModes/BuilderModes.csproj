@@ -756,6 +756,13 @@
   <ItemGroup>
     <None Include="Resources\VertexSlope.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\FlipLinedef.png" />
+    <Content Include="Resources\FlipSidedefs.png" />
+    <Content Include="Resources\SplitLinedef.png" />
+    <None Include="Resources\SelectSingleSide.png" />
+    <None Include="Resources\SelectDoubleSide.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

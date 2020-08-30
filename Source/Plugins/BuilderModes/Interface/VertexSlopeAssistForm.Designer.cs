@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-			System.Windows.Forms.Label label1;
+			this.components = new System.ComponentModel.Container();
 			System.Windows.Forms.Label label4;
 			System.Windows.Forms.Label label3;
 			System.Windows.Forms.Label label2;
@@ -36,6 +36,7 @@
 			System.Windows.Forms.Label label6;
 			System.Windows.Forms.Label label7;
 			System.Windows.Forms.Label label11;
+			System.Windows.Forms.Label label1;
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(VertexSlopeAssistForm));
 			this.labelVSlope3 = new System.Windows.Forms.Label();
 			this.labelVSlope2 = new System.Windows.Forms.Label();
@@ -54,8 +55,10 @@
 			this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
 			this.toolDrawNewTaggedTriangle = new System.Windows.Forms.ToolStripButton();
 			this.toolDrawNewEmptyTriangle = new System.Windows.Forms.ToolStripButton();
+			this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+			this.toolPanZoomMap = new System.Windows.Forms.ToolStripButton();
 			this.vslopegroups = new System.Windows.Forms.ListBox();
-			this.contextNewGroup = new System.Windows.Forms.ContextMenuStrip();
+			this.contextNewGroup = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.newTriangleGroup = new System.Windows.Forms.ToolStripMenuItem();
 			this.newVertexGroup = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
@@ -82,11 +85,14 @@
 			this.vslopeX1 = new CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox();
 			this.cancel = new System.Windows.Forms.Button();
 			this.newtag = new System.Windows.Forms.Button();
-			this.tagID = new CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox();
 			this.currentmode = new System.Windows.Forms.Label();
-			this.tooltip = new System.Windows.Forms.ToolTip();
+			this.tooltip = new System.Windows.Forms.ToolTip(this.components);
 			this.affinevslopes = new System.Windows.Forms.CheckBox();
-			this.contextExistingGroup = new System.Windows.Forms.ContextMenuStrip();
+			this.showHeightZ = new System.Windows.Forms.CheckBox();
+			this.showVSlopeActions = new System.Windows.Forms.CheckBox();
+			this.foundLDVSlopes = new System.Windows.Forms.Label();
+			this.label9 = new System.Windows.Forms.Label();
+			this.contextExistingGroup = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.remakeGroup = new System.Windows.Forms.ToolStripMenuItem();
 			this.remakeAsGroup = new System.Windows.Forms.ToolStripMenuItem();
 			this.remakeAsTriangleGroup = new System.Windows.Forms.ToolStripMenuItem();
@@ -97,15 +103,21 @@
 			this.deleteGroup = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem7 = new System.Windows.Forms.ToolStripSeparator();
 			this.drawNewEmptyTriangle2 = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
 			this.findNewUnusedTag = new System.Windows.Forms.ToolStripMenuItem();
-			this.contextVSlopeLinedef = new System.Windows.Forms.ContextMenuStrip();
+			this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
+			this.panZoomMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.contextVSlopeLinedef = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.setAction704Item = new System.Windows.Forms.ToolStripMenuItem();
 			this.setAction705Item = new System.Windows.Forms.ToolStripMenuItem();
 			this.setAction714Item = new System.Windows.Forms.ToolStripMenuItem();
 			this.setAction715Item = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
 			this.removeActionItem = new System.Windows.Forms.ToolStripMenuItem();
-			label1 = new System.Windows.Forms.Label();
+			this.contextSelectVertex = new System.Windows.Forms.ContextMenuStrip(this.components);
+			this.label8 = new System.Windows.Forms.Label();
+			this.newStartFrom = new CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox();
+			this.tagID = new CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox();
 			label4 = new System.Windows.Forms.Label();
 			label3 = new System.Windows.Forms.Label();
 			label2 = new System.Windows.Forms.Label();
@@ -113,6 +125,7 @@
 			label6 = new System.Windows.Forms.Label();
 			label7 = new System.Windows.Forms.Label();
 			label11 = new System.Windows.Forms.Label();
+			label1 = new System.Windows.Forms.Label();
 			this.groupBox1.SuspendLayout();
 			this.toolStripGroups.SuspendLayout();
 			this.contextNewGroup.SuspendLayout();
@@ -120,16 +133,6 @@
 			this.contextExistingGroup.SuspendLayout();
 			this.contextVSlopeLinedef.SuspendLayout();
 			this.SuspendLayout();
-			// 
-			// label1
-			// 
-			label1.AutoSize = true;
-			label1.Location = new System.Drawing.Point(30, 35);
-			label1.Name = "label1";
-			label1.Size = new System.Drawing.Size(39, 13);
-			label1.TabIndex = 1;
-			label1.Text = "Tag #:";
-			this.tooltip.SetToolTip(label1, "Tag number to be used for the vertex slope, should be between 1 to 65535.");
 			// 
 			// label4
 			// 
@@ -201,6 +204,16 @@
 			label11.Text = "Adj. Heights:";
 			this.tooltip.SetToolTip(label11, "Adjust all heights together. Any negative value will be clipped to zero.");
 			// 
+			// label1
+			// 
+			label1.AutoSize = true;
+			label1.Location = new System.Drawing.Point(234, 35);
+			label1.Name = "label1";
+			label1.Size = new System.Drawing.Size(39, 13);
+			label1.TabIndex = 1;
+			label1.Text = "Tag #:";
+			this.tooltip.SetToolTip(label1, "Tag number to be used for the vertex slope, should be between 1 to 65535.");
+			// 
 			// labelVSlope3
 			// 
 			this.labelVSlope3.AutoSize = true;
@@ -235,7 +248,7 @@
 			// 
 			this.apply.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.apply.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.apply.Location = new System.Drawing.Point(12, 535);
+			this.apply.Location = new System.Drawing.Point(12, 575);
 			this.apply.Name = "apply";
 			this.apply.Size = new System.Drawing.Size(70, 25);
 			this.apply.TabIndex = 8;
@@ -265,7 +278,9 @@
             this.toolDeleteGroup,
             this.toolStripSeparator3,
             this.toolDrawNewTaggedTriangle,
-            this.toolDrawNewEmptyTriangle});
+            this.toolDrawNewEmptyTriangle,
+            this.toolStripSeparator4,
+            this.toolPanZoomMap});
 			this.toolStripGroups.Location = new System.Drawing.Point(3, 16);
 			this.toolStripGroups.Name = "toolStripGroups";
 			this.toolStripGroups.Size = new System.Drawing.Size(334, 25);
@@ -383,6 +398,21 @@
 			this.toolDrawNewEmptyTriangle.Size = new System.Drawing.Size(23, 22);
 			this.toolDrawNewEmptyTriangle.ToolTipText = "DRAW EMPTY TRIANGLE\r\n\r\nDraw a new triangle shape with linedefs.";
 			this.toolDrawNewEmptyTriangle.Click += new System.EventHandler(this.drawNewEmptyTriangle_Click);
+			// 
+			// toolStripSeparator4
+			// 
+			this.toolStripSeparator4.Name = "toolStripSeparator4";
+			this.toolStripSeparator4.Size = new System.Drawing.Size(6, 25);
+			// 
+			// toolPanZoomMap
+			// 
+			this.toolPanZoomMap.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.toolPanZoomMap.Image = global::CodeImp.DoomBuilder.BuilderModes.Properties.Resources.Show;
+			this.toolPanZoomMap.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.toolPanZoomMap.Name = "toolPanZoomMap";
+			this.toolPanZoomMap.Size = new System.Drawing.Size(23, 22);
+			this.toolPanZoomMap.Text = "Pan and Zoom on map";
+			this.toolPanZoomMap.Click += new System.EventHandler(this.toolPanZoomMap_Click);
 			// 
 			// vslopegroups
 			// 
@@ -759,7 +789,7 @@
 			// 
 			this.cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.cancel.Location = new System.Drawing.Point(89, 535);
+			this.cancel.Location = new System.Drawing.Point(89, 575);
 			this.cancel.Name = "cancel";
 			this.cancel.Size = new System.Drawing.Size(70, 25);
 			this.cancel.TabIndex = 9;
@@ -769,32 +799,14 @@
 			// 
 			// newtag
 			// 
-			this.newtag.Location = new System.Drawing.Point(153, 30);
+			this.newtag.Location = new System.Drawing.Point(146, 30);
 			this.newtag.Name = "newtag";
-			this.newtag.Size = new System.Drawing.Size(48, 23);
+			this.newtag.Size = new System.Drawing.Size(80, 23);
 			this.newtag.TabIndex = 3;
-			this.newtag.Text = "New";
+			this.newtag.Text = "Find New";
 			this.tooltip.SetToolTip(this.newtag, "Find a new unused tag.");
 			this.newtag.UseVisualStyleBackColor = true;
 			this.newtag.Click += new System.EventHandler(this.newtag_Click);
-			// 
-			// tagID
-			// 
-			this.tagID.AllowDecimal = false;
-			this.tagID.AllowNegative = false;
-			this.tagID.AllowRelative = false;
-			this.tagID.ButtonStep = 1;
-			this.tagID.ButtonStepBig = 100F;
-			this.tagID.ButtonStepFloat = 1F;
-			this.tagID.ButtonStepSmall = 10F;
-			this.tagID.ButtonStepsUseModifierKeys = true;
-			this.tagID.ButtonStepsWrapAround = false;
-			this.tagID.Location = new System.Drawing.Point(75, 30);
-			this.tagID.Name = "tagID";
-			this.tagID.Size = new System.Drawing.Size(72, 24);
-			this.tagID.StepValues = null;
-			this.tagID.TabIndex = 2;
-			this.tagID.WhenTextChanged += new System.EventHandler(this.tagID_ValueChanged);
 			// 
 			// currentmode
 			// 
@@ -826,6 +838,54 @@
 			this.tooltip.SetToolTip(this.affinevslopes, resources.GetString("affinevslopes.ToolTip"));
 			this.affinevslopes.UseVisualStyleBackColor = true;
 			// 
+			// showHeightZ
+			// 
+			this.showHeightZ.AutoSize = true;
+			this.showHeightZ.Checked = true;
+			this.showHeightZ.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.showHeightZ.Location = new System.Drawing.Point(197, 576);
+			this.showHeightZ.Name = "showHeightZ";
+			this.showHeightZ.Size = new System.Drawing.Size(154, 17);
+			this.showHeightZ.TabIndex = 10;
+			this.showHeightZ.Text = "Show Height/Z Information";
+			this.tooltip.SetToolTip(this.showHeightZ, "Show height or position Z information of selected group vertices.\r\n(Visual Only)");
+			this.showHeightZ.UseVisualStyleBackColor = true;
+			this.showHeightZ.CheckedChanged += new System.EventHandler(this.vslope_ValueChanged);
+			// 
+			// showVSlopeActions
+			// 
+			this.showVSlopeActions.AutoSize = true;
+			this.showVSlopeActions.Checked = true;
+			this.showVSlopeActions.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.showVSlopeActions.Location = new System.Drawing.Point(197, 553);
+			this.showVSlopeActions.Name = "showVSlopeActions";
+			this.showVSlopeActions.Size = new System.Drawing.Size(152, 17);
+			this.showVSlopeActions.TabIndex = 11;
+			this.showVSlopeActions.Text = "Show All Linedefs VSlopes";
+			this.tooltip.SetToolTip(this.showVSlopeActions, "Show all valid vertex slopes from linedef actions, additionally gives information" +
+        " of valid and invalid ones.\r\n(Visual Only)");
+			this.showVSlopeActions.UseVisualStyleBackColor = true;
+			this.showVSlopeActions.CheckedChanged += new System.EventHandler(this.showVSlopeActions_CheckedChanged);
+			// 
+			// foundLDVSlopes
+			// 
+			this.foundLDVSlopes.Location = new System.Drawing.Point(12, 534);
+			this.foundLDVSlopes.Name = "foundLDVSlopes";
+			this.foundLDVSlopes.Size = new System.Drawing.Size(170, 32);
+			this.foundLDVSlopes.TabIndex = 12;
+			this.foundLDVSlopes.Text = "0 Valid\r\n0 Invalid";
+			this.tooltip.SetToolTip(this.foundLDVSlopes, "Show number of valid (and invalid) linedef action vertex slopes.");
+			// 
+			// label9
+			// 
+			this.label9.AutoSize = true;
+			this.label9.Location = new System.Drawing.Point(12, 35);
+			this.label9.Name = "label9";
+			this.label9.Size = new System.Drawing.Size(55, 13);
+			this.label9.TabIndex = 14;
+			this.label9.Text = "Starting at";
+			this.tooltip.SetToolTip(this.label9, "Specified value to start finding a new unused tag.");
+			// 
 			// contextExistingGroup
 			// 
 			this.contextExistingGroup.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -837,9 +897,12 @@
             this.deleteGroup,
             this.toolStripMenuItem7,
             this.drawNewEmptyTriangle2,
-            this.findNewUnusedTag});
+            this.toolStripSeparator5,
+            this.findNewUnusedTag,
+            this.toolStripSeparator6,
+            this.panZoomMapToolStripMenuItem});
 			this.contextExistingGroup.Name = "contextExistingGroup";
-			this.contextExistingGroup.Size = new System.Drawing.Size(212, 154);
+			this.contextExistingGroup.Size = new System.Drawing.Size(212, 188);
 			// 
 			// remakeGroup
 			// 
@@ -927,6 +990,11 @@
 			this.drawNewEmptyTriangle2.ToolTipText = "Draw a new triangle shape with linedefs.";
 			this.drawNewEmptyTriangle2.Click += new System.EventHandler(this.drawNewEmptyTriangle_Click);
 			// 
+			// toolStripSeparator5
+			// 
+			this.toolStripSeparator5.Name = "toolStripSeparator5";
+			this.toolStripSeparator5.Size = new System.Drawing.Size(208, 6);
+			// 
 			// findNewUnusedTag
 			// 
 			this.findNewUnusedTag.Image = global::CodeImp.DoomBuilder.BuilderModes.Properties.Resources.Search;
@@ -934,6 +1002,19 @@
 			this.findNewUnusedTag.Size = new System.Drawing.Size(211, 22);
 			this.findNewUnusedTag.Text = "Find New Unused Tag";
 			this.findNewUnusedTag.Click += new System.EventHandler(this.newtag_Click);
+			// 
+			// toolStripSeparator6
+			// 
+			this.toolStripSeparator6.Name = "toolStripSeparator6";
+			this.toolStripSeparator6.Size = new System.Drawing.Size(208, 6);
+			// 
+			// panZoomMapToolStripMenuItem
+			// 
+			this.panZoomMapToolStripMenuItem.Image = global::CodeImp.DoomBuilder.BuilderModes.Properties.Resources.Show;
+			this.panZoomMapToolStripMenuItem.Name = "panZoomMapToolStripMenuItem";
+			this.panZoomMapToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
+			this.panZoomMapToolStripMenuItem.Text = "Pan and Zoom on map";
+			this.panZoomMapToolStripMenuItem.Click += new System.EventHandler(this.toolPanZoomMap_Click);
 			// 
 			// contextVSlopeLinedef
 			// 
@@ -945,14 +1026,14 @@
             this.toolStripMenuItem2,
             this.removeActionItem});
 			this.contextVSlopeLinedef.Name = "contextVSlopeLinedef";
-			this.contextVSlopeLinedef.Size = new System.Drawing.Size(286, 120);
+			this.contextVSlopeLinedef.Size = new System.Drawing.Size(279, 120);
 			this.contextVSlopeLinedef.Closed += new System.Windows.Forms.ToolStripDropDownClosedEventHandler(this.contextVSlopeLinedef_Closed);
 			// 
 			// setAction704Item
 			// 
 			this.setAction704Item.Image = global::CodeImp.DoomBuilder.BuilderModes.Properties.Resources.VertexSlope;
 			this.setAction704Item.Name = "setAction704Item";
-			this.setAction704Item.Size = new System.Drawing.Size(285, 22);
+			this.setAction704Item.Size = new System.Drawing.Size(278, 22);
 			this.setAction704Item.Text = "Set Vertex Slope Frontside Floor (704)";
 			this.setAction704Item.Click += new System.EventHandler(this.setAction704Item_Click);
 			// 
@@ -960,7 +1041,7 @@
 			// 
 			this.setAction705Item.Image = global::CodeImp.DoomBuilder.BuilderModes.Properties.Resources.VertexSlope;
 			this.setAction705Item.Name = "setAction705Item";
-			this.setAction705Item.Size = new System.Drawing.Size(285, 22);
+			this.setAction705Item.Size = new System.Drawing.Size(278, 22);
 			this.setAction705Item.Text = "Set Vertex Slope Frontside Ceiling (705)";
 			this.setAction705Item.Click += new System.EventHandler(this.setAction705Item_Click);
 			// 
@@ -968,7 +1049,7 @@
 			// 
 			this.setAction714Item.Image = global::CodeImp.DoomBuilder.BuilderModes.Properties.Resources.VertexSlope;
 			this.setAction714Item.Name = "setAction714Item";
-			this.setAction714Item.Size = new System.Drawing.Size(285, 22);
+			this.setAction714Item.Size = new System.Drawing.Size(278, 22);
 			this.setAction714Item.Text = "Set Vertex Slope Backside Floor (714)";
 			this.setAction714Item.Click += new System.EventHandler(this.setAction714Item_Click);
 			// 
@@ -976,22 +1057,72 @@
 			// 
 			this.setAction715Item.Image = global::CodeImp.DoomBuilder.BuilderModes.Properties.Resources.VertexSlope;
 			this.setAction715Item.Name = "setAction715Item";
-			this.setAction715Item.Size = new System.Drawing.Size(285, 22);
+			this.setAction715Item.Size = new System.Drawing.Size(278, 22);
 			this.setAction715Item.Text = "Set Vertex Slope Backside Ceiling (715)";
 			this.setAction715Item.Click += new System.EventHandler(this.setAction715Item_Click);
 			// 
 			// toolStripMenuItem2
 			// 
 			this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-			this.toolStripMenuItem2.Size = new System.Drawing.Size(282, 6);
+			this.toolStripMenuItem2.Size = new System.Drawing.Size(275, 6);
 			// 
 			// removeActionItem
 			// 
 			this.removeActionItem.Image = global::CodeImp.DoomBuilder.BuilderModes.Properties.Resources.Close;
 			this.removeActionItem.Name = "removeActionItem";
-			this.removeActionItem.Size = new System.Drawing.Size(285, 22);
-			this.removeActionItem.Text = "Remove Action and Tag on Vertex Slope";
+			this.removeActionItem.Size = new System.Drawing.Size(278, 22);
+			this.removeActionItem.Text = "Remove Action and Tag on Linedef";
 			this.removeActionItem.Click += new System.EventHandler(this.removeActionItem_Click);
+			// 
+			// contextSelectVertex
+			// 
+			this.contextSelectVertex.Name = "contextSelectVertex";
+			this.contextSelectVertex.Size = new System.Drawing.Size(61, 4);
+			// 
+			// label8
+			// 
+			this.label8.AutoSize = true;
+			this.label8.Location = new System.Drawing.Point(197, 534);
+			this.label8.Name = "label8";
+			this.label8.Size = new System.Drawing.Size(128, 13);
+			this.label8.TabIndex = 13;
+			this.label8.Text = "Visuals only / Information:";
+			// 
+			// newStartFrom
+			// 
+			this.newStartFrom.AllowDecimal = false;
+			this.newStartFrom.AllowNegative = false;
+			this.newStartFrom.AllowRelative = false;
+			this.newStartFrom.ButtonStep = 1;
+			this.newStartFrom.ButtonStepBig = 256F;
+			this.newStartFrom.ButtonStepFloat = 1F;
+			this.newStartFrom.ButtonStepSmall = 16F;
+			this.newStartFrom.ButtonStepsUseModifierKeys = true;
+			this.newStartFrom.ButtonStepsWrapAround = false;
+			this.newStartFrom.Location = new System.Drawing.Point(68, 30);
+			this.newStartFrom.Name = "newStartFrom";
+			this.newStartFrom.Size = new System.Drawing.Size(72, 24);
+			this.newStartFrom.StepValues = null;
+			this.newStartFrom.TabIndex = 27;
+			this.newStartFrom.WhenTextChanged += new System.EventHandler(this.newStartFrom_WhenTextChanged);
+			// 
+			// tagID
+			// 
+			this.tagID.AllowDecimal = false;
+			this.tagID.AllowNegative = false;
+			this.tagID.AllowRelative = false;
+			this.tagID.ButtonStep = 1;
+			this.tagID.ButtonStepBig = 100F;
+			this.tagID.ButtonStepFloat = 1F;
+			this.tagID.ButtonStepSmall = 10F;
+			this.tagID.ButtonStepsUseModifierKeys = true;
+			this.tagID.ButtonStepsWrapAround = false;
+			this.tagID.Location = new System.Drawing.Point(279, 30);
+			this.tagID.Name = "tagID";
+			this.tagID.Size = new System.Drawing.Size(72, 24);
+			this.tagID.StepValues = null;
+			this.tagID.TabIndex = 2;
+			this.tagID.WhenTextChanged += new System.EventHandler(this.tagID_ValueChanged);
 			// 
 			// VertexSlopeAssistForm
 			// 
@@ -999,7 +1130,13 @@
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
 			this.CancelButton = this.cancel;
-			this.ClientSize = new System.Drawing.Size(364, 572);
+			this.ClientSize = new System.Drawing.Size(364, 612);
+			this.Controls.Add(this.newStartFrom);
+			this.Controls.Add(this.label9);
+			this.Controls.Add(this.label8);
+			this.Controls.Add(this.foundLDVSlopes);
+			this.Controls.Add(this.showVSlopeActions);
+			this.Controls.Add(this.showHeightZ);
 			this.Controls.Add(this.affinevslopes);
 			this.Controls.Add(this.currentmode);
 			this.Controls.Add(this.tagID);
@@ -1042,7 +1179,6 @@
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Button cancel;
         private System.Windows.Forms.Button newtag;
-        private Controls.ButtonsNumericTextbox tagID;
         private Controls.ButtonsNumericTextbox vslopeX1;
         private Controls.ButtonsNumericTextbox vslopeZ1;
         private Controls.ButtonsNumericTextbox vslopeY1;
@@ -1104,5 +1240,18 @@
         private System.Windows.Forms.ToolStripMenuItem drawNewEmptyTriangle;
         private System.Windows.Forms.ToolStripMenuItem drawNewEmptyTriangle2;
         private System.Windows.Forms.ToolStripMenuItem findNewUnusedTag;
+        private System.Windows.Forms.ContextMenuStrip contextSelectVertex;
+        private System.Windows.Forms.CheckBox showHeightZ;
+        private System.Windows.Forms.CheckBox showVSlopeActions;
+        private System.Windows.Forms.Label foundLDVSlopes;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label label9;
+        private Controls.ButtonsNumericTextbox newStartFrom;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+        private System.Windows.Forms.ToolStripButton toolPanZoomMap;
+        private Controls.ButtonsNumericTextbox tagID;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
+        private System.Windows.Forms.ToolStripMenuItem panZoomMapToolStripMenuItem;
     }
 }

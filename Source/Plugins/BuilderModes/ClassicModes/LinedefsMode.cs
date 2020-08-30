@@ -339,6 +339,8 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			if(General.Map.UDMF) General.Interface.AddButton(BuilderPlug.Me.MenusForm.TextureOffsetLock, ToolbarSection.Geometry); //mxd
 
 			General.Interface.AddButton(BuilderPlug.Me.MenusForm.PlaceThings); //JBR
+			General.Interface.AddButton(BuilderPlug.Me.MenusForm.FlipLinedefsButton); //JBR
+			General.Interface.AddButton(BuilderPlug.Me.MenusForm.FlipSidedefsButton); //JBR
 			General.Interface.AddButton(BuilderPlug.Me.MenusForm.PerpendicularVertex); //JBR
 			General.Interface.AddButton(BuilderPlug.Me.MenusForm.PerpendicularLinedef); //JBR
 			General.Interface.AddButton(BuilderPlug.Me.MenusForm.ParallelLinedef); //JBR
@@ -372,6 +374,8 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			if(General.Map.UDMF) General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.TextureOffsetLock); //mxd
 
 			General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.PlaceThings); //JBR
+			General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.FlipLinedefsButton); //JBR
+			General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.FlipSidedefsButton); //JBR
 			General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.PerpendicularVertex); //JBR
 			General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.PerpendicularLinedef); //JBR
 			General.Interface.RemoveButton(BuilderPlug.Me.MenusForm.ParallelLinedef); //JBR

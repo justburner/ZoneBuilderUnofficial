@@ -151,7 +151,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
             // Determine if we should repeat the middle texture
             bool srb2repeat = General.Map.SRB2 && Sidedef.Line.IsFlagSet(General.Map.Config.RepeatMidtextureFlag);
             bool doomrepeat = !General.Map.SRB2 && Sidedef.IsFlagSet("wrapmidtex") || Sidedef.Line.IsFlagSet("wrapmidtex");
-            bool repeatmidtex = srb2repeat || doomrepeat;
+            repeatmidtex = srb2repeat || doomrepeat; //JBR was declared as local bool when there's a global bool that never got assigned, it was a mistake?
 
             //A little redundant, but having a separate boolean value for each case makes the code a little more readable
             bool srb2repeatfixed = srb2repeat && Sidedef.OffsetX >= 4096;

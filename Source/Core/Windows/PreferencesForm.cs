@@ -43,7 +43,7 @@ namespace CodeImp.DoomBuilder.Windows
 		private readonly List<int> actionListItemsGroupIndices; //mxd
 
 		private bool reloadresources;
-		
+
 		#endregion
 
 		#region ================== Properties
@@ -59,12 +59,12 @@ namespace CodeImp.DoomBuilder.Windows
 		{
 			// Initialize
 			InitializeComponent();
-			
+
 			// Interface
 			imagebrightness.Value = General.Settings.ImageBrightness;
 			doublesidedalpha.Value = General.Clamp((int)((1.0f - General.Settings.DoubleSidedAlpha) * 10.0f), doublesidedalpha.Minimum, doublesidedalpha.Maximum);
-            nightscircleprecision.Value = General.Clamp((int)(General.Settings.NiGHTSCirclePrecision)/10, nightscircleprecision.Minimum, nightscircleprecision.Maximum);
-            defaultviewmode.SelectedIndex = General.Settings.DefaultViewMode;
+			nightscircleprecision.Value = General.Clamp((int)(General.Settings.NiGHTSCirclePrecision) / 10, nightscircleprecision.Minimum, nightscircleprecision.Maximum);
+			defaultviewmode.SelectedIndex = General.Settings.DefaultViewMode;
 			fieldofview.Value = General.Clamp(General.Settings.VisualFOV / 10, fieldofview.Minimum, fieldofview.Maximum);
 			mousespeed.Value = General.Clamp(General.Settings.MouseSpeed / 100, mousespeed.Minimum, mousespeed.Maximum);
 			movespeed.Value = General.Clamp(General.Settings.MoveSpeed / 100, movespeed.Minimum, movespeed.Maximum);
@@ -91,7 +91,7 @@ namespace CodeImp.DoomBuilder.Windows
 			//mxd
 			locatetexturegroup.Checked = General.Settings.LocateTextureGroup;
 			cbStoreEditTab.Checked = General.Settings.StoreSelectedEditTab;
-            checkforupdates.Checked = General.Settings.CheckForUpdates;
+			checkforupdates.Checked = General.Settings.CheckForUpdates;
 			toolbar_gzdoom.Checked = General.Settings.GZToolbarGZDoom;
 			cbSynchCameras.Checked = General.Settings.GZSynchCameras;
 			tbDynLightCount.Value = General.Clamp(General.Settings.GZMaxDynamicLights, tbDynLightCount.Minimum, tbDynLightCount.Maximum);
@@ -105,58 +105,67 @@ namespace CodeImp.DoomBuilder.Windows
 			vertexScale.Value = General.Clamp((int)(General.Settings.GZVertexScale2D), vertexScale.Minimum, vertexScale.Maximum);
 			vertexScaleLabel.Text = vertexScale.Value * 100 + "%" + (vertexScale.Value == 1 ? " (default)" : "");
 			cbMarkExtraFloors.Checked = General.Settings.GZMarkExtraFloors;
-            cbDrawCrosshair.Checked = General.Settings.DrawCrosshair;
-            cbDrawFullCrosshair.Checked = General.Settings.DrawFullCrosshair;
-            cbDrawThingsFixedSize.Checked = General.Settings.DrawThingsFixedSize;
-            tbDefaultThingSize.Value = General.Clamp((int)General.Settings.DefaultThingSize, tbDefaultThingSize.Minimum, tbDefaultThingSize.Maximum);
-            labelDefaultThingSize.Text = ((int)General.Settings.DefaultThingSize).ToString();
-            recentFiles.Value = General.Settings.MaxRecentFiles;
-            maxBackups.Value = General.Settings.MaxBackups;
-            screenshotsfolderpath.Text = General.Settings.ScreenshotsPath;
-			if(Directory.Exists(General.Settings.ScreenshotsPath))
+			cbDrawCrosshair.Checked = General.Settings.DrawCrosshair;
+			cbDrawFullCrosshair.Checked = General.Settings.DrawFullCrosshair;
+			cbDrawThingsFixedSize.Checked = General.Settings.DrawThingsFixedSize;
+			tbDefaultThingSize.Value = General.Clamp((int)General.Settings.DefaultThingSize, tbDefaultThingSize.Minimum, tbDefaultThingSize.Maximum);
+			labelDefaultThingSize.Text = ((int)General.Settings.DefaultThingSize).ToString();
+			recentFiles.Value = General.Settings.MaxRecentFiles;
+			maxBackups.Value = General.Settings.MaxBackups;
+			screenshotsfolderpath.Text = General.Settings.ScreenshotsPath;
+			if (Directory.Exists(General.Settings.ScreenshotsPath))
 				browseScreenshotsFolderDialog.SelectedPath = General.Settings.ScreenshotsPath;
 
-            //mxd. Script editor
-            scriptfontbold.Checked = General.Settings.ScriptFontBold;
-            scriptontop.Checked = General.Settings.ScriptOnTop;
-            scriptusetabs.Checked = General.Settings.ScriptUseTabs;
-            scripttabwidth.Text = General.Settings.ScriptTabWidth.ToString();
-            scriptautoindent.Checked = General.Settings.ScriptAutoIndent;
-            scriptallmanstyle.Checked = General.Settings.ScriptAllmanStyle; //mxd
-            scriptautoclosebrackets.Checked = General.Settings.ScriptAutoCloseBrackets; //mxd
-            scriptshowfolding.Checked = General.Settings.ScriptShowFolding; //mxd
-            scriptshowlinenumbers.Checked = General.Settings.ScriptShowLineNumbers; //mxd
-            scriptautoshowautocompletion.Checked = General.Settings.ScriptAutoShowAutocompletion; //mxd
+			//mxd. Script editor
+			scriptfontbold.Checked = General.Settings.ScriptFontBold;
+			scriptontop.Checked = General.Settings.ScriptOnTop;
+			scriptusetabs.Checked = General.Settings.ScriptUseTabs;
+			scripttabwidth.Text = General.Settings.ScriptTabWidth.ToString();
+			scriptautoindent.Checked = General.Settings.ScriptAutoIndent;
+			scriptallmanstyle.Checked = General.Settings.ScriptAllmanStyle; //mxd
+			scriptautoclosebrackets.Checked = General.Settings.ScriptAutoCloseBrackets; //mxd
+			scriptshowfolding.Checked = General.Settings.ScriptShowFolding; //mxd
+			scriptshowlinenumbers.Checked = General.Settings.ScriptShowLineNumbers; //mxd
+			scriptautoshowautocompletion.Checked = General.Settings.ScriptAutoShowAutocompletion; //mxd
 
-            // Fill script fonts list
-            scriptfontname.BeginUpdate();
-            foreach (FontFamily ff in FontFamily.Families)
+			//JBR Autosave
+			autosaveenable.Checked = General.Settings.AutosaveEnable;
+			autosaveminutes.Text = General.Settings.AutosaveMinutes.ToString();
+			autosaveforce.Checked = General.Settings.AutosaveForce;
+
+			//JBR Extra settings
+			cbShowAllLinedefVSlopes.Checked = General.Settings.ShowAllLinedefVSlopes;
+			cbNoVisualsTag0.Checked = General.Settings.NoVisualsTag0;
+
+			// Fill script fonts list
+			scriptfontname.BeginUpdate();
+			foreach (FontFamily ff in FontFamily.Families)
 				scriptfontname.Items.Add(ff.Name);
 			scriptfontname.EndUpdate();
-			
+
 			// Select script font name
-			for(int i = 0; i < scriptfontname.Items.Count; i++)
+			for (int i = 0; i < scriptfontname.Items.Count; i++)
 			{
-				if(string.Compare(scriptfontname.Items[i].ToString(), General.Settings.ScriptFontName, true) == 0)
+				if (string.Compare(scriptfontname.Items[i].ToString(), General.Settings.ScriptFontName, true) == 0)
 					scriptfontname.SelectedIndex = i;
 			}
 
 			// Select script font size
-			for(int i = 0; i < scriptfontsize.Items.Count; i++)
+			for (int i = 0; i < scriptfontsize.Items.Count; i++)
 			{
-				if(string.Compare(scriptfontsize.Items[i].ToString(), General.Settings.ScriptFontSize.ToString(CultureInfo.InvariantCulture), true) == 0)
+				if (string.Compare(scriptfontsize.Items[i].ToString(), General.Settings.ScriptFontSize.ToString(CultureInfo.InvariantCulture), true) == 0)
 					scriptfontsize.SelectedIndex = i;
 			}
-			
+
 			// Fill actions list with categories
-			foreach(KeyValuePair<string, string> c in General.Actions.Categories)
+			foreach (KeyValuePair<string, string> c in General.Actions.Categories)
 				listactions.Groups.Add(c.Key, c.Value);
-			
+
 			// Fill list of actions
 			Action[] actions = General.Actions.GetAllActions();
 			actionListItems = new List<ListViewItem>(); //mxd
 			actionListItemsGroupIndices = new List<int>(); //mxd
-			foreach(Action a in actions)
+			foreach (Action a in actions)
 			{
 				// Create item
 				ListViewItem item = listactions.Items.Add(a.Name, a.Title, 0);
@@ -164,13 +173,13 @@ namespace CodeImp.DoomBuilder.Windows
 				item.SubItems[1].Tag = a.ShortcutKey;
 
 				// Put in category, if the category exists
-				if(General.Actions.Categories.ContainsKey(a.Category)) 
+				if (General.Actions.Categories.ContainsKey(a.Category))
 				{
 					item.Group = listactions.Groups[a.Category];
 					actionListItemsGroupIndices.Add(listactions.Groups.IndexOf(item.Group));
 				}
 				else //mxd
-				{ 
+				{
 					actionListItemsGroupIndices.Add(-1);
 				}
 
@@ -193,54 +202,58 @@ namespace CodeImp.DoomBuilder.Windows
 			colorInfo.Color = General.Colors.InfoLine;
 			color3dFloors.Color = General.Colors.ThreeDFloor;
 
-            // Script editor colors
-            colorscriptbackground.Color = General.Colors.ScriptBackground;
+			// Script editor colors
+			colorscriptbackground.Color = General.Colors.ScriptBackground;
 			colorlinenumbers.Color = General.Colors.LineNumbers;
 			colorplaintext.Color = General.Colors.PlainText;
 			colorcomments.Color = General.Colors.Comments;
 			colorkeywords.Color = General.Colors.Keywords;
-            colorproperties.Color = General.Colors.Properties; //mxd
-            colorliterals.Color = General.Colors.Literals;
+			colorproperties.Color = General.Colors.Properties; //mxd
+			colorliterals.Color = General.Colors.Literals;
 			colorconstants.Color = General.Colors.Constants;
-            colorstrings.Color = General.Colors.Strings; //mxd
-            colorincludes.Color = General.Colors.Includes; //mxd
-            colorselectionfore.Color = General.Colors.ScriptSelectionForeColor; //mxd
-            colorselectionback.Color = General.Colors.ScriptSelectionBackColor; //mxd
-            colorindicator.Color = General.Colors.ScriptIndicator; //mxd
-            colorbrace.Color = General.Colors.ScriptBraceHighlight; //mxd
-            colorbracebad.Color = General.Colors.ScriptBadBraceHighlight; //mxd
-            colorwhitespace.Color = General.Colors.ScriptWhitespace; //mxd
-            colorfoldfore.Color = General.Colors.ScriptFoldForeColor; //mxd
-            colorfoldback.Color = General.Colors.ScriptFoldBackColor; //mxd
+			colorstrings.Color = General.Colors.Strings; //mxd
+			colorincludes.Color = General.Colors.Includes; //mxd
+			colorselectionfore.Color = General.Colors.ScriptSelectionForeColor; //mxd
+			colorselectionback.Color = General.Colors.ScriptSelectionBackColor; //mxd
+			colorindicator.Color = General.Colors.ScriptIndicator; //mxd
+			colorbrace.Color = General.Colors.ScriptBraceHighlight; //mxd
+			colorbracebad.Color = General.Colors.ScriptBadBraceHighlight; //mxd
+			colorwhitespace.Color = General.Colors.ScriptWhitespace; //mxd
+			colorfoldfore.Color = General.Colors.ScriptFoldForeColor; //mxd
+			colorfoldback.Color = General.Colors.ScriptFoldBackColor; //mxd
+			colorPreviewShape.Color = General.Colors.PreviewShape; //JBR
+			colorInvalidSelect.Color = General.Colors.InvalidSelect; //JBR
+			colorPreviewLinedef.Color = General.Colors.PreviewLinedef; //JBR
+			colorInvalidLinedef.Color = General.Colors.InvalidLinedef; //JBR
 
-            //mxd. Select "Current colors" preset
-            scriptcolorpresets.SelectedIndex = 0;
+			//mxd. Select "Current colors" preset
+			scriptcolorpresets.SelectedIndex = 0;
 
-            blackbrowsers.Checked = General.Settings.BlackBrowsers;
+			blackbrowsers.Checked = General.Settings.BlackBrowsers;
 			capitalizetexturenames.Checked = General.Settings.CapitalizeTextureNames; //mxd
 			classicbilinear.Checked = General.Settings.ClassicBilinear;
 			visualbilinear.Checked = General.Settings.VisualBilinear;
 			qualitydisplay.Checked = General.Settings.QualityDisplay;
 
-            nightscolormare1.Color = General.Colors.GetNiGHTSColor(0);
-            nightscolormare2.Color = General.Colors.GetNiGHTSColor(1);
-            nightscolormare3.Color = General.Colors.GetNiGHTSColor(2);
-            nightscolormare4.Color = General.Colors.GetNiGHTSColor(3);
-            nightscolormare5.Color = General.Colors.GetNiGHTSColor(4);
-            nightscolormare6.Color = General.Colors.GetNiGHTSColor(5);
-            nightscolormare7.Color = General.Colors.GetNiGHTSColor(6);
-            nightscolormare8.Color = General.Colors.GetNiGHTSColor(7);
+			nightscolormare1.Color = General.Colors.GetNiGHTSColor(0);
+			nightscolormare2.Color = General.Colors.GetNiGHTSColor(1);
+			nightscolormare3.Color = General.Colors.GetNiGHTSColor(2);
+			nightscolormare4.Color = General.Colors.GetNiGHTSColor(3);
+			nightscolormare5.Color = General.Colors.GetNiGHTSColor(4);
+			nightscolormare6.Color = General.Colors.GetNiGHTSColor(5);
+			nightscolormare7.Color = General.Colors.GetNiGHTSColor(6);
+			nightscolormare8.Color = General.Colors.GetNiGHTSColor(7);
 
-            // Paste options
-            pasteoptions.Setup(General.Settings.PasteOptions.Copy());
+			// Paste options
+			pasteoptions.Setup(General.Settings.PasteOptions.Copy());
 
 			// Allow plugins to add tabs
 			this.SuspendLayout();
-            controller = new PreferencesController(this) { AllowAddTab = true };
-            General.Plugins.OnShowPreferences(controller);
+			controller = new PreferencesController(this) { AllowAddTab = true };
+			General.Plugins.OnShowPreferences(controller);
 			controller.AllowAddTab = false;
 			this.ResumeLayout(true);
-			
+
 			// Done
 			allowapplycontrol = true;
 		}
@@ -253,15 +266,15 @@ namespace CodeImp.DoomBuilder.Windows
 		private void apply_Click(object sender, EventArgs e)
 		{
 			//mxd. Check if Screenshots folder is valid
-			if(screenshotsfolderpath.Text != General.Settings.ScreenshotsPath && !Directory.Exists(screenshotsfolderpath.Text.Trim())) 
+			if (screenshotsfolderpath.Text != General.Settings.ScreenshotsPath && !Directory.Exists(screenshotsfolderpath.Text.Trim()))
 			{
 				General.ShowErrorMessage("Screenshots folder does not exist!\nPlease enter a correct path.", MessageBoxButtons.OK);
 				return;
 			}
-			
+
 			// Let the plugins know
 			controller.RaiseAccept();
-			
+
 			// Check if we need to reload the resources
 			reloadresources |= (General.Settings.ImageBrightness != imagebrightness.Value);
 			reloadresources |= (General.Settings.PreviewImageSize != previewsize.Value);
@@ -269,8 +282,8 @@ namespace CodeImp.DoomBuilder.Windows
 			// Apply interface
 			General.Settings.ImageBrightness = imagebrightness.Value;
 			General.Settings.DoubleSidedAlpha = 1.0f - (doublesidedalpha.Value * 0.1f);
-            General.Settings.NiGHTSCirclePrecision = nightscircleprecision.Value * 10;
-            General.Settings.DefaultViewMode = defaultviewmode.SelectedIndex;
+			General.Settings.NiGHTSCirclePrecision = nightscircleprecision.Value * 10;
+			General.Settings.DefaultViewMode = defaultviewmode.SelectedIndex;
 			General.Settings.VisualFOV = fieldofview.Value * 10;
 			General.Settings.MouseSpeed = mousespeed.Value * 100;
 			General.Settings.MoveSpeed = movespeed.Value * 100;
@@ -295,32 +308,41 @@ namespace CodeImp.DoomBuilder.Windows
 			General.Settings.GZToolbarGZDoom = toolbar_gzdoom.Checked; //mxd
 			General.Settings.ShowTextureSizes = showtexturesizes.Checked;
 			General.Settings.StoreSelectedEditTab = cbStoreEditTab.Checked; //mxd
-            General.Settings.CheckForUpdates = checkforupdates.Checked; //mxd
+			General.Settings.CheckForUpdates = checkforupdates.Checked; //mxd
 			General.Settings.LocateTextureGroup = locatetexturegroup.Checked; //mxd
 			General.Settings.MaxRecentFiles = recentFiles.Value; //mxd
-            General.Settings.MaxBackups = maxBackups.Value;
-            General.Settings.ScreenshotsPath = screenshotsfolderpath.Text.Trim(); //mxd
+			General.Settings.MaxBackups = maxBackups.Value;
+			General.Settings.ScreenshotsPath = screenshotsfolderpath.Text.Trim(); //mxd
 
-            // Script settings
-            General.Settings.ScriptFontBold = scriptfontbold.Checked;
-            General.Settings.ScriptFontName = scriptfontname.Text;
-            General.Settings.ScriptOnTop = scriptontop.Checked;
-            General.Settings.ScriptUseTabs = scriptusetabs.Checked;
-            General.Settings.ScriptTabWidth = scripttabwidth.GetResult(General.Settings.ScriptTabWidth);
-            General.Settings.ScriptAutoIndent = scriptautoindent.Checked;
-            General.Settings.ScriptAllmanStyle = scriptallmanstyle.Checked; //mxd
-            General.Settings.ScriptAutoCloseBrackets = scriptautoclosebrackets.Checked; //mxd
-            General.Settings.ScriptShowFolding = scriptshowfolding.Checked; //mxd
-            General.Settings.ScriptShowLineNumbers = scriptshowlinenumbers.Checked; //mxd
-            General.Settings.ScriptAutoShowAutocompletion = scriptautoshowautocompletion.Checked; //mxd
+			// Script settings
+			General.Settings.ScriptFontBold = scriptfontbold.Checked;
+			General.Settings.ScriptFontName = scriptfontname.Text;
+			General.Settings.ScriptOnTop = scriptontop.Checked;
+			General.Settings.ScriptUseTabs = scriptusetabs.Checked;
+			General.Settings.ScriptTabWidth = scripttabwidth.GetResult(General.Settings.ScriptTabWidth);
+			General.Settings.ScriptAutoIndent = scriptautoindent.Checked;
+			General.Settings.ScriptAllmanStyle = scriptallmanstyle.Checked; //mxd
+			General.Settings.ScriptAutoCloseBrackets = scriptautoclosebrackets.Checked; //mxd
+			General.Settings.ScriptShowFolding = scriptshowfolding.Checked; //mxd
+			General.Settings.ScriptShowLineNumbers = scriptshowlinenumbers.Checked; //mxd
+			General.Settings.ScriptAutoShowAutocompletion = scriptautoshowautocompletion.Checked; //mxd
 
-            // Script font size
-            int fontsize;
-			if(!int.TryParse(scriptfontsize.Text, out fontsize)) fontsize = 10;
+			//JBR Autosave
+			General.Settings.AutosaveEnable = autosaveenable.Checked;
+			General.Settings.AutosaveMinutes = autosaveminutes.GetResult(15);
+			General.Settings.AutosaveForce = autosaveforce.Checked;
+
+			//JBR Extra settings
+			General.Settings.ShowAllLinedefVSlopes = cbShowAllLinedefVSlopes.Checked;
+			General.Settings.NoVisualsTag0 = cbNoVisualsTag0.Checked;
+
+			// Script font size
+			int fontsize;
+			if (!int.TryParse(scriptfontsize.Text, out fontsize)) fontsize = 10;
 			General.Settings.ScriptFontSize = fontsize;
-			
+
 			// Apply control keys to actions
-			foreach(ListViewItem item in actionListItems) //mxd
+			foreach (ListViewItem item in actionListItems) //mxd
 				General.Actions[item.Name].SetShortcutKey((int)item.SubItems[1].Tag);
 
 			// Apply the colors
@@ -335,49 +357,55 @@ namespace CodeImp.DoomBuilder.Windows
 			General.Colors.Grid = colorgrid.Color;
 			General.Colors.Grid64 = colorgrid64.Color;
 
-            // Script editor colors
-            General.Colors.ScriptBackground = colorscriptbackground.Color;
+			// Script editor colors
+			General.Colors.ScriptBackground = colorscriptbackground.Color;
 			General.Colors.LineNumbers = colorlinenumbers.Color;
 			General.Colors.PlainText = colorplaintext.Color;
 			General.Colors.Comments = colorcomments.Color;
 			General.Colors.Keywords = colorkeywords.Color;
-            General.Colors.Properties = colorproperties.Color; //mxd
-            General.Colors.Literals = colorliterals.Color;
+			General.Colors.Properties = colorproperties.Color; //mxd
+			General.Colors.Literals = colorliterals.Color;
 			General.Colors.Constants = colorconstants.Color;
-            General.Colors.Strings = colorstrings.Color; //mxd
-            General.Colors.Includes = colorincludes.Color; //mxd
-            General.Colors.ScriptSelectionForeColor = colorselectionfore.Color; //mxd
-            General.Colors.ScriptSelectionBackColor = colorselectionback.Color; //mxd
-            General.Colors.ScriptIndicator = colorindicator.Color; //mxd
-            General.Colors.ScriptBraceHighlight = colorbrace.Color; //mxd
-            General.Colors.ScriptBadBraceHighlight = colorbracebad.Color; //mxd
-            General.Colors.ScriptWhitespace = colorwhitespace.Color; //mxd
-            General.Colors.ScriptFoldForeColor = colorfoldfore.Color; //mxd
-            General.Colors.ScriptFoldBackColor = colorfoldback.Color; //mxd
+			General.Colors.Strings = colorstrings.Color; //mxd
+			General.Colors.Includes = colorincludes.Color; //mxd
+			General.Colors.ScriptSelectionForeColor = colorselectionfore.Color; //mxd
+			General.Colors.ScriptSelectionBackColor = colorselectionback.Color; //mxd
+			General.Colors.ScriptIndicator = colorindicator.Color; //mxd
+			General.Colors.ScriptBraceHighlight = colorbrace.Color; //mxd
+			General.Colors.ScriptBadBraceHighlight = colorbracebad.Color; //mxd
+			General.Colors.ScriptWhitespace = colorwhitespace.Color; //mxd
+			General.Colors.ScriptFoldForeColor = colorfoldfore.Color; //mxd
+			General.Colors.ScriptFoldBackColor = colorfoldback.Color; //mxd
 
-            //mxd
-            General.Colors.ModelWireframe = colorMD3.Color;
+			//mxd
+			General.Colors.ModelWireframe = colorMD3.Color;
 			General.Colors.InfoLine = colorInfo.Color;
 			General.Colors.ThreeDFloor = color3dFloors.Color;
 
-            General.Colors.CreateAssistColors();
+			//JBR
+			General.Colors.PreviewShape = colorPreviewShape.Color;
+			General.Colors.InvalidSelect = colorInvalidSelect.Color;
+			General.Colors.PreviewLinedef = colorPreviewLinedef.Color;
+			General.Colors.InvalidLinedef = colorInvalidLinedef.Color;
+
+			General.Colors.CreateAssistColors();
 			General.Settings.BlackBrowsers = blackbrowsers.Checked;
 			General.Settings.CapitalizeTextureNames = capitalizetexturenames.Checked; //mxd
 			General.Settings.ClassicBilinear = classicbilinear.Checked;
 			General.Settings.VisualBilinear = visualbilinear.Checked;
 			General.Settings.QualityDisplay = qualitydisplay.Checked;
 
-            General.Colors.SetNiGHTSColor(0, nightscolormare1.Color);
-            General.Colors.SetNiGHTSColor(1, nightscolormare2.Color);
-            General.Colors.SetNiGHTSColor(2, nightscolormare3.Color);
-            General.Colors.SetNiGHTSColor(3, nightscolormare4.Color);
-            General.Colors.SetNiGHTSColor(4, nightscolormare5.Color);
-            General.Colors.SetNiGHTSColor(5, nightscolormare6.Color);
-            General.Colors.SetNiGHTSColor(6, nightscolormare7.Color);
-            General.Colors.SetNiGHTSColor(7, nightscolormare8.Color);
+			General.Colors.SetNiGHTSColor(0, nightscolormare1.Color);
+			General.Colors.SetNiGHTSColor(1, nightscolormare2.Color);
+			General.Colors.SetNiGHTSColor(2, nightscolormare3.Color);
+			General.Colors.SetNiGHTSColor(3, nightscolormare4.Color);
+			General.Colors.SetNiGHTSColor(4, nightscolormare5.Color);
+			General.Colors.SetNiGHTSColor(5, nightscolormare6.Color);
+			General.Colors.SetNiGHTSColor(6, nightscolormare7.Color);
+			General.Colors.SetNiGHTSColor(7, nightscolormare8.Color);
 
-            //mxd
-            General.Settings.GZSynchCameras = cbSynchCameras.Checked;
+			//mxd
+			General.Settings.GZSynchCameras = cbSynchCameras.Checked;
 			General.Settings.GZMaxDynamicLights = tbDynLightCount.Value;
 			General.Settings.GZDynamicLightRadius = (tbDynLightSize.Value / 10.0f);
 			General.Settings.GZDynamicLightIntensity = (tbDynLightIntensity.Value / 10.0f);
@@ -385,17 +413,17 @@ namespace CodeImp.DoomBuilder.Windows
 			General.Settings.GZVertexScale2D = vertexScale.Value;
 			General.Settings.GZOldHighlightMode = cbOldHighlightMode.Checked;
 			General.Settings.GZMarkExtraFloors = cbMarkExtraFloors.Checked;
-            General.Settings.DrawCrosshair = cbDrawCrosshair.Checked;
-            General.Settings.DrawFullCrosshair = cbDrawFullCrosshair.Checked;
-            General.Settings.DrawThingsFixedSize = cbDrawThingsFixedSize.Checked;
-            General.Settings.DefaultThingSize = tbDefaultThingSize.Value;
+			General.Settings.DrawCrosshair = cbDrawCrosshair.Checked;
+			General.Settings.DrawFullCrosshair = cbDrawFullCrosshair.Checked;
+			General.Settings.DrawThingsFixedSize = cbDrawThingsFixedSize.Checked;
+			General.Settings.DefaultThingSize = tbDefaultThingSize.Value;
 
-            // Paste options
-            General.Settings.PasteOptions = pasteoptions.GetOptions();
-			
+			// Paste options
+			General.Settings.PasteOptions = pasteoptions.GetOptions();
+
 			// Let the plugins know we're closing
 			General.Plugins.OnClosePreferences(controller);
-			
+
 			// Close
 			this.DialogResult = DialogResult.OK;
 			this.Close();
@@ -429,7 +457,7 @@ namespace CodeImp.DoomBuilder.Windows
 		private void tabs_SelectedIndexChanged(object sender, EventArgs e)
 		{
 			// Enable/disable stuff with tabs
-			if(tabs.SelectedTab != tabkeys)
+			if (tabs.SelectedTab != tabkeys)
 			{
 				this.AcceptButton = apply;
 				this.CancelButton = cancel;
@@ -445,10 +473,10 @@ namespace CodeImp.DoomBuilder.Windows
 				cancel.TabStop = false;
 				tabs.TabStop = false;
 			}
-			
+
 			colorsgroup1.Visible = (tabs.SelectedTab == tabcolors);
-            previewgroup.Visible = (tabs.SelectedTab == tabscripteditor);
-        }
+			previewgroup.Visible = (tabs.SelectedTab == tabscripteditor);
+		}
 
 		#endregion
 
@@ -459,7 +487,7 @@ namespace CodeImp.DoomBuilder.Windows
 			int size = PreviewManager.PREVIEW_SIZES[previewsize.Value];
 			previewsizelabel.Text = size + " x " + size;
 		}
-		
+
 		private void fieldofview_ValueChanged(object sender, EventArgs e)
 		{
 			int value = fieldofview.Value * 10;
@@ -479,7 +507,7 @@ namespace CodeImp.DoomBuilder.Windows
 		}
 
 		//mxd
-		private void vertexScale3D_ValueChanged(object sender, EventArgs e) 
+		private void vertexScale3D_ValueChanged(object sender, EventArgs e)
 		{
 			vertexScale3DLabel.Text = (vertexScale3D.Value * 10) + "%";
 		}
@@ -492,7 +520,7 @@ namespace CodeImp.DoomBuilder.Windows
 
 		private void autoscrollspeed_ValueChanged(object sender, EventArgs e)
 		{
-			if(autoscrollspeed.Value == 0)
+			if (autoscrollspeed.Value == 0)
 				autoscrollspeedlabel.Text = "Off";
 			else
 				autoscrollspeedlabel.Text = autoscrollspeed.Value + "x";
@@ -504,57 +532,57 @@ namespace CodeImp.DoomBuilder.Windows
 		}
 
 		//mxd
-		private void vertexScale_ValueChanged(object sender, EventArgs e) 
+		private void vertexScale_ValueChanged(object sender, EventArgs e)
 		{
 			vertexScaleLabel.Text = (vertexScale.Value * 100) + "%";
 		}
 
 		//mxd
-		private void recentFiles_ValueChanged(object sender, EventArgs e) 
+		private void recentFiles_ValueChanged(object sender, EventArgs e)
 		{
 			labelRecentFiles.Text = recentFiles.Value.ToString();
 		}
 
-        private void maxBackups_ValueChanged(object sender, EventArgs e)
-        {
-            labelBackups.Text = maxBackups.Value.ToString();
-        }
+		private void maxBackups_ValueChanged(object sender, EventArgs e)
+		{
+			labelBackups.Text = maxBackups.Value.ToString();
+		}
 
 		#endregion
-		
+
 		#region ================== Controls Panel
-		
+
 		// This updates the used keys info
 		private void UpdateKeyUsedActions()
 		{
 			List<string> usedactions = new List<string>();
-			
+
 			// Anything selected?
-			if(listactions.SelectedItems.Count > 0)
+			if (listactions.SelectedItems.Count > 0)
 			{
 				// Get info
 				int thiskey = (int)listactions.SelectedItems[0].SubItems[1].Tag;
-				if(thiskey != 0)
+				if (thiskey != 0)
 				{
 					// Find actions with same key
-					foreach(ListViewItem item in actionListItems)
+					foreach (ListViewItem item in actionListItems)
 					{
 						// Don't count the selected action
-						if(item != listactions.SelectedItems[0])
+						if (item != listactions.SelectedItems[0])
 						{
-                            Action a = General.Actions[item.Name];
-                            int akey = (int)item.SubItems[1].Tag;
+							Action a = General.Actions[item.Name];
+							int akey = (int)item.SubItems[1].Tag;
 
 							// Check if the key combination matches
-							if((thiskey & a.ShortcutMask) == (akey & a.ShortcutMask))
+							if ((thiskey & a.ShortcutMask) == (akey & a.ShortcutMask))
 								usedactions.Add(a.Title + "  (" + General.Actions.Categories[a.Category] + ")");
 						}
 					}
 				}
 			}
-			
+
 			// Update info
-			if(usedactions.Count == 0)
+			if (usedactions.Count == 0)
 			{
 				keyusedlabel.Visible = false;
 				keyusedlist.Visible = false;
@@ -563,19 +591,19 @@ namespace CodeImp.DoomBuilder.Windows
 			else
 			{
 				keyusedlist.Items.Clear();
-				foreach(string a in usedactions) keyusedlist.Items.Add(a);
+				foreach (string a in usedactions) keyusedlist.Items.Add(a);
 				keyusedlabel.Visible = true;
 				keyusedlist.Visible = true;
 			}
 		}
 
-        // This fills the list of available controls for the specified action
-        private void FillControlsList(Action a)
-        {
+		// This fills the list of available controls for the specified action
+		private void FillControlsList(Action a)
+		{
 			actioncontrol.Items.Clear();
-			
+
 			// Fill combobox with special controls
-			if(a.AllowMouse)
+			if (a.AllowMouse)
 			{
 				actioncontrol.Items.Add(new KeyControl(Keys.LButton, "LButton"));
 				actioncontrol.Items.Add(new KeyControl(Keys.MButton, "MButton"));
@@ -583,14 +611,14 @@ namespace CodeImp.DoomBuilder.Windows
 				actioncontrol.Items.Add(new KeyControl(Keys.XButton1, "XButton1"));
 				actioncontrol.Items.Add(new KeyControl(Keys.XButton2, "XButton2"));
 			}
-			if(a.AllowScroll)
+			if (a.AllowScroll)
 			{
 				actioncontrol.Items.Add(new KeyControl(SpecialKeys.MScrollUp, "ScrollUp"));
 				actioncontrol.Items.Add(new KeyControl(SpecialKeys.MScrollDown, "ScrollDown"));
 			}
 
 			//mxd. Alt
-			if(a.AllowMouse && !a.DisregardAlt) 
+			if (a.AllowMouse && !a.DisregardAlt)
 			{
 				actioncontrol.Items.Add(new KeyControl(Keys.LButton | Keys.Alt, "Alt+LButton"));
 				actioncontrol.Items.Add(new KeyControl(Keys.MButton | Keys.Alt, "Alt+MButton"));
@@ -598,14 +626,14 @@ namespace CodeImp.DoomBuilder.Windows
 				actioncontrol.Items.Add(new KeyControl(Keys.XButton1 | Keys.Alt, "Alt+XButton1"));
 				actioncontrol.Items.Add(new KeyControl(Keys.XButton2 | Keys.Alt, "Alt+XButton2"));
 			}
-			if(a.AllowScroll && !a.DisregardAlt) 
+			if (a.AllowScroll && !a.DisregardAlt)
 			{
 				actioncontrol.Items.Add(new KeyControl((int)SpecialKeys.MScrollUp | (int)Keys.Alt, "Alt+ScrollUp"));
 				actioncontrol.Items.Add(new KeyControl((int)SpecialKeys.MScrollDown | (int)Keys.Alt, "Alt+ScrollDown"));
 			}
 
 			//Ctrl
-			if(a.AllowMouse && !a.DisregardControl) 
+			if (a.AllowMouse && !a.DisregardControl)
 			{
 				actioncontrol.Items.Add(new KeyControl(Keys.LButton | Keys.Control, "Ctrl+LButton"));
 				actioncontrol.Items.Add(new KeyControl(Keys.MButton | Keys.Control, "Ctrl+MButton"));
@@ -614,14 +642,14 @@ namespace CodeImp.DoomBuilder.Windows
 				actioncontrol.Items.Add(new KeyControl(Keys.XButton2 | Keys.Control, "Ctrl+XButton2"));
 			}
 
-			if(a.AllowScroll && !a.DisregardControl) 
+			if (a.AllowScroll && !a.DisregardControl)
 			{
 				actioncontrol.Items.Add(new KeyControl((int)SpecialKeys.MScrollUp | (int)Keys.Control, "Ctrl+ScrollUp"));
 				actioncontrol.Items.Add(new KeyControl((int)SpecialKeys.MScrollDown | (int)Keys.Control, "Ctrl+ScrollDown"));
 			}
 
 			//Shift
-			if(a.AllowMouse && !a.DisregardShift)
+			if (a.AllowMouse && !a.DisregardShift)
 			{
 				actioncontrol.Items.Add(new KeyControl(Keys.LButton | Keys.Shift, "Shift+LButton"));
 				actioncontrol.Items.Add(new KeyControl(Keys.MButton | Keys.Shift, "Shift+MButton"));
@@ -629,14 +657,14 @@ namespace CodeImp.DoomBuilder.Windows
 				actioncontrol.Items.Add(new KeyControl(Keys.XButton1 | Keys.Shift, "Shift+XButton1"));
 				actioncontrol.Items.Add(new KeyControl(Keys.XButton2 | Keys.Shift, "Shift+XButton2"));
 			}
-			if(a.AllowScroll && !a.DisregardShift)
+			if (a.AllowScroll && !a.DisregardShift)
 			{
 				actioncontrol.Items.Add(new KeyControl((int)SpecialKeys.MScrollUp | (int)Keys.Shift, "Shift+ScrollUp"));
 				actioncontrol.Items.Add(new KeyControl((int)SpecialKeys.MScrollDown | (int)Keys.Shift, "Shift+ScrollDown"));
 			}
 
 			//mxd. Alt-Shift
-			if(a.AllowMouse && !a.DisregardShift && !a.DisregardAlt) 
+			if (a.AllowMouse && !a.DisregardShift && !a.DisregardAlt)
 			{
 				actioncontrol.Items.Add(new KeyControl(Keys.LButton | Keys.Shift | Keys.Alt, "Alt+Shift+LButton"));
 				actioncontrol.Items.Add(new KeyControl(Keys.MButton | Keys.Shift | Keys.Alt, "Alt+Shift+MButton"));
@@ -644,14 +672,14 @@ namespace CodeImp.DoomBuilder.Windows
 				actioncontrol.Items.Add(new KeyControl(Keys.XButton1 | Keys.Shift | Keys.Alt, "Alt+Shift+XButton1"));
 				actioncontrol.Items.Add(new KeyControl(Keys.XButton2 | Keys.Shift | Keys.Alt, "Alt+Shift+XButton2"));
 			}
-			if(a.AllowScroll && !a.DisregardShift && !a.DisregardAlt) 
+			if (a.AllowScroll && !a.DisregardShift && !a.DisregardAlt)
 			{
 				actioncontrol.Items.Add(new KeyControl((int)SpecialKeys.MScrollUp | (int)Keys.Shift | (int)Keys.Alt, "Alt+Shift+ScrollUp"));
 				actioncontrol.Items.Add(new KeyControl((int)SpecialKeys.MScrollDown | (int)Keys.Shift | (int)Keys.Alt, "Alt+Shift+ScrollDown"));
 			}
 
 			//mxd. Ctrl-Alt
-			if(a.AllowMouse && !a.DisregardAlt && !a.DisregardControl) 
+			if (a.AllowMouse && !a.DisregardAlt && !a.DisregardControl)
 			{
 				actioncontrol.Items.Add(new KeyControl(Keys.LButton | Keys.Alt | Keys.Control, "Ctrl+Alt+LButton"));
 				actioncontrol.Items.Add(new KeyControl(Keys.MButton | Keys.Alt | Keys.Control, "Ctrl+Alt+MButton"));
@@ -659,14 +687,14 @@ namespace CodeImp.DoomBuilder.Windows
 				actioncontrol.Items.Add(new KeyControl(Keys.XButton1 | Keys.Alt | Keys.Control, "Ctrl+Alt+XButton1"));
 				actioncontrol.Items.Add(new KeyControl(Keys.XButton2 | Keys.Alt | Keys.Control, "Ctrl+Alt+XButton2"));
 			}
-			if(a.AllowScroll && !a.DisregardAlt && !a.DisregardControl) 
+			if (a.AllowScroll && !a.DisregardAlt && !a.DisregardControl)
 			{
 				actioncontrol.Items.Add(new KeyControl((int)SpecialKeys.MScrollUp | (int)Keys.Control | (int)Keys.Alt, "Ctrl+Alt+ScrollUp"));
 				actioncontrol.Items.Add(new KeyControl((int)SpecialKeys.MScrollDown | (int)Keys.Control | (int)Keys.Alt, "Ctrl+Alt+ScrollDown"));
 			}
-			
+
 			//Ctrl-Shift
-			if(a.AllowMouse && !a.DisregardShift && !a.DisregardControl)
+			if (a.AllowMouse && !a.DisregardShift && !a.DisregardControl)
 			{
 				actioncontrol.Items.Add(new KeyControl(Keys.LButton | Keys.Shift | Keys.Control, "Ctrl+Shift+LButton"));
 				actioncontrol.Items.Add(new KeyControl(Keys.MButton | Keys.Shift | Keys.Control, "Ctrl+Shift+MButton"));
@@ -674,14 +702,14 @@ namespace CodeImp.DoomBuilder.Windows
 				actioncontrol.Items.Add(new KeyControl(Keys.XButton1 | Keys.Shift | Keys.Control, "Ctrl+Shift+XButton1"));
 				actioncontrol.Items.Add(new KeyControl(Keys.XButton2 | Keys.Shift | Keys.Control, "Ctrl+Shift+XButton2"));
 			}
-			if(a.AllowScroll && !a.DisregardShift && !a.DisregardControl)
+			if (a.AllowScroll && !a.DisregardShift && !a.DisregardControl)
 			{
 				actioncontrol.Items.Add(new KeyControl((int)SpecialKeys.MScrollUp | (int)Keys.Shift | (int)Keys.Control, "Ctrl+Shift+ScrollUp"));
 				actioncontrol.Items.Add(new KeyControl((int)SpecialKeys.MScrollDown | (int)Keys.Shift | (int)Keys.Control, "Ctrl+Shift+ScrollDown"));
 			}
 
 			//mxd. Ctrl-Alt-Shift
-			if(a.AllowMouse && !a.DisregardShift && !a.DisregardControl && !a.DisregardAlt) 
+			if (a.AllowMouse && !a.DisregardShift && !a.DisregardControl && !a.DisregardAlt)
 			{
 				actioncontrol.Items.Add(new KeyControl(Keys.LButton | Keys.Shift | Keys.Control | Keys.Alt, "Ctrl+Alt+Shift+LButton"));
 				actioncontrol.Items.Add(new KeyControl(Keys.MButton | Keys.Shift | Keys.Control | Keys.Alt, "Ctrl+Alt+Shift+MButton"));
@@ -689,20 +717,20 @@ namespace CodeImp.DoomBuilder.Windows
 				actioncontrol.Items.Add(new KeyControl(Keys.XButton1 | Keys.Shift | Keys.Control | Keys.Alt, "Ctrl+Alt+Shift+XButton1"));
 				actioncontrol.Items.Add(new KeyControl(Keys.XButton2 | Keys.Shift | Keys.Control | Keys.Alt, "Ctrl+Alt+Shift+XButton2"));
 			}
-			if(a.AllowScroll && !a.DisregardShift && !a.DisregardControl && !a.DisregardAlt) 
+			if (a.AllowScroll && !a.DisregardShift && !a.DisregardControl && !a.DisregardAlt)
 			{
 				actioncontrol.Items.Add(new KeyControl((int)SpecialKeys.MScrollUp | (int)Keys.Shift | (int)Keys.Control | (int)Keys.Alt, "Ctrl+Alt+Shift+ScrollUp"));
 				actioncontrol.Items.Add(new KeyControl((int)SpecialKeys.MScrollDown | (int)Keys.Shift | (int)Keys.Control | (int)Keys.Alt, "Ctrl+Alt+Shift+ScrollDown"));
 			}
 		}
-		
+
 		// Item selected
 		private void listactions_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
 		{
 			string disregardkeys = "";
 
 			// Anything selected?
-			if(listactions.SelectedItems.Count > 0)
+			if (listactions.SelectedItems.Count > 0)
 			{
 				// Begin updating
 				allowapplycontrol = false;
@@ -712,42 +740,42 @@ namespace CodeImp.DoomBuilder.Windows
 				int key = (int)listactions.SelectedItems[0].SubItems[1].Tag;
 				disregardshift = action.DisregardShift;
 				disregardcontrol = action.DisregardControl;
-				
+
 				// Enable panel
 				actioncontrolpanel.Enabled = true;
 				actiontitle.Text = action.Title;
 				actiondescription.Text = action.Description;
 				actioncontrol.SelectedIndex = -1;
 				actionkey.Text = "";
-				
-				if(disregardshift && disregardcontrol)
+
+				if (disregardshift && disregardcontrol)
 					disregardkeys = "Shift and Control";
-				else if(disregardshift)
+				else if (disregardshift)
 					disregardkeys = "Shift";
-				else if(disregardcontrol)
+				else if (disregardcontrol)
 					disregardkeys = "Control";
 
 				disregardshiftlabel.Text = disregardshiftlabel.Tag.ToString().Replace("%s", disregardkeys);
 				disregardshiftlabel.Visible = disregardshift | disregardcontrol;
-				
+
 				// Fill special controls list
 				FillControlsList(action);
-				
+
 				// See if the key is in the combobox
-				for(int i = 0; i < actioncontrol.Items.Count; i++)
+				for (int i = 0; i < actioncontrol.Items.Count; i++)
 				{
 					// Select it when the key is found here
 					KeyControl keycontrol = (KeyControl)actioncontrol.Items[i];
-					if(keycontrol.key == key) actioncontrol.SelectedIndex = i;
+					if (keycontrol.key == key) actioncontrol.SelectedIndex = i;
 				}
 
 				// Otherwise display the key in the textbox
-				if(actioncontrol.SelectedIndex == -1)
+				if (actioncontrol.SelectedIndex == -1)
 					actionkey.Text = Action.GetShortcutKeyDesc(key);
-				
+
 				// Show actions with same key
 				UpdateKeyUsedActions();
-				
+
 				// Focus to the input box
 				actionkey.Focus();
 
@@ -760,7 +788,7 @@ namespace CodeImp.DoomBuilder.Windows
 		private void listactions_KeyUp(object sender, KeyEventArgs e)
 		{
 			// Nothing selected?
-			if(listactions.SelectedItems.Count == 0)
+			if (listactions.SelectedItems.Count == 0)
 			{
 				// Disable panel
 				actioncontrolpanel.Enabled = false;
@@ -770,7 +798,7 @@ namespace CodeImp.DoomBuilder.Windows
 				actioncontrol.SelectedIndex = -1;
 				disregardshiftlabel.Visible = false;
 			}
-			
+
 			// Show actions with same key
 			UpdateKeyUsedActions();
 		}
@@ -791,29 +819,29 @@ namespace CodeImp.DoomBuilder.Windows
 			e.SuppressKeyPress = true;
 
 			// Leave when not allowed to update
-			if(!allowapplycontrol) return;
+			if (!allowapplycontrol) return;
 
 			// Anything selected?
-			if(listactions.SelectedItems.Count > 0)
+			if (listactions.SelectedItems.Count > 0)
 			{
 				// Begin updating
 				allowapplycontrol = false;
-				
+
 				// Remove modifier keys from the key if needed
-				if(disregardshift) key &= ~(int)Keys.Shift;
-				if(disregardcontrol) key &= ~(int)Keys.Control;
-				
+				if (disregardshift) key &= ~(int)Keys.Shift;
+				if (disregardcontrol) key &= ~(int)Keys.Control;
+
 				// Deselect anything from the combobox
 				actioncontrol.SelectedIndex = -1;
 
-                // Apply the key combination
-                listactions.SelectedItems[0].SubItems[1].Text = Action.GetShortcutKeyDesc(key);
-                listactions.SelectedItems[0].SubItems[1].Tag = key;
-                actionkey.Text = Action.GetShortcutKeyDesc(key);
+				// Apply the key combination
+				listactions.SelectedItems[0].SubItems[1].Text = Action.GetShortcutKeyDesc(key);
+				listactions.SelectedItems[0].SubItems[1].Tag = key;
+				actionkey.Text = Action.GetShortcutKeyDesc(key);
 
-                // Show actions with same key
-                UpdateKeyUsedActions();
-				
+				// Show actions with same key
+				UpdateKeyUsedActions();
+
 				// Done
 				allowapplycontrol = true;
 			}
@@ -823,10 +851,10 @@ namespace CodeImp.DoomBuilder.Windows
 		private void actioncontrol_SelectedIndexChanged(object sender, EventArgs e)
 		{
 			// Leave when not allowed to update
-			if(!allowapplycontrol) return;
+			if (!allowapplycontrol) return;
 
 			// Anything selected?
-			if((actioncontrol.SelectedIndex > -1) && (listactions.SelectedItems.Count > 0))
+			if ((actioncontrol.SelectedIndex > -1) && (listactions.SelectedItems.Count > 0))
 			{
 				// Begin updating
 				allowapplycontrol = false;
@@ -837,13 +865,13 @@ namespace CodeImp.DoomBuilder.Windows
 				// Get the key control
 				KeyControl key = (KeyControl)actioncontrol.SelectedItem;
 
-                // Apply the key combination
-                listactions.SelectedItems[0].SubItems[1].Text = Action.GetShortcutKeyDesc(key.key);
-                listactions.SelectedItems[0].SubItems[1].Tag = key.key;
-				
+				// Apply the key combination
+				listactions.SelectedItems[0].SubItems[1].Text = Action.GetShortcutKeyDesc(key.key);
+				listactions.SelectedItems[0].SubItems[1].Tag = key.key;
+
 				// Show actions with same key
 				UpdateKeyUsedActions();
-				
+
 				// Focus to the input box
 				actionkey.Focus();
 
@@ -865,10 +893,10 @@ namespace CodeImp.DoomBuilder.Windows
 			// Apply the key combination
 			listactions.SelectedItems[0].SubItems[1].Text = "";
 			listactions.SelectedItems[0].SubItems[1].Tag = 0;
-			
+
 			// Show actions with same key
 			UpdateKeyUsedActions();
-			
+
 			// Focus to the input box
 			actionkey.Focus();
 
@@ -877,48 +905,48 @@ namespace CodeImp.DoomBuilder.Windows
 		}
 
 		//mxd
-		private void bClearActionFilter_Click(object sender, EventArgs e) 
+		private void bClearActionFilter_Click(object sender, EventArgs e)
 		{
 			tbFilterActions.Clear();
 		}
 
 		//mxd
-		private void tbFilterActions_TextChanged(object sender, EventArgs e) 
+		private void tbFilterActions_TextChanged(object sender, EventArgs e)
 		{
 			listactions.BeginUpdate();
-			
+
 			//restore everything
-			if(string.IsNullOrEmpty(tbFilterActions.Text)) 
+			if (string.IsNullOrEmpty(tbFilterActions.Text))
 			{
 				//restore items
 				listactions.Items.Clear();
 				listactions.Items.AddRange(actionListItems.ToArray());
 
 				//restore groups
-				for(int i = 0; i < actionListItems.Count; i++) 
+				for (int i = 0; i < actionListItems.Count; i++)
 				{
-					if(actionListItemsGroupIndices[i] != -1)
+					if (actionListItemsGroupIndices[i] != -1)
 						actionListItems[i].Group = listactions.Groups[actionListItemsGroupIndices[i]];
 				}
-			} 
+			}
 			else //apply filtering
-			{ 
+			{
 				string match = tbFilterActions.Text.ToUpperInvariant();
-				for(int i = 0; i < actionListItems.Count; i++) 
+				for (int i = 0; i < actionListItems.Count; i++)
 				{
-					if(actionListItems[i].Text.ToUpperInvariant().Contains(match)) 
+					if (actionListItems[i].Text.ToUpperInvariant().Contains(match))
 					{
 						//ensure visible
-						if(!listactions.Items.Contains(actionListItems[i])) 
+						if (!listactions.Items.Contains(actionListItems[i]))
 						{
 							listactions.Items.Add(actionListItems[i]);
 
 							//restore group
-							if(actionListItemsGroupIndices[i] != -1)
+							if (actionListItemsGroupIndices[i] != -1)
 								actionListItems[i].Group = listactions.Groups[actionListItemsGroupIndices[i]];
 						}
-					} 
-					else if(listactions.Items.Contains(actionListItems[i])) 
+					}
+					else if (listactions.Items.Contains(actionListItems[i]))
 					{
 						//ensure invisible
 						listactions.Items.Remove(actionListItems[i]);
@@ -945,274 +973,274 @@ namespace CodeImp.DoomBuilder.Windows
 			doublesidedalphalabel.Text = percent + "%";
 		}
 
-        private void nightscircleprecision_ValueChanged(object sender, EventArgs e)
-        {
-            int value = nightscircleprecision.Value * 10;
-            nightscircleprecisionlabel.Text = value.ToString();
-        }
+		private void nightscircleprecision_ValueChanged(object sender, EventArgs e)
+		{
+			int value = nightscircleprecision.Value * 10;
+			nightscircleprecisionlabel.Text = value.ToString();
+		}
 
-        //mxd
-        private void tbDynLightCount_ValueChanged(object sender, EventArgs e) 
+		//mxd
+		private void tbDynLightCount_ValueChanged(object sender, EventArgs e)
 		{
 			labelDynLightCount.Text = tbDynLightCount.Value.ToString();
 		}
 
 		//mxd
-		private void tbDynLightSize_ValueChanged(object sender, EventArgs e) 
+		private void tbDynLightSize_ValueChanged(object sender, EventArgs e)
 		{
 			labelDynLightSize.Text = ((float)tbDynLightSize.Value / 10).ToString();
 		}
 
 		//mxd
-		private void tbDynLightIntensity_ValueChanged(object sender, EventArgs e) 
+		private void tbDynLightIntensity_ValueChanged(object sender, EventArgs e)
 		{
 			labelDynLightIntensity.Text = ((float)tbDynLightIntensity.Value / 10).ToString();
 		}
 
-        //mxd
-        private void tbDefaultThingSize_ValueChanged(object sender, EventArgs e)
-        {
-            labelDefaultThingSize.Text = ((int)tbDefaultThingSize.Value).ToString();
-        }
+		//mxd
+		private void tbDefaultThingSize_ValueChanged(object sender, EventArgs e)
+		{
+			labelDefaultThingSize.Text = ((int)tbDefaultThingSize.Value).ToString();
+		}
 
-        #endregion
+		#endregion
 
-        #region ================== Script Editor Panel (mxd)
+		#region ================== Script Editor Panel (mxd)
 
-        private void scriptfontbold_CheckedChanged(object sender, EventArgs e)
-        {
-            if (allowapplycontrol) scriptedit.FontBold = scriptfontbold.Checked;
-        }
+		private void scriptfontbold_CheckedChanged(object sender, EventArgs e)
+		{
+			if (allowapplycontrol) scriptedit.FontBold = scriptfontbold.Checked;
+		}
 
 		//mxd
-		private void scriptfontsize_SelectedIndexChanged(object sender, EventArgs e) 
+		private void scriptfontsize_SelectedIndexChanged(object sender, EventArgs e)
 		{
-            if (allowapplycontrol)
-            {
-                int fontsize;
-                if (int.TryParse(scriptfontsize.Text, out fontsize))
-                    scriptedit.FontSize = fontsize;
-            }
-        }
-        
-        private void scripttabwidth_WhenTextChanged(object sender, EventArgs e)
-        {
-            if (allowapplycontrol)
-            {
-                int tabwidth;
-                if (int.TryParse(scripttabwidth.Text, out tabwidth))
-                    scriptedit.TabWidth = tabwidth;
-            }
-        }
+			if (allowapplycontrol)
+			{
+				int fontsize;
+				if (int.TryParse(scriptfontsize.Text, out fontsize))
+					scriptedit.FontSize = fontsize;
+			}
+		}
 
-        private void scriptfontname_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (allowapplycontrol) scriptedit.FontName = scriptfontname.Text;
-        }
+		private void scripttabwidth_WhenTextChanged(object sender, EventArgs e)
+		{
+			if (allowapplycontrol)
+			{
+				int tabwidth;
+				if (int.TryParse(scripttabwidth.Text, out tabwidth))
+					scriptedit.TabWidth = tabwidth;
+			}
+		}
 
-        private void scriptshowlinenumbers_CheckedChanged(object sender, EventArgs e)
-        {
-            if (allowapplycontrol) scriptedit.ShowLineNumbers = scriptshowlinenumbers.Checked;
-        }
+		private void scriptfontname_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			if (allowapplycontrol) scriptedit.FontName = scriptfontname.Text;
+		}
 
-        private void scriptshowfolding_CheckedChanged(object sender, EventArgs e)
-        {
-            if (allowapplycontrol) scriptedit.ShowFolding = scriptshowfolding.Checked;
-        }
+		private void scriptshowlinenumbers_CheckedChanged(object sender, EventArgs e)
+		{
+			if (allowapplycontrol) scriptedit.ShowLineNumbers = scriptshowlinenumbers.Checked;
+		}
 
-        private void colorscriptbackground_ColorChanged(object sender, EventArgs e)
-        {
-            if (allowapplycontrol) scriptedit.ScriptBackground = colorscriptbackground.Color.ToColor();
-        }
+		private void scriptshowfolding_CheckedChanged(object sender, EventArgs e)
+		{
+			if (allowapplycontrol) scriptedit.ShowFolding = scriptshowfolding.Checked;
+		}
 
-        private void colorlinenumbers_ColorChanged(object sender, EventArgs e)
-        {
-            if (allowapplycontrol) scriptedit.LineNumbers = colorlinenumbers.Color.ToColor();
-        }
+		private void colorscriptbackground_ColorChanged(object sender, EventArgs e)
+		{
+			if (allowapplycontrol) scriptedit.ScriptBackground = colorscriptbackground.Color.ToColor();
+		}
 
-        private void colorplaintext_ColorChanged(object sender, EventArgs e)
-        {
-            if (allowapplycontrol) scriptedit.PlainText = colorplaintext.Color.ToColor();
-        }
+		private void colorlinenumbers_ColorChanged(object sender, EventArgs e)
+		{
+			if (allowapplycontrol) scriptedit.LineNumbers = colorlinenumbers.Color.ToColor();
+		}
 
-        private void colorcomments_ColorChanged(object sender, EventArgs e)
-        {
-            if (allowapplycontrol) scriptedit.Comments = colorcomments.Color.ToColor();
-        }
+		private void colorplaintext_ColorChanged(object sender, EventArgs e)
+		{
+			if (allowapplycontrol) scriptedit.PlainText = colorplaintext.Color.ToColor();
+		}
 
-        private void colorkeywords_ColorChanged(object sender, EventArgs e)
-        {
-            if (allowapplycontrol) scriptedit.Keywords = colorkeywords.Color.ToColor();
-        }
+		private void colorcomments_ColorChanged(object sender, EventArgs e)
+		{
+			if (allowapplycontrol) scriptedit.Comments = colorcomments.Color.ToColor();
+		}
 
-        private void colorproperties_ColorChanged(object sender, EventArgs e)
-        {
-            if (allowapplycontrol) scriptedit.Properties = colorproperties.Color.ToColor();
-        }
+		private void colorkeywords_ColorChanged(object sender, EventArgs e)
+		{
+			if (allowapplycontrol) scriptedit.Keywords = colorkeywords.Color.ToColor();
+		}
 
-        private void colorstrings_ColorChanged(object sender, EventArgs e)
-        {
-            if (allowapplycontrol) scriptedit.Strings = colorstrings.Color.ToColor();
-        }
+		private void colorproperties_ColorChanged(object sender, EventArgs e)
+		{
+			if (allowapplycontrol) scriptedit.Properties = colorproperties.Color.ToColor();
+		}
 
-        private void colorliterals_ColorChanged(object sender, EventArgs e)
-        {
-            if (allowapplycontrol) scriptedit.Literals = colorliterals.Color.ToColor();
-        }
+		private void colorstrings_ColorChanged(object sender, EventArgs e)
+		{
+			if (allowapplycontrol) scriptedit.Strings = colorstrings.Color.ToColor();
+		}
 
-        private void colorconstants_ColorChanged(object sender, EventArgs e)
-        {
-            if (allowapplycontrol) scriptedit.Constants = colorconstants.Color.ToColor();
-        }
+		private void colorliterals_ColorChanged(object sender, EventArgs e)
+		{
+			if (allowapplycontrol) scriptedit.Literals = colorliterals.Color.ToColor();
+		}
 
-        private void colorincludes_ColorChanged(object sender, EventArgs e)
-        {
-            if (allowapplycontrol) scriptedit.Includes = colorincludes.Color.ToColor();
-        }
+		private void colorconstants_ColorChanged(object sender, EventArgs e)
+		{
+			if (allowapplycontrol) scriptedit.Constants = colorconstants.Color.ToColor();
+		}
 
-        private void colorselectionfore_ColorChanged(object sender, EventArgs e)
-        {
-            if (allowapplycontrol) scriptedit.SelectionForeColor = colorselectionfore.Color.ToColor();
-        }
+		private void colorincludes_ColorChanged(object sender, EventArgs e)
+		{
+			if (allowapplycontrol) scriptedit.Includes = colorincludes.Color.ToColor();
+		}
 
-        private void colorselectionback_ColorChanged(object sender, EventArgs e)
-        {
-            if (allowapplycontrol) scriptedit.SelectionBackColor = colorselectionback.Color.ToColor();
-        }
+		private void colorselectionfore_ColorChanged(object sender, EventArgs e)
+		{
+			if (allowapplycontrol) scriptedit.SelectionForeColor = colorselectionfore.Color.ToColor();
+		}
 
-        private void colorindicator_ColorChanged(object sender, EventArgs e)
-        {
-            if (allowapplycontrol) scriptedit.ScriptIndicator = colorindicator.Color.ToColor();
-        }
+		private void colorselectionback_ColorChanged(object sender, EventArgs e)
+		{
+			if (allowapplycontrol) scriptedit.SelectionBackColor = colorselectionback.Color.ToColor();
+		}
 
-        private void colorbrace_ColorChanged(object sender, EventArgs e)
-        {
-            if (allowapplycontrol) scriptedit.BraceHighlight = colorbrace.Color.ToColor();
-        }
+		private void colorindicator_ColorChanged(object sender, EventArgs e)
+		{
+			if (allowapplycontrol) scriptedit.ScriptIndicator = colorindicator.Color.ToColor();
+		}
 
-        private void colorbracebad_ColorChanged(object sender, EventArgs e)
-        {
-            if (allowapplycontrol) scriptedit.BadBraceHighlight = colorbracebad.Color.ToColor();
-        }
+		private void colorbrace_ColorChanged(object sender, EventArgs e)
+		{
+			if (allowapplycontrol) scriptedit.BraceHighlight = colorbrace.Color.ToColor();
+		}
 
-        private void colorwhitespace_ColorChanged(object sender, EventArgs e)
-        {
-            if (allowapplycontrol) scriptedit.WhitespaceColor = colorwhitespace.Color.ToColor();
-        }
+		private void colorbracebad_ColorChanged(object sender, EventArgs e)
+		{
+			if (allowapplycontrol) scriptedit.BadBraceHighlight = colorbracebad.Color.ToColor();
+		}
 
-        private void colorfoldfore_ColorChanged(object sender, EventArgs e)
-        {
-            if (allowapplycontrol) scriptedit.FoldForeColor = colorfoldfore.Color.ToColor();
-        }
+		private void colorwhitespace_ColorChanged(object sender, EventArgs e)
+		{
+			if (allowapplycontrol) scriptedit.WhitespaceColor = colorwhitespace.Color.ToColor();
+		}
 
-        private void colorfoldback_ColorChanged(object sender, EventArgs e)
-        {
-            if (allowapplycontrol) scriptedit.FoldBackColor = colorfoldback.Color.ToColor();
-        }
+		private void colorfoldfore_ColorChanged(object sender, EventArgs e)
+		{
+			if (allowapplycontrol) scriptedit.FoldForeColor = colorfoldfore.Color.ToColor();
+		}
 
-        private void scriptcolorpresets_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (!allowapplycontrol) return;
-            switch (scriptcolorpresets.SelectedIndex)
-            {
-                case 0: // Restore current colors
-                    colorscriptbackground.Color = General.Colors.ScriptBackground;
-                    colorlinenumbers.Color = General.Colors.LineNumbers;
-                    colorplaintext.Color = General.Colors.PlainText;
-                    colorcomments.Color = General.Colors.Comments;
-                    colorkeywords.Color = General.Colors.Keywords;
-                    colorproperties.Color = General.Colors.Properties;
-                    colorliterals.Color = General.Colors.Literals;
-                    colorconstants.Color = General.Colors.Constants;
-                    colorstrings.Color = General.Colors.Strings;
-                    colorincludes.Color = General.Colors.Includes;
-                    colorindicator.Color = General.Colors.ScriptIndicator;
-                    colorbrace.Color = General.Colors.ScriptBraceHighlight;
-                    colorbracebad.Color = General.Colors.ScriptBadBraceHighlight;
-                    colorwhitespace.Color = General.Colors.ScriptWhitespace;
-                    colorfoldfore.Color = General.Colors.ScriptFoldForeColor;
-                    colorfoldback.Color = General.Colors.ScriptFoldBackColor;
-                    colorselectionfore.Color = General.Colors.ScriptSelectionForeColor;
-                    colorselectionback.Color = General.Colors.ScriptSelectionBackColor;
-                    break;
+		private void colorfoldback_ColorChanged(object sender, EventArgs e)
+		{
+			if (allowapplycontrol) scriptedit.FoldBackColor = colorfoldback.Color.ToColor();
+		}
 
-                case 1: // Light theme
-                    colorscriptbackground.Color = PixelColor.FromInt(-1);
-                    colorlinenumbers.Color = PixelColor.FromInt(-13921873);
-                    colorplaintext.Color = PixelColor.FromInt(-16777216);
-                    colorcomments.Color = PixelColor.FromInt(-16744448);
-                    colorkeywords.Color = PixelColor.FromInt(-16741493);
-                    colorproperties.Color = PixelColor.FromInt(-16752191);
-                    colorliterals.Color = PixelColor.FromInt(-16776999);
-                    colorconstants.Color = PixelColor.FromInt(-8372160);
-                    colorstrings.Color = PixelColor.FromInt(-8388608);
-                    colorincludes.Color = PixelColor.FromInt(-9868951);
-                    colorindicator.Color = PixelColor.FromInt(-16711936);
-                    colorbrace.Color = PixelColor.FromInt(-16711681);
-                    colorbracebad.Color = PixelColor.FromInt(-65536);
-                    colorwhitespace.Color = PixelColor.FromInt(-8355712);
-                    colorfoldfore.Color = PixelColor.FromColor(SystemColors.ControlDark);
-                    colorfoldback.Color = PixelColor.FromColor(SystemColors.ControlLightLight);
-                    colorselectionfore.Color = PixelColor.FromInt(-1);
-                    colorselectionback.Color = PixelColor.FromInt(-13395457);
-                    break;
+		private void scriptcolorpresets_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			if (!allowapplycontrol) return;
+			switch (scriptcolorpresets.SelectedIndex)
+			{
+				case 0: // Restore current colors
+					colorscriptbackground.Color = General.Colors.ScriptBackground;
+					colorlinenumbers.Color = General.Colors.LineNumbers;
+					colorplaintext.Color = General.Colors.PlainText;
+					colorcomments.Color = General.Colors.Comments;
+					colorkeywords.Color = General.Colors.Keywords;
+					colorproperties.Color = General.Colors.Properties;
+					colorliterals.Color = General.Colors.Literals;
+					colorconstants.Color = General.Colors.Constants;
+					colorstrings.Color = General.Colors.Strings;
+					colorincludes.Color = General.Colors.Includes;
+					colorindicator.Color = General.Colors.ScriptIndicator;
+					colorbrace.Color = General.Colors.ScriptBraceHighlight;
+					colorbracebad.Color = General.Colors.ScriptBadBraceHighlight;
+					colorwhitespace.Color = General.Colors.ScriptWhitespace;
+					colorfoldfore.Color = General.Colors.ScriptFoldForeColor;
+					colorfoldback.Color = General.Colors.ScriptFoldBackColor;
+					colorselectionfore.Color = General.Colors.ScriptSelectionForeColor;
+					colorselectionback.Color = General.Colors.ScriptSelectionBackColor;
+					break;
 
-                case 2: // Dark theme
-                    colorscriptbackground.Color = new PixelColor(255, 34, 40, 42);
-                    colorlinenumbers.Color = new PixelColor(255, 63, 78, 73);
-                    colorplaintext.Color = new PixelColor(255, 241, 242, 243);
-                    colorcomments.Color = new PixelColor(255, 102, 116, 123);
-                    colorkeywords.Color = new PixelColor(255, 103, 140, 177);
-                    colorproperties.Color = PixelColor.FromColor(Color.LightSkyBlue);
-                    colorliterals.Color = new PixelColor(255, 255, 205, 34);
-                    colorconstants.Color = new PixelColor(255, 147, 199, 99);
-                    colorstrings.Color = new PixelColor(255, 236, 118, 0);
-                    colorincludes.Color = new PixelColor(255, 160, 130, 189);
-                    colorindicator.Color = new PixelColor(255, 211, 209, 85);
-                    colorbrace.Color = new PixelColor(255, 135, 211, 85);
-                    colorbracebad.Color = new PixelColor(255, 150, 58, 70);
-                    colorwhitespace.Color = new PixelColor(255, 241, 242, 243);
-                    colorfoldfore.Color = new PixelColor(255, 37, 92, 111);
-                    colorfoldback.Color = new PixelColor(255, 41, 49, 52);
-                    colorselectionfore.Color = new PixelColor(255, 255, 255, 255);
-                    colorselectionback.Color = new PixelColor(255, 71, 71, 71);
-                    break;
-            }
+				case 1: // Light theme
+					colorscriptbackground.Color = PixelColor.FromInt(-1);
+					colorlinenumbers.Color = PixelColor.FromInt(-13921873);
+					colorplaintext.Color = PixelColor.FromInt(-16777216);
+					colorcomments.Color = PixelColor.FromInt(-16744448);
+					colorkeywords.Color = PixelColor.FromInt(-16741493);
+					colorproperties.Color = PixelColor.FromInt(-16752191);
+					colorliterals.Color = PixelColor.FromInt(-16776999);
+					colorconstants.Color = PixelColor.FromInt(-8372160);
+					colorstrings.Color = PixelColor.FromInt(-8388608);
+					colorincludes.Color = PixelColor.FromInt(-9868951);
+					colorindicator.Color = PixelColor.FromInt(-16711936);
+					colorbrace.Color = PixelColor.FromInt(-16711681);
+					colorbracebad.Color = PixelColor.FromInt(-65536);
+					colorwhitespace.Color = PixelColor.FromInt(-8355712);
+					colorfoldfore.Color = PixelColor.FromColor(SystemColors.ControlDark);
+					colorfoldback.Color = PixelColor.FromColor(SystemColors.ControlLightLight);
+					colorselectionfore.Color = PixelColor.FromInt(-1);
+					colorselectionback.Color = PixelColor.FromInt(-13395457);
+					break;
 
-            // Apply changes
-            scriptedit.ScriptBackground = colorscriptbackground.Color.ToColor();
-            scriptedit.LineNumbers = colorlinenumbers.Color.ToColor();
-            scriptedit.PlainText = colorplaintext.Color.ToColor();
-            scriptedit.Comments = colorcomments.Color.ToColor();
-            scriptedit.Keywords = colorkeywords.Color.ToColor();
-            scriptedit.Properties = colorproperties.Color.ToColor();
-            scriptedit.Strings = colorstrings.Color.ToColor();
-            scriptedit.Literals = colorliterals.Color.ToColor();
-            scriptedit.Constants = colorconstants.Color.ToColor();
-            scriptedit.Includes = colorincludes.Color.ToColor();
-            scriptedit.SelectionForeColor = colorselectionfore.Color.ToColor();
-            scriptedit.SelectionBackColor = colorselectionback.Color.ToColor();
-            scriptedit.ScriptIndicator = colorindicator.Color.ToColor();
-            scriptedit.BraceHighlight = colorbrace.Color.ToColor();
-            scriptedit.BadBraceHighlight = colorbracebad.Color.ToColor();
-            scriptedit.WhitespaceColor = colorwhitespace.Color.ToColor();
-            scriptedit.FoldForeColor = colorfoldfore.Color.ToColor();
-            scriptedit.FoldBackColor = colorfoldback.Color.ToColor();
-        }
+				case 2: // Dark theme
+					colorscriptbackground.Color = new PixelColor(255, 34, 40, 42);
+					colorlinenumbers.Color = new PixelColor(255, 63, 78, 73);
+					colorplaintext.Color = new PixelColor(255, 241, 242, 243);
+					colorcomments.Color = new PixelColor(255, 102, 116, 123);
+					colorkeywords.Color = new PixelColor(255, 103, 140, 177);
+					colorproperties.Color = PixelColor.FromColor(Color.LightSkyBlue);
+					colorliterals.Color = new PixelColor(255, 255, 205, 34);
+					colorconstants.Color = new PixelColor(255, 147, 199, 99);
+					colorstrings.Color = new PixelColor(255, 236, 118, 0);
+					colorincludes.Color = new PixelColor(255, 160, 130, 189);
+					colorindicator.Color = new PixelColor(255, 211, 209, 85);
+					colorbrace.Color = new PixelColor(255, 135, 211, 85);
+					colorbracebad.Color = new PixelColor(255, 150, 58, 70);
+					colorwhitespace.Color = new PixelColor(255, 241, 242, 243);
+					colorfoldfore.Color = new PixelColor(255, 37, 92, 111);
+					colorfoldback.Color = new PixelColor(255, 41, 49, 52);
+					colorselectionfore.Color = new PixelColor(255, 255, 255, 255);
+					colorselectionback.Color = new PixelColor(255, 71, 71, 71);
+					break;
+			}
 
-        #endregion
+			// Apply changes
+			scriptedit.ScriptBackground = colorscriptbackground.Color.ToColor();
+			scriptedit.LineNumbers = colorlinenumbers.Color.ToColor();
+			scriptedit.PlainText = colorplaintext.Color.ToColor();
+			scriptedit.Comments = colorcomments.Color.ToColor();
+			scriptedit.Keywords = colorkeywords.Color.ToColor();
+			scriptedit.Properties = colorproperties.Color.ToColor();
+			scriptedit.Strings = colorstrings.Color.ToColor();
+			scriptedit.Literals = colorliterals.Color.ToColor();
+			scriptedit.Constants = colorconstants.Color.ToColor();
+			scriptedit.Includes = colorincludes.Color.ToColor();
+			scriptedit.SelectionForeColor = colorselectionfore.Color.ToColor();
+			scriptedit.SelectionBackColor = colorselectionback.Color.ToColor();
+			scriptedit.ScriptIndicator = colorindicator.Color.ToColor();
+			scriptedit.BraceHighlight = colorbrace.Color.ToColor();
+			scriptedit.BadBraceHighlight = colorbracebad.Color.ToColor();
+			scriptedit.WhitespaceColor = colorwhitespace.Color.ToColor();
+			scriptedit.FoldForeColor = colorfoldfore.Color.ToColor();
+			scriptedit.FoldBackColor = colorfoldback.Color.ToColor();
+		}
 
-        #region ================== Screenshots Stuff (mxd)
+		#endregion
 
-        private void resetscreenshotsdir_Click(object sender, EventArgs e) 
+		#region ================== Screenshots Stuff (mxd)
+
+		private void resetscreenshotsdir_Click(object sender, EventArgs e)
 		{
 			screenshotsfolderpath.Text = General.DefaultScreenshotsPath;
 			browseScreenshotsFolderDialog.SelectedPath = General.DefaultScreenshotsPath;
 		}
 
-		private void browsescreenshotsdir_Click(object sender, EventArgs e) 
+		private void browsescreenshotsdir_Click(object sender, EventArgs e)
 		{
-			if(browseScreenshotsFolderDialog.ShowDialog(General.MainWindow) == DialogResult.OK) 
+			if (browseScreenshotsFolderDialog.ShowDialog(General.MainWindow) == DialogResult.OK)
 				screenshotsfolderpath.Text = browseScreenshotsFolderDialog.SelectedPath;
 		}
 
@@ -1221,14 +1249,20 @@ namespace CodeImp.DoomBuilder.Windows
 		// Help
 		private void PreferencesForm_HelpRequested(object sender, HelpEventArgs hlpevent)
 		{
-			if(!actionkey.Focused)
+			if (!actionkey.Focused)
 			{
 				General.ShowHelp("w_preferences.html");
 				hlpevent.Handled = true;
 			}
 		}
 
-        /*
+		//JBR
+		private void autosaveminutes_WhenTextChanged(object sender, EventArgs e)
+		{
+			if (autosaveminutes.Text.Equals("0")) autosaveminutes.Text = "1";
+		}
+
+		/*
 		// This writes all action help files using a template and some basic info from the actions.
 		// Also writes actioncontents.txt with all files to be inserted into Contents.hhc.
 		// Only used during development. Actual button to call this has been removed.
@@ -1260,5 +1294,5 @@ namespace CodeImp.DoomBuilder.Windows
 			File.WriteAllText(filename, contents.ToString());
 		}
 		*/
-    }
+	}
 }

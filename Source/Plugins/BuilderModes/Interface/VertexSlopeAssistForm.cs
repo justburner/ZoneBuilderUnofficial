@@ -25,7 +25,7 @@ namespace CodeImp.DoomBuilder.BuilderModes.Interface
 		public event EventHandler OnDrawNewTaggedTriangle;
 		public event EventHandler OnDrawNewEmptyTriangle;
 		public event EventHandler OnGroupChanged;
-		public event EventHandler OnGroupChoosen;
+		public event EventHandler OnGroupDoubleClick;
 		public event EventHandler OnGroupNewTriangle;
 		public event EventHandler OnGroupNewVertex;
 		public event EventHandler OnGroupModify;
@@ -49,6 +49,8 @@ namespace CodeImp.DoomBuilder.BuilderModes.Interface
 		public bool Vertex2AbsZ { get { return vslopeAbsZ2.Checked; } set { vslopeAbsZ2.Checked = value; } }
 		public bool Vertex3AbsZ { get { return vslopeAbsZ3.Checked; } set { vslopeAbsZ3.Checked = value; } }
 		public string ModeText { get { return currentmode.Text; } set { currentmode.Text = value; } }
+		public bool ShowHeightZ { get { return showHeightZ.Checked; } set { showHeightZ.Checked = value; } }
+		public bool ShowVSlopeActions { get { return showVSlopeActions.Checked; } set { showVSlopeActions.Checked = value; } }
 
 		public const int HEIGHTADJ_STEP = 1;
 		public const int HEIGHTADJ_SMALL = 4;
@@ -56,7 +58,12 @@ namespace CodeImp.DoomBuilder.BuilderModes.Interface
 		// List[GroupIndex] = Linedef Tag
 		public List<int> vslopeTags;
 		// SortedDictionary<Linedef Tag, List of VSlopes>
-		public SortedDictionary<int, List<Thing>> vslopeDic;
+		private SortedDictionary<int, List<Thing>> vslopeDic;
+
+		// List of VSlopeActions<List of VSlopes>
+		private List<List<Thing>> ldPrevLst;
+		private List<Linedef> ldPrevErr;
+		private int ldValidVS, ldInvalidVS;
 
 		#endregion
 
@@ -78,6 +85,9 @@ namespace CodeImp.DoomBuilder.BuilderModes.Interface
 			vslopeZ3.Text = "0";
 			tooltip.SetToolTip(heightAdj, string.Format("Hold Ctrl to change value by {0}.\nHold Shift to change value by {1}.", HEIGHTADJ_SMALL, HEIGHTADJ_BIG));
 			CreateList();
+			ldPrevLst = null;
+			showVSlopeActions.Checked = General.Settings.ShowAllLinedefVSlopes;
+			newStartFrom.Text = "1";
 			tagID.Text = General.Map.Map.GetNewTag(vslopeTags).ToString();
 			blockEvents = false;
 		}
@@ -140,31 +150,53 @@ namespace CodeImp.DoomBuilder.BuilderModes.Interface
 				contextNewGroup.Show(mx, my);
 		}
 
+		public void OpenContextSelectVertex(int mx, int my, List<int> overgroups)
+		{
+			contextSelectVertex.Items.Clear();
+			foreach (int num in overgroups)
+			{
+				List<Thing> lthings = vslopeDic[num];
+				ToolStripItem tsi = new ToolStripMenuItem(Properties.Resources.VertexSlope);
+				tsi.Name = num.ToString();
+				tsi.Text = "Tag " + num.ToString() + " | Z:" + lthings[0].Position.z;
+				contextSelectVertex.Items.Add(tsi);
+			}
+			contextSelectVertex.ItemClicked += contextSelectVertex_ItemClicked;
+			contextSelectVertex.Show(mx, my);
+		}
+		internal void contextSelectVertex_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+		{
+			ToolStripItem menuItem = e.ClickedItem;
+			int tag = Int32.Parse(menuItem.Name);
+			BuilderPlug.Me.VertexSlopeAssistForm.TagID = tag;
+		}
+
 		public void CreateList()
 		{
+			vslopegroups.Items.Clear();
+
 			// Create dictionary
 			vslopeDic = new SortedDictionary<int, List<Thing>>();
-			vslopegroups.Items.Clear();
 			foreach (Thing t in General.Map.Map.Things)
 			{
 				if (t.SRB2Type == 750)  // Vertex Slope
 				{
-					if (vslopeDic.ContainsKey(t.AngleDoom))
+					int id = t.AngleDoom; // Tag ID
+					if (vslopeDic.ContainsKey(id))
 					{
-						vslopeDic[t.AngleDoom].Add(t);
+						vslopeDic[id].Add(t);
 					}
 					else
 					{
 						List<Thing> thingsList = new List<Thing>();
 						thingsList.Add(t);
-						vslopeDic.Add(t.AngleDoom, thingsList);
+						vslopeDic.Add(id, thingsList);
 					}
 				}
 			}
 
 			// Generate ListBox items
 			vslopeTags = new List<int>();
-			vslopegroups.Items.Clear();
 			foreach (KeyValuePair<int, List<Thing>> kvp in vslopeDic)
 			{
 				vslopeTags.Add(kvp.Key);
@@ -187,6 +219,84 @@ namespace CodeImp.DoomBuilder.BuilderModes.Interface
 			vslopegroups.SelectedIndex = vslopeTags.IndexOf(tagid);
 		}
 
+		public void CreateListEx()
+		{
+			// Create VSlopes triangles for preview
+			ldPrevLst = new List<List<Thing>>();
+			ldPrevErr = new List<Linedef>();
+			ldValidVS = 0;
+			ldInvalidVS = 0;
+			foreach (Linedef ld in General.Map.Map.Linedefs)
+			{
+				int action = ld.Action;
+				if (action == 704 || action == 705 || action == 714 || action == 715)
+				{
+					List<Thing> thingsList = new List<Thing>();
+					if (ld.IsFlagSet("8192"))
+					{
+						// Vertex Group = Tag & Offset
+						List<Thing> vslope1 = GetThingsList(ld.Tag);
+						List<Thing> vslope2, vslope3;
+						if (action < 710) // 704, 705
+						{
+							vslope2 = GetThingsList(ld.Front.OffsetX);
+							vslope3 = GetThingsList(ld.Front.OffsetY);
+						}
+						else // 714, 715
+						{
+							vslope2 = GetThingsList(ld.Back.OffsetX);
+							vslope3 = GetThingsList(ld.Back.OffsetY);
+						}
+						if (vslope1 != null && vslope2 != null && vslope3 != null && vslope1.Count == 1 && vslope2.Count == 1 && vslope3.Count == 1)
+						{
+							thingsList.Add(vslope1[0]);
+							thingsList.Add(vslope2[0]);
+							thingsList.Add(vslope3[0]);
+							ldPrevLst.Add(thingsList);
+							ldValidVS++;
+						}
+						else
+						{
+							ldInvalidVS++;
+							ldPrevErr.Add(ld);
+						}
+					}
+					else
+					{
+						// Triangle Group = 3 Tags
+						List<Thing> vslope3 = GetThingsList(ld.Tag);
+						if (vslope3 != null && vslope3.Count == 3)
+						{
+							thingsList.Add(vslope3[0]);
+							thingsList.Add(vslope3[1]);
+							thingsList.Add(vslope3[2]);
+							ldPrevLst.Add(thingsList);
+							ldValidVS++;
+						}
+						else
+						{
+							ldInvalidVS++;
+							ldPrevErr.Add(ld);
+						}
+					}
+				}
+			}
+		}
+
+		public void SetupForm()
+		{
+			if (showVSlopeActions.Checked) CreateListEx();
+			if (ldInvalidVS > 0)
+			{
+				foundLDVSlopes.Text = string.Format("{0} Linedef VSlope(s)\n{1} Invalid!", ldValidVS, ldInvalidVS);
+			}
+			else
+			{
+				foundLDVSlopes.Text = string.Format("{0} Linedef VSlope(s)", ldValidVS);
+			}
+			foundLDVSlopes.Refresh();
+		}
+
 		public void UpdateForm()
 		{
 			blockEvents = true;
@@ -200,6 +310,7 @@ namespace CodeImp.DoomBuilder.BuilderModes.Interface
 			toolChangeTagGroup.Enabled = tagexist;
 			toolDeleteGroup.Enabled = tagexist;
 			toolDrawNewTaggedTriangle.Enabled = !tagexist;
+			drawNewTaggedTriangle.Enabled = !tagexist;
 			if (tagexist)
 				vslopegroups.ContextMenuStrip = contextExistingGroup;
 			else
@@ -293,6 +404,7 @@ namespace CodeImp.DoomBuilder.BuilderModes.Interface
 				vslopeZ3.Enabled = true;
 				vslopeAbsZ3.Enabled = true;
 			}
+			foundLDVSlopes.Visible = showVSlopeActions.Checked;
 			blockEvents = false;
 		}
 
@@ -336,6 +448,16 @@ namespace CodeImp.DoomBuilder.BuilderModes.Interface
 				return vslopeDic[tagid];
 			}
 			return null;
+		}
+
+		public List<List<Thing>> GetVSlopeActionList()
+		{
+			return ldPrevLst;
+		}
+
+		public List<Linedef> GetVSlopeActionError()
+		{
+			return ldPrevErr;
 		}
 
 		public int GetGroupsAt(Vector2D pos, ref List<int> groups, bool vertexgroups, bool trianglegroups)
@@ -391,6 +513,7 @@ namespace CodeImp.DoomBuilder.BuilderModes.Interface
 
 			blockEvents = true;
 			CreateList();
+			SetupForm();
 			blockEvents = false;
 			tagID_ValueChanged(tagID, EventArgs.Empty);
 
@@ -423,9 +546,24 @@ namespace CodeImp.DoomBuilder.BuilderModes.Interface
 			General.ShowHelp("e_vertexslopeassist.html");
 		}
 
+		private void newStartFrom_WhenTextChanged(object sender, EventArgs e)
+		{
+			if (blockEvents) return;
+			blockEvents = true;
+			int startFrom = newStartFrom.GetResult(1);
+			if (startFrom < 1) newStartFrom.Text = "1";
+			if (startFrom > General.Map.FormatInterface.MaxTag) newStartFrom.Text = General.Map.FormatInterface.MaxTag.ToString();
+			blockEvents = false;
+		}
+
 		private void tagID_ValueChanged(object sender, EventArgs e)
 		{
 			if (blockEvents) return;
+			blockEvents = true;
+			int id = tagID.GetResult(1);
+			if (id < 1) tagID.Text = "1";
+			if (id > General.Map.FormatInterface.MaxTag) tagID.Text = General.Map.FormatInterface.MaxTag.ToString();
+			blockEvents = false;
 
 			UpdateForm();
 			if (OnGroupChanged != null) OnGroupChanged(sender, e);
@@ -446,7 +584,7 @@ namespace CodeImp.DoomBuilder.BuilderModes.Interface
 
 		private void vslopegroups_DoubleClick(object sender, EventArgs e)
 		{
-			if (OnGroupChoosen != null) OnGroupChoosen(sender, e);
+			if (OnGroupDoubleClick != null) OnGroupDoubleClick(sender, e);
 			ValueChanged(sender, e);
 		}
 
@@ -462,9 +600,16 @@ namespace CodeImp.DoomBuilder.BuilderModes.Interface
 			ValueChanged(sender, e);
 		}
 
+		private void toolPanZoomMap_Click(object sender, EventArgs e)
+		{
+			if (OnGroupDoubleClick != null) OnGroupDoubleClick(sender, e);
+			ValueChanged(sender, e);
+		}
+
 		private void newtag_Click(object sender, EventArgs e)
 		{
-			tagID.Text = General.Map.Map.GetNewTag(vslopeTags).ToString();
+			int startFrom = newStartFrom.GetResult(1);
+			tagID.Text = General.Map.Map.GetNewTag(vslopeTags, startFrom).ToString();
 			ValueChanged(sender, e);
 		}
 
@@ -597,7 +742,13 @@ namespace CodeImp.DoomBuilder.BuilderModes.Interface
 			ValueChanged(sender, e);
 		}
 
-		#endregion
+		private void showVSlopeActions_CheckedChanged(object sender, EventArgs e)
+		{
+			if (showVSlopeActions.Checked) CreateListEx();
+			foundLDVSlopes.Visible = showVSlopeActions.Checked;
+			ValueChanged(sender, e);
+		}
 
+		#endregion
 	}
 }

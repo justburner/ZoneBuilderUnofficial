@@ -37,7 +37,7 @@ namespace CodeImp.DoomBuilder.Rendering
 		private const float DARK_ADDITION = -0.2f;
 
 		// Palette size
-		private const int NUM_COLORS = 60;
+		private const int NUM_COLORS = 64;
 		public const int NUM_THING_COLORS = 20;
 		public const int THING_COLORS_OFFSET = 20;
 
@@ -102,12 +102,17 @@ namespace CodeImp.DoomBuilder.Rendering
         public const int SCRIPTFOLDFORE = 57;
         public const int SCRIPTFOLDBACK = 58;
         public const int PROPERTIES = 59;
-        #endregion
+		public const int PREVIEWSHAPE = 60;
+		public const int INVALIDSELECT = 61;
+		public const int PREVIEWLINEDEF = 62;
+		public const int INVALIDLINEDEF = 63;
 
-        #region ================== Variables
+		#endregion
 
-        // Colors
-        private readonly PixelColor[] colors;
+		#region ================== Variables
+
+		// Colors
+		private readonly PixelColor[] colors;
 		private readonly PixelColor[] brightcolors;
 		private readonly PixelColor[] darkcolors;
 		
@@ -158,13 +163,17 @@ namespace CodeImp.DoomBuilder.Rendering
         public PixelColor Includes { get { return colors[INCLUDES]; } internal set { colors[INCLUDES] = value; } } //mxd
         public PixelColor ScriptFoldForeColor { get { return colors[SCRIPTFOLDFORE]; } internal set { colors[SCRIPTFOLDFORE] = value; } } //mxd
         public PixelColor ScriptFoldBackColor { get { return colors[SCRIPTFOLDBACK]; } internal set { colors[SCRIPTFOLDBACK] = value; } } //mxd
+		public PixelColor PreviewShape { get { return colors[PREVIEWSHAPE]; } internal set { colors[PREVIEWSHAPE] = value; } } //JBR
+		public PixelColor InvalidSelect { get { return colors[INVALIDSELECT]; } internal set { colors[INVALIDSELECT] = value; } } //JBR
+		public PixelColor PreviewLinedef { get { return colors[PREVIEWLINEDEF]; } internal set { colors[PREVIEWLINEDEF] = value; } } //JBR
+		public PixelColor InvalidLinedef { get { return colors[INVALIDLINEDEF]; } internal set { colors[INVALIDLINEDEF] = value; } } //JBR
 
-        #endregion
+		#endregion
 
-        #region ================== Constructor / Disposer
+		#region ================== Constructor / Disposer
 
-        // Constructor for settings from configuration
-        internal ColorCollection(Configuration cfg)
+		// Constructor for settings from configuration
+		internal ColorCollection(Configuration cfg)
 		{
 			// Initialize
 			colors = new PixelColor[NUM_COLORS];
@@ -179,31 +188,35 @@ namespace CodeImp.DoomBuilder.Rendering
             }
 
 			// Set new colors
-			if(colors[THINGCOLOR00].ToInt() == 0) colors[THINGCOLOR00] = PixelColor.FromColor(Color.DimGray);
-			if(colors[THINGCOLOR01].ToInt() == 0) colors[THINGCOLOR01] = PixelColor.FromColor(Color.RoyalBlue);
-			if(colors[THINGCOLOR02].ToInt() == 0) colors[THINGCOLOR02] = PixelColor.FromColor(Color.ForestGreen);
-			if(colors[THINGCOLOR03].ToInt() == 0) colors[THINGCOLOR03] = PixelColor.FromColor(Color.LightSeaGreen);
-			if(colors[THINGCOLOR04].ToInt() == 0) colors[THINGCOLOR04] = PixelColor.FromColor(Color.Firebrick);
-			if(colors[THINGCOLOR05].ToInt() == 0) colors[THINGCOLOR05] = PixelColor.FromColor(Color.DarkViolet);
-			if(colors[THINGCOLOR06].ToInt() == 0) colors[THINGCOLOR06] = PixelColor.FromColor(Color.DarkGoldenrod);
-			if(colors[THINGCOLOR07].ToInt() == 0) colors[THINGCOLOR07] = PixelColor.FromColor(Color.Silver);
-			if(colors[THINGCOLOR08].ToInt() == 0) colors[THINGCOLOR08] = PixelColor.FromColor(Color.Gray);
-			if(colors[THINGCOLOR09].ToInt() == 0) colors[THINGCOLOR09] = PixelColor.FromColor(Color.DeepSkyBlue);
-			if(colors[THINGCOLOR10].ToInt() == 0) colors[THINGCOLOR10] = PixelColor.FromColor(Color.LimeGreen);
-			if(colors[THINGCOLOR11].ToInt() == 0) colors[THINGCOLOR11] = PixelColor.FromColor(Color.PaleTurquoise);
-			if(colors[THINGCOLOR12].ToInt() == 0) colors[THINGCOLOR12] = PixelColor.FromColor(Color.Tomato);
-			if(colors[THINGCOLOR13].ToInt() == 0) colors[THINGCOLOR13] = PixelColor.FromColor(Color.Violet);
-			if(colors[THINGCOLOR14].ToInt() == 0) colors[THINGCOLOR14] = PixelColor.FromColor(Color.Yellow);
-			if(colors[THINGCOLOR15].ToInt() == 0) colors[THINGCOLOR15] = PixelColor.FromColor(Color.WhiteSmoke);
-			if(colors[THINGCOLOR16].ToInt() == 0) colors[THINGCOLOR16] = PixelColor.FromColor(Color.LightPink);
-			if(colors[THINGCOLOR17].ToInt() == 0) colors[THINGCOLOR17] = PixelColor.FromColor(Color.DarkOrange);
-			if(colors[THINGCOLOR18].ToInt() == 0) colors[THINGCOLOR18] = PixelColor.FromColor(Color.DarkKhaki);
-			if(colors[THINGCOLOR19].ToInt() == 0) colors[THINGCOLOR19] = PixelColor.FromColor(Color.Goldenrod);
+			if (colors[THINGCOLOR00].ToInt() == 0) colors[THINGCOLOR00] = PixelColor.FromColor(Color.DimGray);
+			if (colors[THINGCOLOR01].ToInt() == 0) colors[THINGCOLOR01] = PixelColor.FromColor(Color.RoyalBlue);
+			if (colors[THINGCOLOR02].ToInt() == 0) colors[THINGCOLOR02] = PixelColor.FromColor(Color.ForestGreen);
+			if (colors[THINGCOLOR03].ToInt() == 0) colors[THINGCOLOR03] = PixelColor.FromColor(Color.LightSeaGreen);
+			if (colors[THINGCOLOR04].ToInt() == 0) colors[THINGCOLOR04] = PixelColor.FromColor(Color.Firebrick);
+			if (colors[THINGCOLOR05].ToInt() == 0) colors[THINGCOLOR05] = PixelColor.FromColor(Color.DarkViolet);
+			if (colors[THINGCOLOR06].ToInt() == 0) colors[THINGCOLOR06] = PixelColor.FromColor(Color.DarkGoldenrod);
+			if (colors[THINGCOLOR07].ToInt() == 0) colors[THINGCOLOR07] = PixelColor.FromColor(Color.Silver);
+			if (colors[THINGCOLOR08].ToInt() == 0) colors[THINGCOLOR08] = PixelColor.FromColor(Color.Gray);
+			if (colors[THINGCOLOR09].ToInt() == 0) colors[THINGCOLOR09] = PixelColor.FromColor(Color.DeepSkyBlue);
+			if (colors[THINGCOLOR10].ToInt() == 0) colors[THINGCOLOR10] = PixelColor.FromColor(Color.LimeGreen);
+			if (colors[THINGCOLOR11].ToInt() == 0) colors[THINGCOLOR11] = PixelColor.FromColor(Color.PaleTurquoise);
+			if (colors[THINGCOLOR12].ToInt() == 0) colors[THINGCOLOR12] = PixelColor.FromColor(Color.Tomato);
+			if (colors[THINGCOLOR13].ToInt() == 0) colors[THINGCOLOR13] = PixelColor.FromColor(Color.Violet);
+			if (colors[THINGCOLOR14].ToInt() == 0) colors[THINGCOLOR14] = PixelColor.FromColor(Color.Yellow);
+			if (colors[THINGCOLOR15].ToInt() == 0) colors[THINGCOLOR15] = PixelColor.FromColor(Color.WhiteSmoke);
+			if (colors[THINGCOLOR16].ToInt() == 0) colors[THINGCOLOR16] = PixelColor.FromColor(Color.LightPink);
+			if (colors[THINGCOLOR17].ToInt() == 0) colors[THINGCOLOR17] = PixelColor.FromColor(Color.DarkOrange);
+			if (colors[THINGCOLOR18].ToInt() == 0) colors[THINGCOLOR18] = PixelColor.FromColor(Color.DarkKhaki);
+			if (colors[THINGCOLOR19].ToInt() == 0) colors[THINGCOLOR19] = PixelColor.FromColor(Color.Goldenrod);
             if (colors[SCRIPTFOLDFORE].ToInt() == 0) colors[SCRIPTFOLDFORE] = PixelColor.FromColor(SystemColors.ControlDark);
             if (colors[SCRIPTFOLDBACK].ToInt() == 0) colors[SCRIPTFOLDBACK] = PixelColor.FromColor(SystemColors.ControlLightLight);
+			if (colors[PREVIEWSHAPE].ToInt() == 0) colors[PREVIEWSHAPE] = PixelColor.FromColor(Color.DarkSlateGray); //JBR
+			if (colors[INVALIDSELECT].ToInt() == 0) colors[INVALIDSELECT] = PixelColor.FromColor(Color.Brown); //JBR
+			if (colors[PREVIEWLINEDEF].ToInt() == 0) colors[PREVIEWLINEDEF] = PixelColor.FromColor(Color.LemonChiffon); //JBR
+			if (colors[INVALIDLINEDEF].ToInt() == 0) colors[INVALIDLINEDEF] = PixelColor.FromColor(Color.Red); //JBR
 
-            // Create assist colors
-            CreateAssistColors();
+			// Create assist colors
+			CreateAssistColors();
 			
 			// Create color correction table
 			CreateCorrectionTable();

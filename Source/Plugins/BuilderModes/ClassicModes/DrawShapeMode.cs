@@ -372,9 +372,9 @@ namespace CodeImp.DoomBuilder.BuilderModes
 					{
 						List<Vector2D> refcircle = GenerateShape(origin, 32, 0, 0, radiusX, radiusY, angle, angle + sweepangle);
 						for (int i = 1; i < refcircle.Count; i++)
-							renderer.RenderLine(refcircle[i - 1], refcircle[i], LINE_THICKNESS, General.Colors.Grid, true);
-						renderer.RenderLine(origin, shapevecs[0], LINE_THICKNESS, General.Colors.Grid, true);
-						renderer.RenderLine(origin, shapevecs[shapevecs.Count - 1], LINE_THICKNESS, General.Colors.Grid, true);
+							renderer.RenderLine(refcircle[i - 1], refcircle[i], LINE_THICKNESS, General.Colors.PreviewShape, true);
+						renderer.RenderLine(origin, shapevecs[0], LINE_THICKNESS, General.Colors.PreviewShape, true);
+						renderer.RenderLine(origin, shapevecs[shapevecs.Count - 1], LINE_THICKNESS, General.Colors.PreviewShape, true);
 					}
 					renderer.RenderRectangleFilled(new RectangleF(start.x - vsize, start.y - vsize, vsize * 2.0f, vsize * 2.0f), General.Colors.InfoLine, true);
 					renderer.RenderRectangleFilled(new RectangleF(endpoint.x - vsize, endpoint.y - vsize, vsize * 2.0f, vsize * 2.0f), General.Colors.InfoLine, true);

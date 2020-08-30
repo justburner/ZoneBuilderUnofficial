@@ -207,7 +207,13 @@ namespace CodeImp.DoomBuilder.Editing
 				return false;
 			}
 		}
-		
+
+		//JBR Report if is volatile mode
+		public bool HasVolatileMode()
+		{
+			return (General.Map != null) && (mode != null) && mode.Attributes.Volatile;
+		}
+
 		// This returns specific editing mode info by name
 		internal EditModeInfo GetEditModeInfo(string editmodename)
 		{

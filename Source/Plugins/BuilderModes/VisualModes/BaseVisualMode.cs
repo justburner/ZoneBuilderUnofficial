@@ -756,29 +756,6 @@ namespace CodeImp.DoomBuilder.BuilderModes
 				vertices[v].Changed = true;
 		}
 
-        internal void ApplyFlatAlignment(Linedef l, Sector s, bool alignfloor, bool alignceiling, Vector2D offset, float rotation)
-        {
-            s.Fields.BeforeFieldsChange();
-            if (alignfloor)
-            {
-                if (s.Fields.ContainsKey("xpanningfloor")) s.Fields["xpanningfloor"] = new UniValue(UniversalType.Float, offset.x);
-                else s.Fields.Add("xpanningfloor", new UniValue(UniversalType.Float, offset.x));
-                if (s.Fields.ContainsKey("ypanningfloor")) s.Fields["ypanningfloor"] = new UniValue(UniversalType.Float, offset.y);
-                else s.Fields.Add("ypanningfloor", new UniValue(UniversalType.Float, offset.y));
-                if (s.Fields.ContainsKey("rotationfloor")) s.Fields["rotationfloor"] = new UniValue(UniversalType.Float, rotation);
-                else s.Fields.Add("rotationfloor", new UniValue(UniversalType.Float, rotation));
-            }
-            if (alignceiling)
-            {
-                if (s.Fields.ContainsKey("xpanningceiling")) s.Fields["xpanningceiling"] = new UniValue(UniversalType.Float, offset.x);
-                else s.Fields.Add("xpanningceiling", new UniValue(UniversalType.Float, offset.x));
-                if (s.Fields.ContainsKey("ypanningceiling")) s.Fields["ypanningceiling"] = new UniValue(UniversalType.Float, offset.y);
-                else s.Fields.Add("ypanningceiling", new UniValue(UniversalType.Float, offset.y));
-                if (s.Fields.ContainsKey("rotationceiling")) s.Fields["rotationceiling"] = new UniValue(UniversalType.Float, rotation);
-                else s.Fields.Add("rotationceiling", new UniValue(UniversalType.Float, rotation));
-            }
-        }
-
         // This rebuilds the sector data
         // This requires that the blockmap is up-to-date!
         internal void RebuildElementData()
@@ -842,8 +819,8 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			{
 				foreach(int tag in s.Tags)
 				{
-					if(tag == 0) continue;
-					if(!sectortags.ContainsKey(tag)) sectortags[tag] = new List<Sector>();
+					if (tag == 0 && General.Settings.NoVisualsTag0) continue;
+					if (!sectortags.ContainsKey(tag)) sectortags[tag] = new List<Sector>();
 					sectortags[tag].Add(s);
 				}
 			}
@@ -969,27 +946,116 @@ namespace CodeImp.DoomBuilder.BuilderModes
                     //MascaraSnake: Flat alignment
                     if (l.IsFlatAlignment)
                     {
-                        int sectortag = l.Tag;
-                        bool alignfloor = !l.IsFlagSet("2048");
-                        bool alignceiling = !l.IsFlagSet("4096");
-                        bool useoffsets = l.IsFlagSet("8192");
-                        float xoffset = useoffsets ? -l.Front.OffsetY : -l.Start.Position.y;
-                        float yoffset = useoffsets ? l.Front.OffsetX : -l.Start.Position.x;
-                        Vector2D offset = new Vector2D(xoffset, yoffset);
-                        float rotation = General.ClampAngle(l.AngleDeg - 90);
-                        offset = offset.GetRotated(Angle2D.DegToRad(-l.AngleDeg));
+						//if (General.Map.NewFlatAlignment)
+						if (General.Map.NewFlatAlignment)
+						{
+							//JBR - SRB2 2.2 / SRB2 Kart - Sector Flat Alignment
+							int sectortag = l.Tag;
+							bool alignonlyceiling = l.IsFlagSet("2048");
+							bool alignonlyfloor = l.IsFlagSet("4096");
+							bool offsetbytexture = l.IsFlagSet("8192");
 
-                        if (sectortag == 0)
-                            ApplyFlatAlignment(l, l.Front.Sector, alignfloor, alignceiling, offset, rotation);
-                        else if (sectortags.ContainsKey(sectortag))
-                        {
-                            List<Sector> sectors = sectortags[sectortag];
-                            foreach (Sector s in sectors)
-                            {
-                                ApplyFlatAlignment(l, s, alignfloor, alignceiling, offset, rotation);
-                            }
-                        }
-                    }
+							if (sectortags.ContainsKey(sectortag))
+							{
+								float rotation = General.ClampAngle(90f - l.Angle * Angle2D.PIDEG);
+								float xoffset = -l.Start.Position.x;
+								float yoffset = -l.Start.Position.y;
+								if (offsetbytexture)
+								{
+									xoffset = l.Front.OffsetX;
+									yoffset = -l.Front.OffsetY;
+								}
+
+								// Affine offset, this got me a few headaches of why both rotation and offset didn't worked at same time
+								float rotationrad = rotation / Angle2D.PIDEG;
+								float cos = (float)Math.Cos(rotationrad);
+								float sin = (float)Math.Sin(rotationrad);
+								float rx = cos * xoffset - sin * yoffset;
+								float ry = sin * xoffset + cos * yoffset;
+								xoffset = rx;
+								yoffset = -ry;
+
+								List<Sector> sectors = sectortags[sectortag];
+								foreach (Sector s in sectors)
+								{
+									s.Fields.BeforeFieldsChange();
+
+									if (!alignonlyceiling)
+									{
+										if (s.Fields.ContainsKey("rotationfloor")) s.Fields["rotationfloor"] = new UniValue(UniversalType.Float, rotation);
+										else s.Fields.Add("rotationfloor", new UniValue(UniversalType.Float, rotation));
+										if (s.Fields.ContainsKey("xpanningfloor")) s.Fields["xpanningfloor"] = new UniValue(UniversalType.Float, xoffset);
+										else s.Fields.Add("xpanningfloor", new UniValue(UniversalType.Float, xoffset));
+										if (s.Fields.ContainsKey("ypanningfloor")) s.Fields["ypanningfloor"] = new UniValue(UniversalType.Float, yoffset);
+										else s.Fields.Add("ypanningfloor", new UniValue(UniversalType.Float, yoffset));
+									}
+									if (!alignonlyfloor)
+									{
+										if (s.Fields.ContainsKey("rotationceiling")) s.Fields["rotationceiling"] = new UniValue(UniversalType.Float, rotation);
+										else s.Fields.Add("rotationceiling", new UniValue(UniversalType.Float, rotation));
+										if (s.Fields.ContainsKey("xpanningceiling")) s.Fields["xpanningceiling"] = new UniValue(UniversalType.Float, xoffset);
+										else s.Fields.Add("xpanningceiling", new UniValue(UniversalType.Float, xoffset));
+										if (s.Fields.ContainsKey("ypanningceiling")) s.Fields["ypanningceiling"] = new UniValue(UniversalType.Float, yoffset);
+										else s.Fields.Add("ypanningceiling", new UniValue(UniversalType.Float, yoffset));
+									}
+								}
+							}
+						}
+						else
+						{
+							//MascaraSnake: Flat alignment
+							int sectortag = l.Tag;
+							bool alignonlyceiling = l.IsFlagSet("2");
+							bool alignonlyfloor = l.IsFlagSet("64");
+							bool rotate = l.IsFlagSet("512");
+							bool rotateonlyceiling = l.IsFlagSet("1024");
+							bool rotateonlyfloor = l.IsFlagSet("16384");
+
+							if (sectortags.ContainsKey(sectortag))
+							{
+								List<Sector> sectors = sectortags[sectortag];
+								foreach (Sector s in sectors)
+								{
+									s.Fields.BeforeFieldsChange();
+									if (rotate)
+									{
+										float rotation = General.ClampAngle(l.AngleDeg - 90);
+
+										if (!rotateonlyceiling)
+										{
+											if (s.Fields.ContainsKey("rotationfloor")) s.Fields["rotationfloor"] = new UniValue(UniversalType.Float, rotation);
+											else s.Fields.Add("rotationfloor", new UniValue(UniversalType.Float, rotation));
+										}
+										if (!rotateonlyfloor)
+										{
+											if (s.Fields.ContainsKey("rotationceiling")) s.Fields["rotationceiling"] = new UniValue(UniversalType.Float, rotation);
+											else s.Fields.Add("rotationceiling", new UniValue(UniversalType.Float, rotation));
+										}
+									}
+									else
+									{
+										float xoffset = l.Rect.Width;
+										float yoffset = l.Rect.Height;
+
+										if (!alignonlyceiling)
+										{
+											if (s.Fields.ContainsKey("xpanningfloor")) s.Fields["xpanningfloor"] = new UniValue(UniversalType.Float, xoffset);
+											else s.Fields.Add("xpanningfloor", new UniValue(UniversalType.Float, xoffset));
+											if (s.Fields.ContainsKey("ypanningfloor")) s.Fields["ypanningfloor"] = new UniValue(UniversalType.Float, yoffset);
+											else s.Fields.Add("ypanningfloor", new UniValue(UniversalType.Float, yoffset));
+										}
+										if (!alignonlyfloor)
+										{
+											if (s.Fields.ContainsKey("xpanningceiling")) s.Fields["xpanningceiling"] = new UniValue(UniversalType.Float, xoffset);
+											else s.Fields.Add("xpanningceiling", new UniValue(UniversalType.Float, xoffset));
+											if (s.Fields.ContainsKey("ypanningceiling")) s.Fields["ypanningceiling"] = new UniValue(UniversalType.Float, yoffset);
+											else s.Fields.Add("ypanningceiling", new UniValue(UniversalType.Float, yoffset));
+										}
+									}
+								}
+							}
+						}
+					}
 
                     //MascaraSnake: Colormap
                     if (l.IsColormap && l.Front != null && General.Settings.ShowColormaps)

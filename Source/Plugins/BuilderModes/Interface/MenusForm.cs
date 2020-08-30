@@ -97,6 +97,10 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		public ToolStripButton VertexIntoShape { get { return buttonVertexIntoShape; } } //JBR
 		public ToolStripButton VertexSlopeAssist { get { return buttonVertexSlopeAssist; } } //JBR
 		public ToolStripMenuItem VertexSlopeAssistMenu { get { return vertexSlopeAssistT; } } //JBR
+		public ToolStripButton FlipLinedefsButton { get { return buttonFlipLinedefs; } } //JBR
+		public ToolStripButton FlipSidedefsButton { get { return buttonFlipSidedefs; } } //JBR
+		public ToolStripButton JoinSectorsButton { get { return buttonJoinSectors; } } //JBR
+		public ToolStripButton MergeSectorsButton { get { return buttonMergeSectors; } } //JBR
 
 		#endregion
 
